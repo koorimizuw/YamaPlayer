@@ -54,8 +54,17 @@ jobs:
             ${{ env.unityPackage }}
             package.json
 
-      - name: Repository dispatch
+      - name: Set var of request header
+        run: |
+          echo ::set-env name=REQUEST_HEADER::"'"Accept:application/vnd.github.everest-preview+json"'"
+
+      - name: Set var of request body
+        run: |
+          echo ::set-env name=REQUEST_BODY::'{"event_type": "build-listing", "client_payload": {}}'
+
+      - name: Build Listing
         run: |
           curl -X POST https://api.github.com/repos/koorimizuw/vpm-repos/dispatches \
           -H $REQUEST_HEADER \
-          -u ${{ secrets.GITHUB_TOKEN }}
+          -u ${{ secrets.GITHUB_TOKEN }} \
+          --data "$REQUEST_BODY"
