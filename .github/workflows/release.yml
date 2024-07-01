@@ -53,10 +53,10 @@ jobs:
             ${{ env.zipFile }}
             ${{ env.unityPackage }}
             package.json
-            
+
       - name: Build Listing
-        run: |
-          curl -X POST https://api.github.com/repos/koorimizuw/vpm-repos/dispatches \
-          -H "Accept:application/vnd.github.everest-preview+json" \
-          -u ${{ secrets.GITHUB_TOKEN }} \
-          --data '{"event_type": "build-listing", "client_payload": {}}'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT }}
+          repository: koorimizuw/vpm-repos
+          event-type: build-listing
