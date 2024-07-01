@@ -51,4 +51,5 @@ jobs:
           tag_name: ${{ steps.version.outputs.prop }}
           files: |
             ${{ env.zipFile }}
+            ${{ env.unityPackage }}
             package.json
