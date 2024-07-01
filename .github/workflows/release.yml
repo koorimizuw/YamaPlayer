@@ -49,6 +49,7 @@ jobs:
         uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5
         with:
           tag_name: ${{ steps.version.outputs.prop }}
+          prerelease: ${{ contains(steps.version.outputs.prop, 'beta') }}
           files: |
             ${{ env.zipFile }}
             ${{ env.unityPackage }}
