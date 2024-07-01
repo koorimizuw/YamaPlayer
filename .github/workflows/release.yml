@@ -54,9 +54,8 @@ jobs:
             ${{ env.unityPackage }}
             package.json
 
-      - name: Build Listing
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          repository: koorimizuw/vpm-repos
-          event-type: build-listing
+      - name: Repository dispatch
+        run: |
+          curl -X POST https://api.github.com/repos/koorimizuw/vpm-repos/dispatches \
+          -H $REQUEST_HEADER \
+          -u ${{ secrets.GITHUB_TOKEN }}
