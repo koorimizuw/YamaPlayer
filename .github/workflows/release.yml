@@ -53,3 +53,10 @@ jobs:
             ${{ env.zipFile }}
             ${{ env.unityPackage }}
             package.json
+
+      - name: Build Listing
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: koorimizuw/vpm-repos
+          event-type: build-listing

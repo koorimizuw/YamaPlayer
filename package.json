@@ -8,6 +8,9 @@
     "name": "kwxxw",
     "url": "https://yamadev.booth.pm"
   },
+  "legacyFolders": {
+    "Assets\\Yamadev\\YamaStream": "af99c59180c62fb41ab655b73f426e61"
+  },
   "vpmDependencies": {
     "com.vrchat.worlds": ">=3.6.0",
     "net.kwxxw.yamachan-web-unit": ">=1.0.0"
