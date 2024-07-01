@@ -1,0 +1,15 @@
+{
+  "name": "yamadev.yama-stream",
+  "displayName": "YamaPlayer",
+  "version": "1.4.2",
+  "unity": "2022.3",
+  "description": "Video player for VRChat.",
+  "author": {
+    "name": "kwxxw",
+    "url": "https://yamadev.booth.pm"
+  },
+  "vpmDependencies": {
+    "com.vrchat.worlds": ">=3.6.0",
+    "net.kwxxw.yamachan-web-unit": ">=1.0.0"
+  }
+}
