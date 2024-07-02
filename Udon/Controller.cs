@@ -253,6 +253,7 @@ namespace Yamadev.YamaStream
             if (!_isReload)
             {
                 _paused = false;
+                _loading = false;
                 _stopped = true;
                 _repeat = new Vector3(0f, 0f, 999999f);
                 if (!string.IsNullOrEmpty(Track.GetUrl())) _history.AddTrack(Track);
@@ -277,7 +278,8 @@ namespace Yamadev.YamaStream
         }
         public override void OnVideoEnd()
         {
-            if (Networking.IsOwner(gameObject) && !_isLocal) SendCustomEventDelayedFrames(nameof(Forward), 0);
+            if (Networking.IsOwner(gameObject) && !_isLocal && _forwardInterval > 0)
+                SendCustomEventDelayedSeconds(nameof(Forward), _forwardInterval);
             foreach (Listener listener in _listeners) listener.OnVideoEnd();
         }
 

@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using VRC.SDK3.Components.Video;
@@ -9,6 +10,11 @@ using VRC.SDK3.Video.Components;
 using VRC.SDK3.Video.Components.AVPro;
 using VRC.SDK3.Video.Interfaces.AVPro;
 using VRC.SDKBase;
+#if AVPRO_DEBUG
+using RenderHeads.Media.AVProVideo;
+using static RenderHeads.Media.AVProVideo.MediaPlayer;
+#endif
+
 
 namespace Yamadev.YamaStream.Script
 {
@@ -20,6 +26,32 @@ namespace Yamadev.YamaStream.Script
     {
         private static HashSet<System.Diagnostics.Process> _runningYtdlProcesses = new HashSet<System.Diagnostics.Process>();
         private static HashSet<MonoBehaviour> _registeredBehaviours = new HashSet<MonoBehaviour>();
+        private static readonly BuildTargetGroup[] _targetGroups =
+        {
+            BuildTargetGroup.Standalone,
+            BuildTargetGroup.Android,
+            BuildTargetGroup.iOS,
+        };
+        private static readonly string _avProDebugSymbol = "AVPRO_DEBUG";
+
+        [MenuItem("YamaPlayer/Enable AVPro Debug")]
+        public static void AVProDebug()
+        {
+            if (Utils.FindType("RenderHeads.Media.AVProVideo.MediaPlayer", true) != null)
+            {
+                foreach (var group in _targetGroups)
+                {
+                    List<string> symbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(group).Split(';').Select(s => s.Trim()).ToList();
+                    if (!symbols.Contains(_avProDebugSymbol))
+                    {
+                        symbols.Insert(0, _avProDebugSymbol);
+                        PlayerSettings.SetScriptingDefineSymbolsForGroup(group, string.Join(";", symbols.ToArray()));
+                    }
+                }
+                EditorUtility.DisplayDialog("Success", "AVPro debug on.", "OK");
+            }
+            else EditorUtility.DisplayDialog("AVPro not imported", "You should import AVPro player first.", "OK");
+        }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void SetupURLResolveCallback()
@@ -31,27 +63,28 @@ namespace Yamadev.YamaStream.Script
                 return;
             }
 
+#if AVPRO_DEBUG
             VRCAVProVideoPlayer.Initialize = InitilizeVRCAVProVideoPlayer;
-            VRCUnityVideoPlayer.StartResolveURLCoroutine = ResolveURLCallback;
             AVProPlayerResolver.StartResolveURLCoroutine = ResolveURLCallback;
+#endif
+            VRCUnityVideoPlayer.StartResolveURLCoroutine = ResolveURLCallback;
             EditorApplication.playModeStateChanged += PlayModeChanged;
         }
 
+#if AVPRO_DEBUG
         private static IAVProVideoPlayerInternal InitilizeVRCAVProVideoPlayer(VRCAVProVideoPlayer avPro)
         {
-            Type mediaPlayerType = Utils.FindType("RenderHeads.Media.AVProVideo.MediaPlayer", true);
-            Type applyToMeshType = Utils.FindType("RenderHeads.Media.AVProVideo.ApplyToMesh", true);
-            Type audioOutputType = Utils.FindType("RenderHeads.Media.AVProVideo.AudioOutput", true);
-            if (mediaPlayerType == null || applyToMeshType == null || audioOutputType == null) return null;
-
-            dynamic mediaPlayer = avPro.gameObject.AddComponent(mediaPlayerType);
-            mediaPlayer.GetCurrentPlatformOptions().audioOutput = Enum.Parse(mediaPlayer.GetCurrentPlatformOptions().audioOutput.GetType(), "Unity");
+            MediaPlayer mediaPlayer = avPro.gameObject.AddComponent<MediaPlayer>();
+#if UNITY_EDITOR_WIN
+            OptionsWindows options = (OptionsWindows)mediaPlayer.GetCurrentPlatformOptions();
+            options.audioOutput = Windows.AudioOutput.Unity;
+#endif
             VRCAVProVideoScreen[] vrcAVProVideoScreens = Utils.FindComponentsInHierarthy<VRCAVProVideoScreen>();
             foreach (VRCAVProVideoScreen screen in vrcAVProVideoScreens)
             {
                 if (screen.VideoPlayer == avPro)
                 {
-                    dynamic applyToMesh = screen.gameObject.AddComponent(applyToMeshType);
+                    ApplyToMesh applyToMesh = screen.gameObject.AddComponent<ApplyToMesh>();
                     applyToMesh.Player = mediaPlayer;
                     MeshRenderer renderer = screen.GetComponent<MeshRenderer>();
                     if (renderer != null) applyToMesh.MeshRenderer = renderer;
@@ -62,16 +95,17 @@ namespace Yamadev.YamaStream.Script
             {
                 if (speaker.VideoPlayer == avPro)
                 {
-                    dynamic audioOutput = speaker.gameObject.AddComponent(audioOutputType);
+                    AudioOutput audioOutput = speaker.gameObject.AddComponent<AudioOutput>();
                     audioOutput.Player = mediaPlayer;
                 }
             }
 
-            AVProPlayerResolver result = new AVProPlayerResolver();
-            result.BasePlayer = avPro;
-            result.MediaPlayer = mediaPlayer;
-            return result;
+            AVProPlayerResolver resolver = new AVProPlayerResolver();
+            resolver.BasePlayer = avPro;
+            resolver.MediaPlayer = mediaPlayer;
+            return resolver;
         }
+#endif
 
         /// <summary>
         /// Cleans up any remaining YTDL processes from this play.

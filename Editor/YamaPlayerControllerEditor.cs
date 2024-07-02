@@ -1,4 +1,5 @@
 ﻿
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using VRC.SDK3.Components;
@@ -8,6 +9,13 @@ namespace Yamadev.YamaStream.Script
     [CustomEditor(typeof(YamaPlayerController))]
     public class YamaPlayerControllerEditor : EditorBase
     {
+        enum Tab
+        {
+            UI,
+            DefaultSettings,
+            Permission,
+        }
+
         VRCPickup _vrcPickup;
         SerializedObject _vrcPickupSerializedObject;
         SerializedProperty _pickup;
@@ -21,6 +29,7 @@ namespace Yamadev.YamaStream.Script
         YamaPlayerController _target;
         YamaPlayer[] _players;
         bool _uiOn;
+        Tab _tab = Tab.UI;
 
         private void OnEnable()
         {
@@ -42,6 +51,16 @@ namespace Yamadev.YamaStream.Script
             }
             _yamaPlayer = serializedObject.FindProperty("YamaPlayer");
             _players = Utils.FindComponentsInHierarthy<YamaPlayer>();
+        }
+
+        public void DrawTab()
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                GUILayout.FlexibleSpace();
+                _tab = (Tab)GUILayout.Toolbar((int)_tab, System.Enum.GetNames(typeof(Tab)).Select(x => new GUIContent(x)).ToArray(), "LargeButton", GUI.ToolbarButtonSize.Fixed);
+                GUILayout.FlexibleSpace();
+            }
         }
 
         public override void OnInspectorGUI()

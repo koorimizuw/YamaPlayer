@@ -2,7 +2,6 @@
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
-using Yamadev.YamaStream.Script;
 
 namespace Yamadev.YamaStream
 {
@@ -10,6 +9,7 @@ namespace Yamadev.YamaStream
     {
         protected GUIStyle _uiTitle;
         protected GUIStyle _bold;
+
         protected virtual void Initilize()
         {
             _uiTitle = new GUIStyle()

@@ -12,6 +12,7 @@ namespace Yamadev.YamaStream
         [SerializeField] StandardPlaylist _history;
         [SerializeField] Playlist[] _playlists;
         [SerializeField] Transform _dynamicPlaylistsContainer;
+        [SerializeField] float _forwardInterval = 0;
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(ShufflePlay))] bool _shuffle = false;
         [UdonSynced] int _activePlaylistIndex = -1;
         [UdonSynced] int _playingTrackIndex = -1;
@@ -96,6 +97,7 @@ namespace Yamadev.YamaStream
 
         public void Forward()
         {
+            if (IsPlaying || IsLoading) return;
             if (_queue.Length > 0)
             {
                 PlayTrack(_queue, 0);
