@@ -15,6 +15,7 @@ namespace Yamadev.YamaStream
         public override void OnVideoReady() { }
         public override void OnVideoStart() { }
         public virtual void OnVideoStop() { }
+        public virtual void OnTextureUpdated() { }
         public virtual void OnVideoReloaded() { }
         #endregion
 

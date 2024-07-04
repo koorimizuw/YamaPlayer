@@ -13,7 +13,7 @@ using static RenderHeads.Media.AVProVideo.MediaPlayer;
 namespace Yamadev.YamaStream.Script
 {
 #if AVPRO_DEBUG
-    public class AVProPlayerResolver : MonoBehaviour, IAVProVideoPlayerInternal
+    public class AVProPlayerResolver : IAVProVideoPlayerInternal
     {
         public VRCAVProVideoPlayer BasePlayer;
         MediaPlayer _player;
@@ -24,7 +24,6 @@ namespace Yamadev.YamaStream.Script
             set
             {
                 _player = value;
-                _player.Events.AddListener(HandleEvent);
             }
         }
 
@@ -89,7 +88,6 @@ namespace Yamadev.YamaStream.Script
 
             void PlayVideo(string resolvedURL)
             {
-                MediaPlayer.Events.AddListener(HandleEvent);
                 MediaPlayer.OpenMedia(MediaPathType.AbsolutePathOrURL, resolvedURL, false);
             }
         }
@@ -107,7 +105,6 @@ namespace Yamadev.YamaStream.Script
 
             void PlayVideo(string resolvedURL)
             {
-                MediaPlayer.Events.AddListener(HandleEvent);
                 MediaPlayer.OpenMedia(MediaPathType.AbsolutePathOrURL, resolvedURL, true);
             }
         }
@@ -140,24 +137,6 @@ namespace Yamadev.YamaStream.Script
         public float GetDuration()
         {
             return (float)MediaPlayer.Info.GetDuration();
-        }
-
-        public void HandleEvent(MediaPlayer mp, MediaPlayerEvent.EventType eventType, ErrorCode code)
-        {
-            Debug.Log("MediaPlayer " + mp.name + " generated event: " + eventType.ToString());
-            if (eventType == MediaPlayerEvent.EventType.Error) Debug.LogError("Error: " + code);
-            switch (eventType)
-            {
-                case MediaPlayerEvent.EventType.Started:
-                    BasePlayer.OnVideoStart();
-                    break;
-                case MediaPlayerEvent.EventType.ReadyToPlay:
-                    BasePlayer.OnVideoReady(); 
-                    break;
-                case MediaPlayerEvent.EventType.FinishedPlaying:
-                    BasePlayer.OnVideoEnd();
-                    break;
-            }
         }
     }
 #endif

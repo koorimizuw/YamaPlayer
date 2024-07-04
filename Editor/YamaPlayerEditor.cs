@@ -262,6 +262,9 @@ namespace Yamadev.YamaStream.Script
 
             EditorGUILayout.LabelField("Playback", _bold);
             EditorGUILayout.PropertyField(_loop);
+            EditorGUILayout.Space();
+
+            EditorGUILayout.LabelField("Playlist", _bold);
             EditorGUILayout.PropertyField(_shuffle);
             if (_useLowLatency != null) EditorGUILayout.PropertyField(_useLowLatency);
             EditorGUILayout.PropertyField(_forwardInterval);
@@ -274,26 +277,17 @@ namespace Yamadev.YamaStream.Script
         #region Playlist Settings
         void drawPlaylistSettings()
         {
-            using (new GUILayout.VerticalScope(GUI.skin.box))
-            {
-                EditorGUILayout.LabelField("Playlist / プレイリスト", _bold);
-                if (GUILayout.Button("Edit Playlist")) PlaylistEditor.ShowPlaylistEditorWindow(_target);
-            }
+            EditorGUILayout.LabelField("Playlist / プレイリスト", _bold);
+            if (GUILayout.Button("Edit Playlist")) PlaylistEditor.ShowPlaylistEditorWindow(_target);
         }
         #endregion
 
         #region Permission Settings
         void drawPermissionSettings()
         {
-            if (_permission != null)
-            {
-                using (new GUILayout.VerticalScope(GUI.skin.box))
-                {
-                    EditorGUILayout.LabelField("Permission / 権限", _bold);
-                    EditorGUILayout.PropertyField(_defaultPermission);
-                    EditorGUILayout.PropertyField(_ownerList);
-                }
-            }
+            EditorGUILayout.LabelField("Permission / 権限", _bold);
+            EditorGUILayout.PropertyField(_defaultPermission);
+            EditorGUILayout.PropertyField(_ownerList);
         }
         #endregion
     }

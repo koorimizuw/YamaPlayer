@@ -37,7 +37,6 @@ namespace Yamadev.YamaStream
         void Update()
         {
             checkRepeat();
-            renderScreen();
             if (IsPlaying && Time.time - _syncFrequency > _lastSync) DoSync();
         }
 

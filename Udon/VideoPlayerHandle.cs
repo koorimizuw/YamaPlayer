@@ -4,6 +4,7 @@ using UnityEngine;
 using VRC.SDK3.Components.Video;
 using VRC.SDK3.Video.Components.Base;
 using VRC.SDKBase;
+using VRC.Udon.Common.Enums;
 
 namespace Yamadev.YamaStream
 {
@@ -14,8 +15,13 @@ namespace Yamadev.YamaStream
         [SerializeField] VideoPlayerType _videoPlayerType;
         [SerializeField] string _textureName = "_MainTex";
         [SerializeField] bool _useMaterial;
+        [SerializeField] bool _isAvPro;
+        [SerializeField] bool _fixFlicker;
+        [SerializeField] Material _blitMaterial;
         Renderer _renderer;
         MaterialPropertyBlock _properties;
+        Texture _texture;
+        RenderTexture _blitTexture;
         Listener _listener;
 
         VRCUrl _url = VRCUrl.Empty;
@@ -26,6 +32,16 @@ namespace Yamadev.YamaStream
             _renderer = GetComponentInChildren<Renderer>();
             _properties = new MaterialPropertyBlock();
         }
+
+#if UNITY_EDITOR && AVPRO_DEBUG
+        private void Update()
+        {
+            if (_isAvPro && _stopped && _baseVideoPlayer.IsPlaying)
+            {
+                OnVideoStart();
+            }
+        }
+#endif
 
         BaseVRCVideoPlayer _baseVideoPlayer => GetComponent<BaseVRCVideoPlayer>();
 
@@ -57,6 +73,7 @@ namespace Yamadev.YamaStream
         {
             if (_listener != null && _stopped) _listener.OnVideoStart();
             _stopped = false;
+            GetVideoTexture();
         }
 
         public override void OnVideoEnd()
@@ -107,15 +124,53 @@ namespace Yamadev.YamaStream
 
         public VideoPlayerType VideoPlayerType => _videoPlayerType;
 
-        public Texture Texture
+        void createBlitTexture(int width, int height)
         {
-            get
+            _blitTexture = VRCRenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB64, RenderTextureReadWrite.sRGB, 1);
+            _blitTexture.filterMode = FilterMode.Bilinear;
+            _blitTexture.wrapMode = TextureWrapMode.Clamp;
+        }
+
+        public Texture Texture => _texture != null ? _blitTexture != null ? _blitTexture : _texture : null;
+
+        void resetTexture()
+        {
+            _texture = null;
+            if (_blitTexture != null)
             {
-                if (_renderer == null ||!_baseVideoPlayer.IsPlaying) return null;
-                if (_useMaterial) return _renderer.material.GetTexture(_textureName);
-                _renderer.GetPropertyBlock(_properties);
-                return _properties.GetTexture(_textureName);
+                _blitTexture.Release();
+                _blitTexture = null;
             }
+        }
+
+        public void GetVideoTexture()
+        {
+            if (_renderer == null || _stopped)
+            {
+                resetTexture();
+                return;
+            }
+
+            if (_useMaterial) _texture = _renderer.sharedMaterial.GetTexture(_textureName);
+            else
+            {
+                _renderer.GetPropertyBlock(_properties);
+                _texture = _properties.GetTexture(_textureName);
+            }
+
+            if (_isAvPro && _fixFlicker && _texture != null)
+                SendCustomEventDelayedFrames(nameof(BlitLastUpdate), 0, EventTiming.LateUpdate);
+
+            if (_listener != null) _listener.OnTextureUpdated();
+            SendCustomEventDelayedFrames(nameof(GetVideoTexture), 1);
+        }
+
+        public void BlitLastUpdate()
+        {
+            if (_texture == null) return;
+            if (_blitTexture == null || _blitTexture.width != _texture.width || _blitTexture.height != _texture.height)
+                createBlitTexture(_texture.width, _texture.height);
+            VRCGraphics.Blit(_texture, _blitTexture, _blitMaterial);
         }
 
         public bool IsPlaying

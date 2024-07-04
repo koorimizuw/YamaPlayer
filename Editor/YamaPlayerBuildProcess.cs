@@ -13,7 +13,7 @@ namespace Yamadev.YamaStream.Script
 {
     public class YamaPlayerBuildProcess : IProcessSceneWithReport
     {
-        public int callbackOrder => 0;
+        public int callbackOrder => -1;
 
         private void SetAngle(Transform trans)
         {
@@ -48,7 +48,6 @@ namespace Yamadev.YamaStream.Script
                 {
                     GameObject newObject = Object.Instantiate(template.gameObject, handle.TargetContent, false);
                     GameObjectUtility.EnsureUniqueNameForSibling(newObject);
-                    // newObject.transform.Find("Input").gameObject.SetActive(false);
 
                     Playlist udon = newObject.transform.GetComponent<Playlist>();
 

@@ -79,9 +79,9 @@ namespace Yamadev.YamaStream
             }
         }
 
-        void renderScreen()
+        public override void OnTextureUpdated()
         {
-            if (!IsPlaying || Texture == null) return;
+            if (Texture == null) return;
 
             MaterialProperty.SetTexture("_MainTex", Texture);
             foreach (Renderer renderer in _renderScreens) renderer.SetPropertyBlock(_properties, 0);
@@ -92,15 +92,10 @@ namespace Yamadev.YamaStream
         void updateProperties()
         {
 #if UNITY_STANDALONE_WIN
-            MaterialProperty.SetInt("_Flip", 1);
-            foreach (RawImage image in _rawImageScreens) image.material.SetInt("_Flip", 1);
-            if (_lod != null) _lod.SetInt("_Flip", 1);
-#else
-            MaterialProperty.SetInt("_Flip", 0);
-            foreach (RawImage image in _rawImageScreens) image.material.SetInt("_Flip", 0);
-            if (_lod != null) _lod.SetInt("_Flip", 0);
-#endif
             int isAVPro = VideoPlayerType == VideoPlayerType.AVProVideoPlayer ? 1 : 0;
+#else
+            int isAVPro = 0;
+#endif
             MaterialProperty.SetInt("_AVPro", isAVPro);
             foreach (RawImage image in _rawImageScreens) image.material.SetInt("_AVPro", isAVPro);
             if (_lod != null) _lod.SetInt("_AVPro", isAVPro);

@@ -2,10 +2,7 @@
 using System;
 using System.Linq;
 using UnityEditor;
-using UnityEditor.Build.Reporting;
 using UnityEngine;
-using VRC.SDKBase;
-using VRC.Utility;
 
 namespace Yamadev.YamaStream.Script
 {
@@ -19,14 +16,11 @@ namespace Yamadev.YamaStream.Script
             public string version;
         }
 
-        public static string GetYamaPlayerVersion()
-        {
-            var packageInfo = JsonUtility.FromJson<PackageInfo>(
-                System.IO.File.ReadAllText(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath), 
+        public static string GetYamaPlayerVersion() =>
+            JsonUtility.FromJson<PackageInfo>(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath),
                 AssetDatabase.GUIDToAssetPath(_packageInfoGuid)))
-                );
-            return packageInfo.version ?? string.Empty;
-        }
+                ).version ?? string.Empty;
 
         public static T[] FindComponentsInHierarthy<T>() where T : UnityEngine.Object
         {
