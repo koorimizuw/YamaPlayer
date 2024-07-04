@@ -18,7 +18,7 @@ Shader "Yamadev/YamaStream/Screen"
 
         sampler2D _MainTex;
         float4 _MainTex_TexelSize;
-	    fixed4 _BaseColor;
+        float4 _BaseColor;
         int _InversionInMirror;
         int _AVPro;
         fixed _Emission;
@@ -39,12 +39,11 @@ Shader "Yamadev/YamaStream/Screen"
         }
     
 	    void surf (Input IN, inout SurfaceOutputStandard o) {
-            o.Albedo = _BaseColor;
-
-			    fixed4 e = tex2D (_MainTex, IN.uv_MainTex);
+			fixed4 e = tex2D (_MainTex, IN.uv_MainTex);
             e *= !any(IN.uv_MainTex < 0 || 1 < IN.uv_MainTex);
             if (_AVPro) e.rgb = pow(e.rgb, 2.2);
 
+            o.Albedo = _BaseColor.rgb + e;
             o.Alpha = e.a;
             o.Emission = e * _Emission;
 		}

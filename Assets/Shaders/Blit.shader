@@ -45,9 +45,7 @@ Shader "Hidden/YamaStream/Blit"
 
             fixed4 frag(v2f i) : SV_Target
             {
-                fixed4 tex = tex2D(_MainTex, i.texcoord);
-                tex.rgb = pow(tex.rgb, 2.2);
-                tex.a = 1;
+                float4 tex = tex2D(_MainTex, i.texcoord);
                 return tex;
             }
         ENDCG

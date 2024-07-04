@@ -277,7 +277,7 @@ namespace Yamadev.YamaStream
         }
         public override void OnVideoEnd()
         {
-            if (Networking.IsOwner(gameObject) && !_isLocal && _forwardInterval > 0)
+            if (Networking.IsOwner(gameObject) && !_isLocal && _forwardInterval >= 0)
                 SendCustomEventDelayedSeconds(nameof(Forward), _forwardInterval);
             foreach (Listener listener in _listeners) listener.OnVideoEnd();
         }
