@@ -77,7 +77,6 @@ namespace Yamadev.YamaStream
                 VideoPlayerHandle.Stop();
                 _videoPlayerType = value;
                 updateProperties();
-                if (value != VideoPlayerType.UnityVideoPlayer) Speed = 1f;
                 if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
                 foreach (Listener listener in _listeners) listener.OnPlayerChanged();
             }
