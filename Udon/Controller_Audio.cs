@@ -8,6 +8,7 @@ namespace Yamadev.YamaStream
     {
         [SerializeField] bool _mute;
         [SerializeField, Range(0f, 1f)] float _volume;
+        // [SerializeField, Range(-6f, 6f)] float _pitch = 1f;
         [SerializeField] AudioSource[] _audioSources = new AudioSource[] { };
 
         public void AddAudioSource(AudioSource audioSource)
@@ -24,13 +25,14 @@ namespace Yamadev.YamaStream
                 if (audioSource == null) continue;
                 audioSource.volume = _volume;
                 audioSource.mute = _mute;
+                audioSource.pitch = _speed; // * Mathf.Pow(2, _pitch / 12f);
             }
             foreach (Listener listener in _listeners) listener.OnVolumeChanged();
         }
 
         public float Volume
         {
-            get { return _volume; }
+            get => _volume;
             set
             {
                 _volume = Mathf.Clamp01(value);
@@ -40,12 +42,24 @@ namespace Yamadev.YamaStream
 
         public bool Mute
         {
-            get { return _mute; }
+            get => _mute;
             set
             {
                 _mute = value;
                 UpdateAudio();
             }
         }
+
+        /*
+        public float Pitch
+        {
+            get => _pitch;
+            set
+            {
+                _pitch = value;
+                UpdateAudio();
+            }
+        }
+        */
     }
 }
