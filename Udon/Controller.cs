@@ -24,13 +24,13 @@ namespace Yamadev.YamaStream
         [UdonSynced, FieldChangeCallback(nameof(Speed))] float _speed = 1f;
         [UdonSynced, FieldChangeCallback(nameof(Repeat))] Vector3 _repeat = new Vector3(0f, 0f, 999999f);
         Listener[] _listeners = { };
-        bool _isLocal = false;
-        int _errorRetryCount = 0;
-        bool _loading = false;
-        bool _isReload = false;
-        float _lastSetTime = 0f;
-        float _setTimeCooling = 0.6f; 
-        bool _initialized = false;
+        bool _isLocal;
+        int _errorRetryCount;
+        bool _loading;
+        bool _isReload;
+        float _lastSetTime;
+        float _setTimeCooling = 0.5f; 
+        bool _initialized;
 
         void Start() => initialize();
 
@@ -181,10 +181,10 @@ namespace Yamadev.YamaStream
             foreach (Listener listener in _listeners) listener.OnVideoRetry();
         }
 
-        public void SetTime(float time)
+        public bool SetTime(float time)
         {
-            if (IsLive || Time.time - _lastSetTime < _setTimeCooling) return;
-            if (Repeat.ToRepeatStatus().IsOn() && (time < Repeat.ToRepeatStatus().GetStartTime() || time > Repeat.ToRepeatStatus().GetEndTime())) return;
+            if (IsLive || Time.time - _lastSetTime < _setTimeCooling) return false;
+            if (Repeat.ToRepeatStatus().IsOn() && (time < Repeat.ToRepeatStatus().GetStartTime() || time > Repeat.ToRepeatStatus().GetEndTime())) return false;
             VideoPlayerHandle.Time = time;
             _lastSetTime = Time.time;
             if (Networking.IsOwner(gameObject) && !_isLocal)
@@ -193,6 +193,7 @@ namespace Yamadev.YamaStream
                 RequestSerialization();
             }
             foreach (Listener listener in _listeners) listener.OnSetTime(time);
+            return true;
         }
 
         public void SendCustomVideoEvent(string eventName)
@@ -212,8 +213,6 @@ namespace Yamadev.YamaStream
         public override void OnVideoReady()
         {
             _loading = false;
-            if (_paused) VideoPlayerHandle.Pause();
-            else VideoPlayerHandle.Play();
             _videoPlayerAnimator.SetFloat("Speed", _speed);
             foreach (Listener listener in _listeners) listener.OnVideoReady();
         }
@@ -223,6 +222,8 @@ namespace Yamadev.YamaStream
             _errorRetryCount = 0;
             _loading = false;
             _stopped = false;
+            if (_paused) VideoPlayerHandle.Pause();
+            else VideoPlayerHandle.Play();
             if (Networking.IsOwner(gameObject) && !_isLocal && !_isReload)
             {
                 SyncTime = 0f;

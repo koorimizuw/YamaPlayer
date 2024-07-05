@@ -6,7 +6,7 @@ using VRC.SDKBase;
 
 namespace Yamadev.YamaStream
 {
-    public partial class Controller : Listener
+    public partial class Controller
     {
         [SerializeField] StandardPlaylist _queue;
         [SerializeField] StandardPlaylist _history;

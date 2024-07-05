@@ -6,7 +6,7 @@ using VRC.SDKBase;
 
 namespace Yamadev.YamaStream
 {
-    public partial class Controller : Listener
+    public partial class Controller
     {
         [SerializeField] LatencyManager _latencyManager;
         [SerializeField, Range(1f, 10f)] float _syncFrequency = 5.0f;

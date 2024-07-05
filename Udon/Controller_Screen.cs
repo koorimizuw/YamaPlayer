@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace Yamadev.YamaStream
 {
-    public partial class Controller : Listener
+    public partial class Controller
     {
         [SerializeField] int _maxResolution;
         [SerializeField] bool _mirrorInverse = true;

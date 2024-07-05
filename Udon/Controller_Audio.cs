@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Yamadev.YamaStream
 {
-    public partial class Controller : Listener
+    public partial class Controller
     {
         [SerializeField] bool _mute;
         [SerializeField, Range(0f, 1f)] float _volume;
