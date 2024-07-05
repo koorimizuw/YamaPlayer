@@ -2,6 +2,7 @@
 using System;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.UIElements;
 using VRC.SDK3.Components.Video;
 using VRC.SDKBase;
 
@@ -29,14 +30,15 @@ namespace Yamadev.YamaStream
         bool _loading = false;
         bool _isReload = false;
         float _lastSetTime = 0f;
-        float _setTimeCooling = 0.6f; 
+        float _repeatCooling = 0.6f; 
         bool _initialized = false;
 
         void Start() => initialize();
 
         void Update()
         {
-            checkRepeat();
+            if (OutOfRepeat(VideoTime) && Time.time - _lastSetTime > _repeatCooling) 
+                SetTime(Repeat.ToRepeatStatus().GetStartTime());
             if (IsPlaying && Time.time - _syncFrequency > _lastSync) DoSync();
         }
 
@@ -124,10 +126,19 @@ namespace Yamadev.YamaStream
             set
             {
                 _loop = value;
-                foreach (VideoPlayerHandle handle in _videoPlayerHandles) handle.Loop = value;
+                foreach (VideoPlayerHandle handle in _videoPlayerHandles) handle.Loop = _loop;
                 if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
                 foreach (Listener listener in _listeners) listener.OnLoopChanged();
             }
+        }
+
+        public void UpdateSpeed()
+        {
+            _videoPlayerAnimator.SetFloat("Speed", _speed);
+            _videoPlayerAnimator.Update(0f);
+            if (!_stopped && _videoPlayerType == VideoPlayerType.AVProVideoPlayer) 
+                SendCustomEventDelayedFrames(nameof(Reload), 1);
+            UpdateAudio();
         }
 
         public float Speed
@@ -135,8 +146,8 @@ namespace Yamadev.YamaStream
             get => _speed;
             set
             {
-                _speed = VideoPlayerType == VideoPlayerType.UnityVideoPlayer ? value : 1f;
-                if (!_stopped) _videoPlayerAnimator.SetFloat("Speed", value);
+                _speed = value;
+                UpdateSpeed();
                 if (Networking.IsOwner(gameObject) && !_isLocal)
                 {
                     SyncTime = VideoTime - VideoStandardDelay;
@@ -146,10 +157,11 @@ namespace Yamadev.YamaStream
             }
         }
 
-        void checkRepeat()
+        public bool OutOfRepeat(float targetTime)
         {
-            if (!IsPlaying || !Repeat.ToRepeatStatus().IsOn()) return;
-            if (VideoTime > Repeat.ToRepeatStatus().GetEndTime() || VideoTime < Repeat.ToRepeatStatus().GetStartTime()) SetTime(Repeat.ToRepeatStatus().GetStartTime());
+            if (!IsPlaying || !Repeat.ToRepeatStatus().IsOn()) return false;
+            return targetTime > Repeat.ToRepeatStatus().GetEndTime() || targetTime < Repeat.ToRepeatStatus().GetStartTime();
+
         }
 
         public Vector3 Repeat
@@ -183,8 +195,7 @@ namespace Yamadev.YamaStream
 
         public void SetTime(float time)
         {
-            if (IsLive || Time.time - _lastSetTime < _setTimeCooling) return;
-            if (Repeat.ToRepeatStatus().IsOn() && (time < Repeat.ToRepeatStatus().GetStartTime() || time > Repeat.ToRepeatStatus().GetEndTime())) return;
+            if (IsLive || OutOfRepeat(time)) return;
             VideoPlayerHandle.Time = time;
             _lastSetTime = Time.time;
             if (Networking.IsOwner(gameObject) && !_isLocal)
@@ -212,9 +223,6 @@ namespace Yamadev.YamaStream
         public override void OnVideoReady()
         {
             _loading = false;
-            if (_paused) VideoPlayerHandle.Pause();
-            else VideoPlayerHandle.Play();
-            _videoPlayerAnimator.SetFloat("Speed", _speed);
             foreach (Listener listener in _listeners) listener.OnVideoReady();
         }
 
@@ -223,6 +231,8 @@ namespace Yamadev.YamaStream
             _errorRetryCount = 0;
             _loading = false;
             _stopped = false;
+            if (_paused) VideoPlayerHandle.Pause();
+            else VideoPlayerHandle.Play();
             if (Networking.IsOwner(gameObject) && !_isLocal && !_isReload)
             {
                 SyncTime = 0f;

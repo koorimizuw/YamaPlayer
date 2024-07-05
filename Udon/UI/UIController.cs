@@ -64,6 +64,8 @@ namespace Yamadev.YamaStream
         [SerializeField] Slider _volume;
         [SerializeField] SliderHelper _volumeHelper;
         [SerializeField] Text _volumeTooltip;
+        [SerializeField] Slider _pitchSlider;
+        [SerializeField] Text _pitchText;
 
         [Header("Main UI - Playlist")]
         [SerializeField] Transform _playlistSelector;
@@ -417,39 +419,35 @@ namespace Yamadev.YamaStream
         {
             if (!CheckPermission()) return;
             RepeatStatus status = _controller.Repeat.ToRepeatStatus();
-            if (on && !status.IsOn()) status.TurnOn(); else return;
-            if (!on && status.IsOn()) status.TurnOff(); else return;
+            if (on) status.TurnOn(); 
+            else status.TurnOff();
             _controller.SetMeOwner();
             _controller.Repeat = status.ToVector3();
         }
 
         public void SetRepeatStart()
         {
-            if (_repeatSlider != null && _controller.IsPlaying)
+            if (_repeatSlider == null || _controller.Stopped) return;
+            if (!_controller.Repeat.ToRepeatStatus().IsOn())
             {
-                if (!_controller.Repeat.ToRepeatStatus().IsOn())
-                {
-                    RepeatStatus status = _controller.Repeat.ToRepeatStatus();
-                    status.SetStartTime(_controller.IsLive ? 0f : Mathf.Clamp(_controller.Duration * _repeatSlider.SliderLeft.value, 0f, _controller.Duration));
-                    _controller.SetMeOwner();
-                    _controller.Repeat = status.ToVector3();
-                }
-                else _repeatSlider.SliderLeft.SetValueWithoutNotify(_controller.Repeat.ToRepeatStatus().GetStartTime() / _controller.Duration);
+                RepeatStatus status = _controller.Repeat.ToRepeatStatus();
+                status.SetStartTime(_controller.IsLive ? 0f : Mathf.Clamp(_controller.Duration * _repeatSlider.SliderLeft.value, 0f, _controller.Duration));
+                _controller.SetMeOwner();
+                _controller.Repeat = status.ToVector3();
             }
+            else _repeatSlider.SliderLeft.SetValueWithoutNotify(_controller.Repeat.ToRepeatStatus().GetStartTime() / _controller.Duration);
         }
         public void SetRepeatEnd()
         {
-            if (_repeatSlider != null && _controller.IsPlaying)
+            if (_repeatSlider == null || _controller.Stopped) return;
+            if (!_controller.Repeat.ToRepeatStatus().IsOn())
             {
-                if (!_controller.Repeat.ToRepeatStatus().IsOn())
-                {
-                    RepeatStatus status = _controller.Repeat.ToRepeatStatus();
-                    status.SetEndTime(_controller.IsLive ? 999999f : Mathf.Clamp(_controller.Duration * _repeatSlider.SliderRight.value, 0f, _controller.Duration));
-                    _controller.SetMeOwner();
-                    _controller.Repeat = status.ToVector3();
-                }
-                else _repeatSlider.SliderRight.SetValueWithoutNotify(_controller.Repeat.ToRepeatStatus().GetEndTime() / _controller.Duration);
+                RepeatStatus status = _controller.Repeat.ToRepeatStatus();
+                status.SetEndTime(_controller.IsLive ? 999999f : Mathf.Clamp(_controller.Duration * _repeatSlider.SliderRight.value, 0f, _controller.Duration));
+                _controller.SetMeOwner();
+                _controller.Repeat = status.ToVector3();
             }
+            else _repeatSlider.SliderRight.SetValueWithoutNotify(_controller.Repeat.ToRepeatStatus().GetEndTime() / _controller.Duration);
         }
         public void SetShuffle()
         {
@@ -496,6 +494,10 @@ namespace Yamadev.YamaStream
         public void SetEmission()
         {
             if (_emissionSlider != null) _controller.Emission = _emissionSlider.value;
+        }
+        public void SetPitch()
+        {
+            // if (_pitchSlider != null) _controller.Pitch = _pitchSlider.value;
         }
         public void SetMirrorInverse() => _controller.MirrorInverse = true;
         public void SetMirrorInverseOff() => _controller.MirrorInverse = false;
