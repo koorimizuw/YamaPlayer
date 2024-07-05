@@ -195,7 +195,7 @@ namespace Yamadev.YamaStream
 
         public bool SetTime(float time)
         {
-            if (IsLive || OutOfRepeat(time)) return;
+            if (IsLive || OutOfRepeat(time)) return false;
             VideoPlayerHandle.Time = time;
             _lastSetTime = Time.time;
             if (Networking.IsOwner(gameObject) && !_isLocal)
