@@ -3309,19 +3309,19 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _permissionEntry
+      Data: _permission
     - Name: $v
       Entry: 7
       Data: 199|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
-      Data: _permissionEntry
+      Data: _permission
     - Name: <UserType>k__BackingField
       Entry: 9
-      Data: 196
+      Data: 142
     - Name: <SystemType>k__BackingField
       Entry: 9
-      Data: 196
+      Data: 4
     - Name: <SyncMode>k__BackingField
       Entry: 7
       Data: System.Nullable`1[[UdonSharp.UdonSyncMode, UdonSharp.Runtime]], mscorlib
@@ -3373,13 +3373,13 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _permissionPage
+      Data: _permissionEntry
     - Name: $v
       Entry: 7
       Data: 203|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
-      Data: _permissionPage
+      Data: _permissionEntry
     - Name: <UserType>k__BackingField
       Entry: 9
       Data: 196
@@ -3428,19 +3428,19 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _permissionContent
+      Data: _permissionPage
     - Name: $v
       Entry: 7
       Data: 206|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
-      Data: _permissionContent
+      Data: _permissionPage
     - Name: <UserType>k__BackingField
       Entry: 9
-      Data: 137
+      Data: 196
     - Name: <SystemType>k__BackingField
       Entry: 9
-      Data: 137
+      Data: 196
     - Name: <SyncMode>k__BackingField
       Entry: 7
       Data: System.Nullable`1[[UdonSharp.UdonSyncMode, UdonSharp.Runtime]], mscorlib
