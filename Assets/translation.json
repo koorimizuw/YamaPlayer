@@ -13,7 +13,7 @@
     "videoPlayer": "動画プレイヤー",
     "videoPlayerDesc": "UnityVideoPlayer: 一般の動画のみを再生できる。\nAVProVideoPlayer: 一般の動画に加えて、YouTube Live、twitchも見られる。",
     "playbackSpeed": "再生速度",
-    "playbackSpeedDesc": "動画の再生速度を0.05x刻みで0.05xから2.0xまで調整できる。\n動画プレイヤーがAVPro Video Playerとなっているときは変更されたあとにリロードします。",
+    "playbackSpeedDesc": "動画の再生速度を0.05x刻みで0.05xから2.0xまで調整できる。\n動画プレイヤーがAVPro Video Playerの場合は変更されたあとにリロードします。",
     "slower": "より遅い",
     "faster": "より速い",
     "repeatPlay": "区間リピート再生",
