@@ -95,9 +95,14 @@ namespace Yamadev.YamaStream
             }
         }
 
-        public void Forward()
+        public void RunForward()
         {
             if (IsPlaying || IsLoading) return;
+            Forward();
+        }
+
+        public void Forward()
+        {
             if (_queue.Length > 0)
             {
                 PlayTrack(_queue, 0);

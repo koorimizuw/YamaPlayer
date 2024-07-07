@@ -215,7 +215,11 @@ namespace Yamadev.YamaStream
         {
             Track track = Track.New(_targetPlayer, _title, _url, _originalUrl);
             foreach (Listener listener in _listeners) listener.OnTrackSynced(track.GetUrl());
-            if (track.GetUrl() != Track.GetUrl()) PlayTrack(track);
+            if (track.GetUrl() != Track.GetUrl())
+            {
+                Stopped = true;
+                PlayTrack(track);
+            }
             DoSync(true);
         }
 
@@ -288,7 +292,7 @@ namespace Yamadev.YamaStream
         public override void OnVideoEnd()
         {
             if (Networking.IsOwner(gameObject) && !_isLocal && _forwardInterval >= 0)
-                SendCustomEventDelayedSeconds(nameof(Forward), _forwardInterval);
+                SendCustomEventDelayedSeconds(nameof(RunForward), _forwardInterval);
             foreach (Listener listener in _listeners) listener.OnVideoEnd();
         }
 
