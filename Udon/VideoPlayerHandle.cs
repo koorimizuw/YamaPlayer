@@ -103,20 +103,21 @@ namespace Yamadev.YamaStream
 
         public void Play()
         {
-            if (_baseVideoPlayer.IsPlaying) return;
+            if (_stopped || _baseVideoPlayer.IsPlaying) return;
             _baseVideoPlayer.Play();
             if (_listener != null) _listener.OnVideoPlay();
         }
 
         public void Pause()
         {
-            if (!_baseVideoPlayer.IsPlaying) return;
+            if (_stopped || !_baseVideoPlayer.IsPlaying) return;
             _baseVideoPlayer.Pause();
             if (_listener != null) _listener.OnVideoPause();
         }
 
         public void Stop()
         {
+            if (_stopped) return;
             _baseVideoPlayer.Stop();
             _stopped = true;
             if (_listener != null) _listener.OnVideoStop();
