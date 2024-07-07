@@ -114,7 +114,8 @@ namespace Yamadev.YamaStream
             set
             {
                 _stopped = value;
-                if (value) VideoPlayerHandle.Stop();
+                _isReload = false;
+                if (_stopped) VideoPlayerHandle.Stop();
                 if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
             }
         }

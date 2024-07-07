@@ -26,6 +26,7 @@ namespace Yamadev.YamaStream
 
         VRCUrl _url = VRCUrl.Empty;
         bool _stopped = true;
+        bool _loading;
 
         void Start()
         {
@@ -71,9 +72,18 @@ namespace Yamadev.YamaStream
 
         public override void OnVideoStart()
         {
-            if (_listener != null && _stopped) _listener.OnVideoStart();
-            _stopped = false;
-            GetVideoTexture();
+            if (_stopped && !_loading)
+            {
+                _baseVideoPlayer.Stop();
+                return;
+            }
+            if (_listener != null && _stopped)
+            {
+                _loading = false;
+                _stopped = false;
+                _listener.OnVideoStart();
+                GetVideoTexture();
+            }
         }
 
         public override void OnVideoEnd()
@@ -98,6 +108,7 @@ namespace Yamadev.YamaStream
         public void PlayUrl(VRCUrl url)
         {
             _url = url;
+            _loading = true;
             _baseVideoPlayer.PlayURL(_url);
         }
 
@@ -117,9 +128,10 @@ namespace Yamadev.YamaStream
 
         public void Stop()
         {
-            if (_stopped) return;
+            if (_stopped && !_loading) return;
             _baseVideoPlayer.Stop();
             _stopped = true;
+            _loading = false;
             if (_listener != null) _listener.OnVideoStop();
         }
 

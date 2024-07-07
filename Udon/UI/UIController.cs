@@ -237,21 +237,18 @@ namespace Yamadev.YamaStream
         {
             UpdateUI();
             if (_controller.VideoPlayerType == VideoPlayerType.UnityVideoPlayer || !CheckPermission()) return;
-            if (_modal == null || _controller.Stopped)
+            if (_modal == null || (_controller.Stopped && !_controller.IsLoading))
             {
                 SetUnityPlayerEvent();
                 return;
             }
-            if (_modal != null)
-            {
-                _modal.Title = _i18n.GetValue("confirmChangePlayer");
-                _modal.Message = _i18n.GetValue("confirmChangePlayerMessage");
-                _modal.CancelText = _i18n.GetValue("cancel");
-                _modal.ExecuteText = _i18n.GetValue("continue");
-                _modal.CloseEvent = UdonEvent.Empty();
-                _modal.ExecuteEvent = UdonEvent.New(this, nameof(SetUnityPlayerEvent));
-                _modal.Open(1);
-            }
+            _modal.Title = _i18n.GetValue("confirmChangePlayer");
+            _modal.Message = _i18n.GetValue("confirmChangePlayerMessage");
+            _modal.CancelText = _i18n.GetValue("cancel");
+            _modal.ExecuteText = _i18n.GetValue("continue");
+            _modal.CloseEvent = UdonEvent.Empty();
+            _modal.ExecuteEvent = UdonEvent.New(this, nameof(SetUnityPlayerEvent));
+            _modal.Open(1);
         }
         public void SetUnityPlayerEvent()
         {
@@ -263,21 +260,18 @@ namespace Yamadev.YamaStream
         {
             UpdateUI();
             if (_controller.VideoPlayerType == VideoPlayerType.AVProVideoPlayer || !CheckPermission()) return;
-            if (_modal == null || _controller.Stopped)
+            if (_modal == null || (_controller.Stopped && !_controller.IsLoading))
             {
                 SetAVProPlayerEvent();
                 return;
             }
-            if (_modal != null)
-            {
-                _modal.Title = _i18n.GetValue("confirmChangePlayer");
-                _modal.Message = _i18n.GetValue("confirmChangePlayerMessage");
-                _modal.CancelText = _i18n.GetValue("cancel");
-                _modal.ExecuteText = _i18n.GetValue("continue");
-                _modal.CloseEvent = UdonEvent.Empty();
-                _modal.ExecuteEvent = UdonEvent.New(this, nameof(SetAVProPlayerEvent));
-                _modal.Open(1);
-            }
+            _modal.Title = _i18n.GetValue("confirmChangePlayer");
+            _modal.Message = _i18n.GetValue("confirmChangePlayerMessage");
+            _modal.CancelText = _i18n.GetValue("cancel");
+            _modal.ExecuteText = _i18n.GetValue("continue");
+            _modal.CloseEvent = UdonEvent.Empty();
+            _modal.ExecuteEvent = UdonEvent.New(this, nameof(SetAVProPlayerEvent));
+            _modal.Open(1);
         }
         public void SetAVProPlayerEvent()
         {
