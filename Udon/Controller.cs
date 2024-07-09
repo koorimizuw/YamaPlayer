@@ -299,7 +299,7 @@ namespace Yamadev.YamaStream
         public override void OnVideoError(VideoError videoError)
         {
             _loading = false;
-            if (videoError != VideoError.InvalidURL && videoError != VideoError.AccessDenied && videoError != VideoError.PlayerError)
+            if (videoError != VideoError.InvalidURL && videoError != VideoError.AccessDenied)
             {
                 if (_errorRetryCount < _maxErrorRetry)
                 {
