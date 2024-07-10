@@ -361,7 +361,7 @@
     "videoPlayer": "비디오 플레이어",
     "videoPlayerDesc": "UnityVideoPlayer: 일반 동영상만 재생 가능.\nAVProVideoPlayer: 일반 동영상 외에도 YouTube Live, twitch도 재생 가능.",
     "playbackSpeed": "재생속도",
-    "playbackSpeedDesc": "동영상 재생 속도를 0.05x배 단위로, 0.05x배부터 2.0x배까지 조정할 수 있습니다. \n이 옵션은 동영상 플레이어가 Unity Video Player일 때만 유효합니다.",
+    "playbackSpeedDesc": "동영상 재생 속도를 0.05x배 단위로, 0.05x배부터 2.0x배까지 조정할 수 있습니다. \n동영상 플레이어가 AVPro Video Player인 경우 변경된 후 다시 로드합니다.",
     "slower": "느리게",
     "faster": "빠르게",
     "repeatPlay": "구간 반복 재생",
