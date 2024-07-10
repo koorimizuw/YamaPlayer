@@ -6,8 +6,22 @@ using UnityEngine;
 
 namespace Yamadev.YamaStream.Script
 {
-    public class Utils
+    public static class Utils
     {
+        static string _packageInfoGuid = "b4c53d030728ff34098bd0ed5fc21c72";
+
+        [Serializable]
+        private struct PackageInfo
+        {
+            public string version;
+        }
+
+        public static string GetYamaPlayerVersion() =>
+            JsonUtility.FromJson<PackageInfo>(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath),
+                AssetDatabase.GUIDToAssetPath(_packageInfoGuid)))
+                ).version ?? string.Empty;
+
         public static T[] FindComponentsInHierarthy<T>() where T : UnityEngine.Object
         {
             T[] res = Resources.FindObjectsOfTypeAll<T>();

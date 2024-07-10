@@ -5,7 +5,6 @@ Shader "Yamadev/YamaStream/Screen"
     _BaseColor ("Base Color", Color) = (0, 0, 0, 0)
     [Toggle] _InversionInMirror("Inversion in mirron", Int) = 1
     [Toggle] _AVPro("AVPro", Int) = 0
-    [Toggle] _Flip("Flip", Int) = 1
     _Emission ("Emission Scale", Float) = 1
 	}
 
@@ -19,10 +18,9 @@ Shader "Yamadev/YamaStream/Screen"
 
         sampler2D _MainTex;
         float4 _MainTex_TexelSize;
-	    fixed4 _BaseColor;
+        float4 _BaseColor;
         int _InversionInMirror;
         int _AVPro;
-        int _Flip;
         fixed _Emission;
 
 	    struct Input {
@@ -30,7 +28,7 @@ Shader "Yamadev/YamaStream/Screen"
 	    };
 
         void vert (inout appdata_full v) {
-            if (_AVPro && _Flip) v.texcoord.y = 1 - v.texcoord.y;
+            if (_AVPro) v.texcoord.y = 1 - v.texcoord.y;
 
             bool inMirror = 0 < dot(cross(UNITY_MATRIX_V[0], UNITY_MATRIX_V[1]), UNITY_MATRIX_V[2]);
             if (inMirror && _InversionInMirror) v.texcoord.xy = float2(1 - v.texcoord.x, v.texcoord.y);
@@ -41,12 +39,11 @@ Shader "Yamadev/YamaStream/Screen"
         }
     
 	    void surf (Input IN, inout SurfaceOutputStandard o) {
-            o.Albedo = _BaseColor;
-
-			    fixed4 e = tex2D (_MainTex, IN.uv_MainTex);
+			fixed4 e = tex2D (_MainTex, IN.uv_MainTex);
             e *= !any(IN.uv_MainTex < 0 || 1 < IN.uv_MainTex);
             if (_AVPro) e.rgb = pow(e.rgb, 2.2);
 
+            o.Albedo = _BaseColor.rgb + e;
             o.Alpha = e.a;
             o.Emission = e * _Emission;
 		}

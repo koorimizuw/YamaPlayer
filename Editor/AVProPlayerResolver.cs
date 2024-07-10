@@ -5,13 +5,27 @@ using VRC.SDK3.Components.Video;
 using VRC.SDK3.Video.Components.AVPro;
 using VRC.SDK3.Video.Interfaces.AVPro;
 using VRC.SDKBase;
+#if AVPRO_DEBUG
+using RenderHeads.Media.AVProVideo;
+using static RenderHeads.Media.AVProVideo.MediaPlayer;
+#endif
 
 namespace Yamadev.YamaStream.Script
 {
-    public class AVProPlayerResolver : MonoBehaviour, IAVProVideoPlayerInternal
+#if AVPRO_DEBUG
+    public class AVProPlayerResolver : IAVProVideoPlayerInternal
     {
         public VRCAVProVideoPlayer BasePlayer;
-        public dynamic MediaPlayer;
+        MediaPlayer _player;
+
+        public MediaPlayer MediaPlayer
+        {
+            get => _player;
+            set
+            {
+                _player = value;
+            }
+        }
 
         public bool Loop
         {
@@ -33,7 +47,7 @@ namespace Yamadev.YamaStream.Script
         {
             get
             {
-                Texture frame = (Texture)MediaPlayer.TextureProducer.GetTexture(0);
+                Texture frame = MediaPlayer.TextureProducer.GetTexture(0);
                 return frame.width;
             }
         }
@@ -42,14 +56,21 @@ namespace Yamadev.YamaStream.Script
         {
             get
             {
-                Texture frame = (Texture)MediaPlayer.TextureProducer.GetTexture(0);
+                Texture frame = MediaPlayer.TextureProducer.GetTexture(0);
                 return frame.height;
             }
         }
 
         public bool UseLowLatency
         {
-            get => MediaPlayer.GetCurrentPlatformOptions()?.useLowLatency;
+            get
+            {
+#if UNITY_EDITOR_WIN
+                return ((OptionsWindows)MediaPlayer.GetCurrentPlatformOptions()).useLowLatency;
+#else
+                return false;
+#endif
+            }
         }
 
         public static Action<VRCUrl, int, UnityEngine.Object, Action<string>, Action<VideoError>> StartResolveURLCoroutine { get; set; }
@@ -67,7 +88,7 @@ namespace Yamadev.YamaStream.Script
 
             void PlayVideo(string resolvedURL)
             {
-                MediaPlayer.OpenMedia(0, resolvedURL, false);
+                MediaPlayer.OpenMedia(MediaPathType.AbsolutePathOrURL, resolvedURL, false);
             }
         }
 
@@ -84,9 +105,7 @@ namespace Yamadev.YamaStream.Script
 
             void PlayVideo(string resolvedURL)
             {
-                MediaPlayer.OpenMedia(0, resolvedURL, true);
-                BasePlayer.OnVideoStart();
-                BasePlayer.OnVideoReady();
+                MediaPlayer.OpenMedia(MediaPathType.AbsolutePathOrURL, resolvedURL, true);
             }
         }
 
@@ -120,4 +139,5 @@ namespace Yamadev.YamaStream.Script
             return (float)MediaPlayer.Info.GetDuration();
         }
     }
+#endif
 }

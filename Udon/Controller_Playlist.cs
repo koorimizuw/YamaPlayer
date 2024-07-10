@@ -12,6 +12,7 @@ namespace Yamadev.YamaStream
         [SerializeField] StandardPlaylist _history;
         [SerializeField] Playlist[] _playlists;
         [SerializeField] Transform _dynamicPlaylistsContainer;
+        [SerializeField] float _forwardInterval = 0;
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(ShufflePlay))] bool _shuffle = false;
         [UdonSynced] int _activePlaylistIndex = -1;
         [UdonSynced] int _playingTrackIndex = -1;
@@ -92,6 +93,12 @@ namespace Yamadev.YamaStream
                 int result = UnityEngine.Random.Range(0, length);
                 if (result != exclude) return result;
             }
+        }
+
+        public void RunForward()
+        {
+            if (IsPlaying || IsLoading) return;
+            Forward();
         }
 
         public void Forward()

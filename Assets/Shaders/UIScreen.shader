@@ -4,7 +4,6 @@ Shader "Yamadev/YamaStream/UIScreen"
     {
         [PerRendererData] _MainTex("Main Texture", 2D) = "black" {}
         [Toggle] _AVPro("AVPro", Int) = 0
-        [Toggle] _Flip("Flip", Int) = 1
     }
 
         SubShader
@@ -52,7 +51,6 @@ Shader "Yamadev/YamaStream/UIScreen"
                 sampler2D _MainTex;
                 float4 _MainTex_TexelSize;
                 int _AVPro;
-                int _Flip;
 
                 v2f vert(appdata_t v)
                 {
@@ -61,7 +59,7 @@ Shader "Yamadev/YamaStream/UIScreen"
                     OUT.texcoord = v.texcoord;
                     OUT.color = v.color;
 
-                    if (_AVPro && _Flip) OUT.texcoord.y = 1 - OUT.texcoord.y;
+                    if (_AVPro) OUT.texcoord.y = 1 - OUT.texcoord.y;
 
                     float aspect = _MainTex_TexelSize.z / 1.77777778;
                     if (_MainTex_TexelSize.w > aspect) OUT.texcoord.x = ((OUT.texcoord.x - 0.5) / (aspect / _MainTex_TexelSize.w)) + 0.5;

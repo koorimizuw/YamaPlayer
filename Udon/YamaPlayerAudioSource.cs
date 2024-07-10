@@ -7,7 +7,7 @@ namespace Yamadev.YamaStream
 {
     [RequireComponent(typeof(AudioSource))]
     [RequireComponent(typeof(VRCSpatialAudioSource))]
-    [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class YamaPlayerAudioSource : UdonSharpBehaviour
     {
         [SerializeField] Controller _controller;

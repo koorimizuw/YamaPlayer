@@ -64,6 +64,8 @@ namespace Yamadev.YamaStream
         [SerializeField] Slider _volume;
         [SerializeField] SliderHelper _volumeHelper;
         [SerializeField] Text _volumeTooltip;
+        [SerializeField] Slider _pitchSlider;
+        [SerializeField] Text _pitchText;
 
         [Header("Main UI - Playlist")]
         [SerializeField] Transform _playlistSelector;
@@ -89,9 +91,9 @@ namespace Yamadev.YamaStream
         [SerializeField] GameObject _karaokeModal;
 
         [Header("Settings - Permission")]
+        [SerializeField] LoopScroll _permission;
         [SerializeField] GameObject _permissionEntry;
         [SerializeField] GameObject _permissionPage;
-        [SerializeField] Transform _permissionContent;
 
         [Header("Loading")]
         [SerializeField] GameObject _loading;
@@ -235,21 +237,18 @@ namespace Yamadev.YamaStream
         {
             UpdateUI();
             if (_controller.VideoPlayerType == VideoPlayerType.UnityVideoPlayer || !CheckPermission()) return;
-            if (_modal == null || _controller.Stopped)
+            if (_modal == null || (_controller.Stopped && !_controller.IsLoading))
             {
                 SetUnityPlayerEvent();
                 return;
             }
-            if (_modal != null)
-            {
-                _modal.Title = _i18n.GetValue("confirmChangePlayer");
-                _modal.Message = _i18n.GetValue("confirmChangePlayerMessage");
-                _modal.CancelText = _i18n.GetValue("cancel");
-                _modal.ExecuteText = _i18n.GetValue("continue");
-                _modal.CloseEvent = UdonEvent.Empty();
-                _modal.ExecuteEvent = UdonEvent.New(this, nameof(SetUnityPlayerEvent));
-                _modal.Open(1);
-            }
+            _modal.Title = _i18n.GetValue("confirmChangePlayer");
+            _modal.Message = _i18n.GetValue("confirmChangePlayerMessage");
+            _modal.CancelText = _i18n.GetValue("cancel");
+            _modal.ExecuteText = _i18n.GetValue("continue");
+            _modal.CloseEvent = UdonEvent.Empty();
+            _modal.ExecuteEvent = UdonEvent.New(this, nameof(SetUnityPlayerEvent));
+            _modal.Open(1);
         }
         public void SetUnityPlayerEvent()
         {
@@ -261,21 +260,18 @@ namespace Yamadev.YamaStream
         {
             UpdateUI();
             if (_controller.VideoPlayerType == VideoPlayerType.AVProVideoPlayer || !CheckPermission()) return;
-            if (_modal == null || _controller.Stopped)
+            if (_modal == null || (_controller.Stopped && !_controller.IsLoading))
             {
                 SetAVProPlayerEvent();
                 return;
             }
-            if (_modal != null)
-            {
-                _modal.Title = _i18n.GetValue("confirmChangePlayer");
-                _modal.Message = _i18n.GetValue("confirmChangePlayerMessage");
-                _modal.CancelText = _i18n.GetValue("cancel");
-                _modal.ExecuteText = _i18n.GetValue("continue");
-                _modal.CloseEvent = UdonEvent.Empty();
-                _modal.ExecuteEvent = UdonEvent.New(this, nameof(SetAVProPlayerEvent));
-                _modal.Open(1);
-            }
+            _modal.Title = _i18n.GetValue("confirmChangePlayer");
+            _modal.Message = _i18n.GetValue("confirmChangePlayerMessage");
+            _modal.CancelText = _i18n.GetValue("cancel");
+            _modal.ExecuteText = _i18n.GetValue("continue");
+            _modal.CloseEvent = UdonEvent.Empty();
+            _modal.ExecuteEvent = UdonEvent.New(this, nameof(SetAVProPlayerEvent));
+            _modal.Open(1);
         }
         public void SetAVProPlayerEvent()
         {
@@ -417,39 +413,35 @@ namespace Yamadev.YamaStream
         {
             if (!CheckPermission()) return;
             RepeatStatus status = _controller.Repeat.ToRepeatStatus();
-            if (on && !status.IsOn()) status.TurnOn(); else return;
-            if (!on && status.IsOn()) status.TurnOff(); else return;
+            if (on) status.TurnOn(); 
+            else status.TurnOff();
             _controller.SetMeOwner();
             _controller.Repeat = status.ToVector3();
         }
 
         public void SetRepeatStart()
         {
-            if (_repeatSlider != null && _controller.IsPlaying)
+            if (_repeatSlider == null || _controller.Stopped) return;
+            if (!_controller.Repeat.ToRepeatStatus().IsOn())
             {
-                if (!_controller.Repeat.ToRepeatStatus().IsOn())
-                {
-                    RepeatStatus status = _controller.Repeat.ToRepeatStatus();
-                    status.SetStartTime(_controller.IsLive ? 0f : Mathf.Clamp(_controller.Duration * _repeatSlider.SliderLeft.value, 0f, _controller.Duration));
-                    _controller.SetMeOwner();
-                    _controller.Repeat = status.ToVector3();
-                }
-                else _repeatSlider.SliderLeft.SetValueWithoutNotify(_controller.Repeat.ToRepeatStatus().GetStartTime() / _controller.Duration);
+                RepeatStatus status = _controller.Repeat.ToRepeatStatus();
+                status.SetStartTime(_controller.IsLive ? 0f : Mathf.Clamp(_controller.Duration * _repeatSlider.SliderLeft.value, 0f, _controller.Duration));
+                _controller.SetMeOwner();
+                _controller.Repeat = status.ToVector3();
             }
+            else _repeatSlider.SliderLeft.SetValueWithoutNotify(_controller.Repeat.ToRepeatStatus().GetStartTime() / _controller.Duration);
         }
         public void SetRepeatEnd()
         {
-            if (_repeatSlider != null && _controller.IsPlaying)
+            if (_repeatSlider == null || _controller.Stopped) return;
+            if (!_controller.Repeat.ToRepeatStatus().IsOn())
             {
-                if (!_controller.Repeat.ToRepeatStatus().IsOn())
-                {
-                    RepeatStatus status = _controller.Repeat.ToRepeatStatus();
-                    status.SetEndTime(_controller.IsLive ? 999999f : Mathf.Clamp(_controller.Duration * _repeatSlider.SliderRight.value, 0f, _controller.Duration));
-                    _controller.SetMeOwner();
-                    _controller.Repeat = status.ToVector3();
-                }
-                else _repeatSlider.SliderRight.SetValueWithoutNotify(_controller.Repeat.ToRepeatStatus().GetEndTime() / _controller.Duration);
+                RepeatStatus status = _controller.Repeat.ToRepeatStatus();
+                status.SetEndTime(_controller.IsLive ? 999999f : Mathf.Clamp(_controller.Duration * _repeatSlider.SliderRight.value, 0f, _controller.Duration));
+                _controller.SetMeOwner();
+                _controller.Repeat = status.ToVector3();
             }
+            else _repeatSlider.SliderRight.SetValueWithoutNotify(_controller.Repeat.ToRepeatStatus().GetEndTime() / _controller.Duration);
         }
         public void SetShuffle()
         {
@@ -496,6 +488,10 @@ namespace Yamadev.YamaStream
         public void SetEmission()
         {
             if (_emissionSlider != null) _controller.Emission = _emissionSlider.value;
+        }
+        public void SetPitch()
+        {
+            // if (_pitchSlider != null) _controller.Pitch = _pitchSlider.value;
         }
         public void SetMirrorInverse() => _controller.MirrorInverse = true;
         public void SetMirrorInverseOff() => _controller.MirrorInverse = false;
@@ -555,10 +551,10 @@ namespace Yamadev.YamaStream
 
         public void SetPermission()
         {
-            if (_controller.Permission == null || _permissionContent == null || _permissionIndex < 0) return;
-            IndexTrigger[] triggers = _permissionContent.GetComponentsInChildren<IndexTrigger>();
-            if (_permissionIndex < triggers.Length && 
-                triggers[_permissionIndex].transform.TryFind("Dropdown", out var dr) && 
+            if (_controller.Permission == null || _permission == null || _permissionIndex < 0) return;
+            int index = Array.IndexOf(_permission.Indexes, _permissionIndex);
+            if (index >= 0 &&
+                _permission.GetComponent<ScrollRect>().content.GetChild(index).TryFind("Dropdown", out var dr) && 
                 dr.TryGetComponentLocal(out Dropdown dropdown))
             {
                 PlayerPermission playerPermission = PlayerPermission.Viewer;
@@ -583,11 +579,11 @@ namespace Yamadev.YamaStream
                 if (_playlists.Indexes[i] == _playlists.LastIndexes[i] || _playlists.Indexes[i] == -1) continue;
                 Transform cell = _playlists.GetComponent<ScrollRect>().content.GetChild(i);
                 Playlist playlist = _controller.Playlists[_playlists.Indexes[i]];
-                if (cell.transform.TryFind("FolderMark", out var folderMark)) folderMark.gameObject.SetActive(!playlist.IsLoading);
-                if (cell.transform.TryFind("Loading", out var loading)) loading.gameObject.SetActive(playlist.IsLoading);
-                if (cell.transform.TryFind("Text", out var n) && n.TryGetComponentLocal(out Text name))
+                if (cell.TryFind("FolderMark", out var folderMark)) folderMark.gameObject.SetActive(!playlist.IsLoading);
+                if (cell.TryFind("Loading", out var loading)) loading.gameObject.SetActive(playlist.IsLoading);
+                if (cell.TryFind("Text", out var n) && n.TryGetComponentLocal(out Text name))
                     name.text = _controller.Playlists[_playlists.Indexes[i]].PlaylistName;
-                if (cell.transform.TryFind("TrackCount", out var tr) && tr.TryGetComponentLocal(out Text trackCount))
+                if (cell.TryFind("TrackCount", out var tr) && tr.TryGetComponentLocal(out Text trackCount))
                     trackCount.text = playlist.Length > 0 ? $"{_i18n.GetValue("total")} {playlist.Length} {_i18n.GetValue("tracks")}" : string.Empty;
                 if (cell.TryGetComponentLocal<IndexTrigger>(out var trigger)) trigger.SetProgramVariable("_varibaleObject", _playlists.Indexes[i]);
             }
@@ -635,7 +631,7 @@ namespace Yamadev.YamaStream
                 Track track = playlist.GetTrack(_playlistTracks.Indexes[i]);
                 bool isPlaying = playlist == _controller.ActivePlaylist && _controller.PlayingTrackIndex == _playlistTracks.Indexes[i];
 
-                if (cell.transform.TryFind("Info", out var info))
+                if (cell.TryFind("Info", out var info))
                 {
                     if (info.TryFind("Title", out var ti) && ti.TryGetComponentLocal(out Text title))
                     {
@@ -651,7 +647,7 @@ namespace Yamadev.YamaStream
                     }
                     if (info.TryFind("PlayingMark", out var playingMark)) playingMark.gameObject.SetActive(isPlaying);
                 }
-                if (cell.transform.TryFind("Actions", out var actions))
+                if (cell.TryFind("Actions", out var actions))
                 {
                     if (actions.TryFind("Up", out var upMark)) upMark.gameObject.SetActive(_isQueuePage);
                     if (actions.TryFind("Down", out var downMark)) downMark.gameObject.SetActive(_isQueuePage);
@@ -843,52 +839,60 @@ namespace Yamadev.YamaStream
             if (_message != null) _message.text = _i18n.GetValue("videoLoadingMessage");
         }
 
-        void updatePermissionView()
+        public void GeneratePermissionView()
         {
-            if (_controller.Permission == null) return;
+            if (_controller.Permission == null || _permission == null) return;
+            _permission.CallbackEvent = UdonEvent.New(this, nameof(UpdatePermissionView));
+            _permission.Length = _controller.Permission.PermissionData.Count;
+
             bool showPage = _controller.PlayerPermission == PlayerPermission.Owner || _controller.PlayerPermission == PlayerPermission.Admin;
             if (_permissionEntry != null) _permissionEntry.SetActive(showPage);
             if (_permissionPage != null && !showPage && _permissionPage.activeSelf) _permissionPage.SetActive(false);
-            if (_permissionContent == null) return;
-            for (int i = 0; i < _permissionContent.childCount; i++)
+        }
+
+        public void UpdatePermissionView()
+        {
+            for (int i = 0; i < _permission.LineCount; i++)
             {
-                Transform item = _permissionContent.GetChild(i);
-                item.gameObject.SetActive(false);
-                if (i >= _controller.Permission.PermissionData.Count) continue;
-                DataToken value = _controller.Permission.PermissionData.GetValues()[i];
-                value.DataDictionary.TryGetValue("displayName", TokenType.String, out DataToken displayName);
-                item.Find("Name").GetComponent<Text>().text = displayName.String;
+                if (_permission.Indexes[i] == _permission.LastIndexes[i] || _permission.Indexes[i] == -1) continue;
+                Transform cell = _permission.GetComponent<ScrollRect>().content.GetChild(i);
+                DataToken value = _controller.Permission.PermissionData.GetValues()[_permission.Indexes[i]];
+                if (value.DataDictionary.TryGetValue("displayName", TokenType.String, out DataToken displayName) &&
+                    cell.TryFind("Name", out var name) &&
+                    name.TryGetComponentLocal(out Text nameText)) nameText.text = displayName.String;
 
                 PlayerPermission permission = (PlayerPermission)value.DataDictionary["permission"].Int;
-                bool noEdit = (int)_controller.PlayerPermission <= (int)permission;
-                if (noEdit)
+                bool couldControl = (int)_controller.PlayerPermission > (int)permission;
+                if (cell.TryFind("Label", out var label) &&
+                    label.TryGetComponentLocal(out Text labelText)) labelText.text = permission == PlayerPermission.Owner ? "Owner" : "Admin";
+                if (cell.TryFind("Dropdown", out var dropdown)) dropdown.gameObject.SetActive(couldControl);
+
+                if (cell.TryFind("Mark", out var mark) && mark.TryGetComponentLocal(out Image markImage))
                 {
-                    item.Find("Label").GetComponent<Text>().text = permission == PlayerPermission.Owner ? "Owner" : "Admin";
-                    item.Find("Label").gameObject.SetActive(noEdit);
-                    item.Find("Dropdown").gameObject.SetActive(!noEdit);
+                    switch (permission)
+                    {
+                        case PlayerPermission.Owner:
+                            markImage.color = _ownerColor;
+                            break;
+                        case PlayerPermission.Admin:
+                            markImage.color = _adminColor;
+                            if (dropdown != null) dropdown.GetComponent<Dropdown>().SetValueWithoutNotify(0);
+                            break;
+                        case PlayerPermission.Editor:
+                            markImage.color = _editorColor;
+                            if (dropdown != null) dropdown.GetComponent<Dropdown>().SetValueWithoutNotify(1);
+                            break;
+                        case PlayerPermission.Viewer:
+                            markImage.color = _viewerColor;
+                            if (dropdown != null) dropdown.GetComponent<Dropdown>().SetValueWithoutNotify(2);
+                            break;
+                        default:
+                            break;
+                    }
                 }
 
-                switch (permission)
-                {
-                    case PlayerPermission.Owner:
-                        item.Find("Mark").GetComponent<Image>().color = _ownerColor;
-                        break;
-                    case PlayerPermission.Admin:
-                        item.Find("Mark").GetComponent<Image>().color = _adminColor;
-                        item.Find("Dropdown").GetComponent<Dropdown>().SetValueWithoutNotify(0);
-                        break;
-                    case PlayerPermission.Editor:
-                        item.Find("Mark").GetComponent<Image>().color = _editorColor;
-                        item.Find("Dropdown").GetComponent<Dropdown>().SetValueWithoutNotify(1);
-                        break;
-                    case PlayerPermission.Viewer:
-                        item.Find("Mark").GetComponent<Image>().color = _viewerColor;
-                        item.Find("Dropdown").GetComponent<Dropdown>().SetValueWithoutNotify(2);
-                        break;
-                    default:
-                        break;
-                }
-                item.gameObject.SetActive(true);
+                if (cell.TryGetComponentLocal<IndexTrigger>(out var trigger)) trigger.SetProgramVariable("_varibaleObject", _permission.Indexes[i]);
+                cell.gameObject.SetActive(true);
             }
         }
 
@@ -969,8 +973,8 @@ namespace Yamadev.YamaStream
             }
         }
 
-        public override void OnPlayerJoined(VRCPlayerApi player) => updatePermissionView();
-        public override void OnPlayerLeft(VRCPlayerApi player) => updatePermissionView();
+        public override void OnPlayerJoined(VRCPlayerApi player) => GeneratePermissionView();
+        public override void OnPlayerLeft(VRCPlayerApi player) => GeneratePermissionView();
         public override void OnVideoReady() => UpdateUI();
         public override void OnVideoStart() => UpdateUI();
         public override void OnVideoEnd() => UpdateUI();
@@ -1019,6 +1023,6 @@ namespace Yamadev.YamaStream
             UpdateTranslation();
             GeneratePlaylistView();
         }
-        public override void OnPermissionChanged() => updatePermissionView();
+        public override void OnPermissionChanged() => GeneratePermissionView();
     }
 }

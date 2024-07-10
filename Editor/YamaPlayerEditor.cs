@@ -3,13 +3,23 @@ using System;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 using VRC.SDK3.Video.Components.AVPro;
+using Yamadev.YamaStream.UI;
 
 namespace Yamadev.YamaStream.Script
 {
     [CustomEditor(typeof(YamaPlayer))]
     internal class YamaPlayerEditor : EditorBase
     {
+        enum Tab
+        {
+            UI,
+            DefaultSettings,
+            Playlist,
+            Permission,
+        }
+
         // controller
         Controller _controller;
         SerializedObject _controllerSerializedObject;
@@ -20,6 +30,7 @@ namespace Yamadev.YamaStream.Script
         SerializedProperty _loop;
         SerializedProperty _shuffle;
         SerializedProperty _defaultPlayerEngine;
+        SerializedProperty _forwardInterval;
         // auto play
         AutoPlay _autoPlay;
         SerializedObject _autoPlaySerializedObject;
@@ -49,6 +60,7 @@ namespace Yamadev.YamaStream.Script
 
         YamaPlayer _target;
         PlayList[] _playlists;
+        Tab _tab = Tab.UI;
 
         private void OnEnable()
         {
@@ -64,6 +76,7 @@ namespace Yamadev.YamaStream.Script
                 _loop = _controllerSerializedObject.FindProperty("_loop");
                 _shuffle = _controllerSerializedObject.FindProperty("_shuffle");
                 _defaultPlayerEngine = _controllerSerializedObject.FindProperty("_videoPlayerType");
+                _forwardInterval = _controllerSerializedObject.FindProperty("_forwardInterval");
             }
             _autoPlay = _target.GetComponentInChildren<AutoPlay>();
             if (_autoPlay != null)
@@ -101,7 +114,94 @@ namespace Yamadev.YamaStream.Script
             }
         }
 
-        internal void DrawPlaylistPopup()
+
+
+        public override void OnInspectorGUI()
+        {
+            base.OnInspectorGUI();
+            serializedObject.Update();
+
+            EditorGUILayout.LabelField($"YamaPlayer v{Utils.GetYamaPlayerVersion()}", _uiTitle);
+            EditorGUILayout.Space();
+
+            if (EditorApplication.isPlaying) return;
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.Space();
+                _tab = (Tab)GUILayout.Toolbar((int)_tab, Enum.GetNames(typeof(Tab)).Select(x => new GUIContent(x)).ToArray(), "LargeButton", GUI.ToolbarButtonSize.Fixed);
+                EditorGUILayout.Space();
+            }
+
+            switch (_tab)
+            {
+                case Tab.UI:
+                    drawUISettings();
+                    break;
+                case Tab.DefaultSettings:
+                    drawDefaultSettings();
+                    break;
+                case Tab.Playlist:
+                    drawPlaylistSettings(); 
+                    break;
+                case Tab.Permission:
+                    drawPermissionSettings();
+                    break;
+            }
+
+            if (serializedObject.ApplyModifiedProperties()
+                || (_autoPlaySerializedObject?.ApplyModifiedProperties() ?? false)
+                || (_permissionSerializedObject?.ApplyModifiedProperties() ?? false)
+                || (_uiControllerSerializedObject?.ApplyModifiedProperties() ?? false)
+                || (_controllerSerializedObject?.ApplyModifiedProperties() ?? false)
+                || (_avProSerializedObject?.ApplyModifiedProperties() ?? false)
+                ) ApplyModifiedProperties();
+        }
+
+        internal void ApplyModifiedProperties()
+        {
+        }
+
+        #region UI Settings
+        void setUIColor()
+        {
+            foreach (UIColor component in _uiController.GetComponentsInChildren<UIColor>(true))
+            {
+                if (component.GetProgramVariable("_uiController") == null)
+                    component.SetProgramVariable("_uiController", _uiController);
+                component.Apply();
+            }
+        }
+
+        void drawUISettings()
+        {
+            if (_uiController == null) return;
+            EditorGUILayout.PropertyField(_primaryColor);
+            EditorGUILayout.PropertyField(_secondaryColor);
+            EditorGUILayout.Space();
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("Preview")) setUIColor();
+            }
+            EditorGUILayout.Space();
+
+            EditorGUILayout.LabelField("Idle Image", _bold);
+            EditorGUILayout.PropertyField(_idleImage);
+            EditorGUILayout.LabelField("　", "Show image when video not playing.");
+            EditorGUILayout.Space();
+
+            if (_defaultOpen != null)
+            {
+                EditorGUILayout.LabelField("Playlist", _bold);
+                EditorGUILayout.PropertyField(_defaultOpen);
+                EditorGUILayout.LabelField("　", "Open playlist UI after game started.");
+            }
+        }
+        #endregion
+
+        #region Default Settings
+        void drawPlaylistPopup()
         {
             string[] playlistNames = _playlists.Select(i => i.PlayListName.Replace("/", "|")).ToArray();
             _autoPlayPlaylistIndex.intValue = EditorGUILayout.Popup(
@@ -119,97 +219,76 @@ namespace Yamadev.YamaStream.Script
             );
         }
 
-        public override void OnInspectorGUI()
+        void drawDefaultSettings()
         {
-            base.OnInspectorGUI();
-            serializedObject.Update();
-
-            EditorGUILayout.LabelField("YamaPlayer", _uiTitle);
+            if (_controller == null) return;
+            EditorGUILayout.LabelField("Default player type", _bold);
+            EditorGUILayout.PropertyField(_defaultPlayerEngine);
             EditorGUILayout.Space();
 
-            if (_uiController != null)
+            EditorGUILayout.LabelField("Auto Play", _bold);
+            if (_autoPlay != null)
             {
-                using (new GUILayout.VerticalScope(GUI.skin.box))
+                EditorGUILayout.PropertyField(_autoPlayMode);
+                if ((AutoPlayMode)_autoPlayMode.intValue != AutoPlayMode.Off)
                 {
-                    EditorGUILayout.LabelField("UI", _bold);
-                    EditorGUILayout.PropertyField(_primaryColor);
-                    EditorGUILayout.PropertyField(_secondaryColor);
-                    EditorGUILayout.LabelField("Idle", _bold);
-                    EditorGUILayout.PropertyField(_idleImage);
-                    if (_defaultOpen != null )
+                    switch ((AutoPlayMode)_autoPlayMode.intValue)
                     {
-                        EditorGUILayout.LabelField("Playlist", _bold);
-                        EditorGUILayout.PropertyField(_defaultOpen);
+                        case AutoPlayMode.FromTrack:
+                            EditorGUILayout.PropertyField(_autoPlayVideoPlayerType);
+                            EditorGUILayout.PropertyField(_autoPlayVideoTitle);
+                            EditorGUILayout.PropertyField(_autoPlayVideoUrl);
+                            break;
+                        case AutoPlayMode.FromPlaylist:
+                            _playlists = _target.GetComponentsInChildren<PlayList>();
+                            if (_playlists.Length > 0) drawPlaylistPopup();
+                            else EditorGUILayout.HelpBox("No Playlist.", MessageType.Error, false);
+                            break;
                     }
+                    EditorGUILayout.PropertyField(_autoPlayDelay);
                 }
-                EditorGUILayout.Space();
-            }
-
-            if (_controller != null && _autoPlay != null)
-            {
-                using (new GUILayout.VerticalScope(GUI.skin.box))
-                {
-                    EditorGUILayout.LabelField("Video Player Settings / デフォルト設定", _bold);
-                    EditorGUILayout.PropertyField(_defaultPlayerEngine);
-                    EditorGUILayout.PropertyField(_mute);
-                    EditorGUILayout.PropertyField(_volume);
-                    EditorGUILayout.PropertyField(_mirrorInverse);
-                    EditorGUILayout.PropertyField(_emission);
-                    EditorGUILayout.PropertyField(_loop);
-                    EditorGUILayout.PropertyField(_shuffle);
-                    if (_useLowLatency != null) EditorGUILayout.PropertyField(_useLowLatency);
-                    EditorGUILayout.PropertyField(_autoPlayMode);
-                    if ((AutoPlayMode)_autoPlayMode.intValue != AutoPlayMode.Off)
-                    {
-                        switch ((AutoPlayMode)_autoPlayMode.intValue)
-                        {
-                            case AutoPlayMode.FromTrack:
-                                EditorGUILayout.PropertyField(_autoPlayVideoPlayerType);
-                                EditorGUILayout.PropertyField(_autoPlayVideoTitle);
-                                EditorGUILayout.PropertyField(_autoPlayVideoUrl);
-                                break;
-                            case AutoPlayMode.FromPlaylist:
-                                _playlists = _target.GetComponentsInChildren<PlayList>();
-                                if (_playlists.Length > 0) DrawPlaylistPopup();
-                                else EditorGUILayout.HelpBox("No Playlist.", MessageType.Error, false);
-                                break;
-                        }
-                        EditorGUILayout.PropertyField(_autoPlayDelay);
-                    }
-                }
-                EditorGUILayout.Space();
-            }
-
-            using (new GUILayout.VerticalScope(GUI.skin.box))
-            {
-                EditorGUILayout.LabelField("Playlist / プレイリスト", _bold);
-                if (GUILayout.Button("Edit Playlist")) PlaylistEditor.ShowPlaylistEditorWindow(_target);
             }
             EditorGUILayout.Space();
 
-            if (_permission != null)
-            {
-                using (new GUILayout.VerticalScope(GUI.skin.box))
-                {
-                    EditorGUILayout.LabelField("Permission / 権限", _bold);
-                    EditorGUILayout.PropertyField(_defaultPermission);
-                    EditorGUILayout.PropertyField(_ownerList);
-                }
-            }
+            EditorGUILayout.LabelField("Volume", _bold);
+            EditorGUILayout.PropertyField(_mute);
+            EditorGUILayout.PropertyField(_volume);
+            EditorGUILayout.Space();
 
-            if (EditorApplication.isPlaying) return;
+            EditorGUILayout.LabelField("Display", _bold);
+            EditorGUILayout.PropertyField(_mirrorInverse);
+            EditorGUILayout.PropertyField(_emission);
+            EditorGUILayout.Space();
 
-            if (serializedObject.ApplyModifiedProperties()
-                || (_autoPlaySerializedObject?.ApplyModifiedProperties() ?? false)
-                || (_permissionSerializedObject?.ApplyModifiedProperties() ?? false)
-                || (_uiControllerSerializedObject?.ApplyModifiedProperties() ?? false)
-                || (_controllerSerializedObject?.ApplyModifiedProperties() ?? false)
-                || (_avProSerializedObject?.ApplyModifiedProperties() ?? false)
-                ) ApplyModifiedProperties();
+            EditorGUILayout.LabelField("Playback", _bold);
+            EditorGUILayout.PropertyField(_loop);
+            EditorGUILayout.Space();
+
+            EditorGUILayout.LabelField("Playlist", _bold);
+            EditorGUILayout.PropertyField(_shuffle);
+            if (_useLowLatency != null) EditorGUILayout.PropertyField(_useLowLatency);
+            EditorGUILayout.PropertyField(_forwardInterval);
+            EditorGUILayout.LabelField("　", "Play next track after seconds.");
+            EditorGUILayout.LabelField("　", "Disable when value is smaller then 0.");
+
         }
+        #endregion
 
-        internal void ApplyModifiedProperties()
+        #region Playlist Settings
+        void drawPlaylistSettings()
         {
+            EditorGUILayout.LabelField("Playlist / プレイリスト", _bold);
+            if (GUILayout.Button("Edit Playlist")) PlaylistEditor.ShowPlaylistEditorWindow(_target);
         }
+        #endregion
+
+        #region Permission Settings
+        void drawPermissionSettings()
+        {
+            EditorGUILayout.LabelField("Permission / 権限", _bold);
+            EditorGUILayout.PropertyField(_defaultPermission);
+            EditorGUILayout.PropertyField(_ownerList);
+        }
+        #endregion
     }
 }

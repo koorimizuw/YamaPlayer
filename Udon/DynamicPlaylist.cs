@@ -48,12 +48,12 @@ namespace Yamadev.YamaStream
             VRCStringDownloader.LoadUrl(_playlistLink, (IUdonEventReceiver)this);
         }
 
-        public override void OnStringLoadSuccess(IVRCStringDownload result)
+        public void ParsePlaylist(string result)
         {
-            int index = result.Result.IndexOf("{\"playlist\":");
+            int index = result.IndexOf("{\"playlist\":");
             if (index >= 0)
             {
-                string playlistString = Utils.FindPairBrackets(result.Result, index);
+                string playlistString = Utils.FindPairBrackets(result, index);
                 if (playlistString != string.Empty && VRCJson.TryDeserializeFromJson(playlistString, out var json))
                 {
                     DataDictionary dict = json.DataDictionary["playlist"].DataDictionary;
@@ -75,17 +75,19 @@ namespace Yamadev.YamaStream
                     _isLoading = false;
                     _loaded = true;
                     _controller.SendCustomEventDelayedSeconds(nameof(_controller.UpdatePlaylists), 0.1f);
+                    return;
                 }
-            } else
+            }
+            else
             {
-                int playlistIndex = result.Result.IndexOf("{\"playlistVideoListRenderer\":");
+                int playlistIndex = result.IndexOf("{\"playlistVideoListRenderer\":");
                 if (playlistIndex >= 0)
                 {
-                    int headerIndex = result.Result.IndexOf("{\"playlistHeaderRenderer\":");
-                    string headerString = Utils.FindPairBrackets(result.Result, headerIndex);
+                    int headerIndex = result.IndexOf("{\"playlistHeaderRenderer\":");
+                    string headerString = Utils.FindPairBrackets(result, headerIndex);
                     if (headerString != string.Empty && VRCJson.TryDeserializeFromJson(headerString, out var headerJson))
                         _playlistName = headerJson.DataDictionary["playlistHeaderRenderer"].DataDictionary["title"].DataDictionary["simpleText"].String;
-                    string playlistString = Utils.FindPairBrackets(result.Result, playlistIndex);
+                    string playlistString = Utils.FindPairBrackets(result, playlistIndex);
                     if (playlistString != string.Empty && VRCJson.TryDeserializeFromJson(playlistString, out var playlistJson))
                     {
                         DataList contents = playlistJson.DataDictionary["playlistVideoListRenderer"].DataDictionary["contents"].DataList;
@@ -103,9 +105,17 @@ namespace Yamadev.YamaStream
                         _isLoading = false;
                         _loaded = true;
                         _controller.SendCustomEventDelayedSeconds(nameof(_controller.UpdatePlaylists), 0.1f);
+                        return;
                     }
                 }
             }
+            _isLoading = false;
+            _controller.SendCustomEventDelayedSeconds(nameof(_controller.UpdatePlaylists), 0.1f);
+        }
+
+        public override void OnStringLoadSuccess(IVRCStringDownload result)
+        {
+            ParsePlaylist(result.Result);
         }
 
         public override void OnStringLoadError(IVRCStringDownload result)

@@ -21,6 +21,7 @@ namespace Yamadev.YamaStream.Script
         YamaPlayerController _target;
         YamaPlayer[] _players;
         bool _uiOn;
+        bool _globalSync;
 
         private void OnEnable()
         {
@@ -60,6 +61,14 @@ namespace Yamadev.YamaStream.Script
                 if (vrcPickup != null)
                 {
                     EditorGUILayout.PropertyField(_pickup);
+                    if (_pickup.boolValue)
+                    {
+                        VRCObjectSync objectSync = vrcPickup.gameObject.GetComponent<VRCObjectSync>();
+                        _globalSync = objectSync != null;
+                        _globalSync = EditorGUILayout.Toggle("Global Sync", _globalSync);
+                        if (_globalSync && objectSync == null) vrcPickup.gameObject.AddComponent<VRCObjectSync>();
+                        if (!_globalSync && objectSync != null) GameObject.DestroyImmediate(objectSync);
+                    }
                 }
             }
             EditorGUILayout.Space();
@@ -100,13 +109,6 @@ namespace Yamadev.YamaStream.Script
 
         internal void ApplyModifiedProperties()
         {
-            /*
-            if (_yamaPlayer.objectReferenceValue == null)
-            {
-                _players = Utils.FindComponentsInHierarthy<YamaPlayer>();
-                if (_players.Length > 0) _yamaPlayer.objectReferenceValue = _players[0];
-            }
-            */
             Controller controller = (_yamaPlayer.objectReferenceValue as YamaPlayer)?.GetComponentInChildren<Controller>();
             if (controller == null) return;
             UIController uiController = _target.GetComponentInChildren<UIController>();

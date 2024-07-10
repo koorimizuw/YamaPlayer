@@ -364,6 +364,7 @@ namespace Yamadev.YamaStream.Script
             }
         }
 
+        #region Playlist Importer
         void handleImportPlaylists(UnityEngine.Object[] objects)
         {
             List<Playlist> results = new List<Playlist>();
@@ -510,7 +511,9 @@ namespace Yamadev.YamaStream.Script
             }
             return results;
         }
+        #endregion
 
+        #region Exporter
         [Serializable] class Playlists { public List<Playlist> playlists;  }
 
         public void Export()
@@ -530,5 +533,7 @@ namespace Yamadev.YamaStream.Script
             _isDirty = true;
             GeneratePlaylistsView();
         }
+        #endregion
+
     }
 }
