@@ -1,8 +1,6 @@
 ﻿
-using System.Linq;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Device;
 using VRC.SDK3.Components;
 
 namespace Yamadev.YamaStream.Script
