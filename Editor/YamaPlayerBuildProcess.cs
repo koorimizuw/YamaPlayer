@@ -25,15 +25,10 @@ namespace Yamadev.YamaStream.Script
             }
         }
 
-        private void BuildPlaylists()
+        private void GeneratePlaylists()
         {
-            PlayListContainer[] ret = Resources.FindObjectsOfTypeAll<PlayListContainer>();
-            if (ret.Length == 0) return;
-
-            foreach (PlayListContainer handle in ret)
+            foreach (PlayListContainer handle in Utils.FindComponentsInHierarthy<PlayListContainer>())
             {
-                if (!AssetDatabase.GetAssetOrScenePath(handle).Contains(".unity")) continue;
-
                 Transform template = handle.TargetContent.transform.GetChild(0);
 
                 int count = handle.TargetContent.childCount;
@@ -72,6 +67,8 @@ namespace Yamadev.YamaStream.Script
 
         public void OnProcessScene(Scene scene, BuildReport report)
         {
+            GeneratePlaylists();
+
             foreach (YamaPlayer player in Utils.FindComponentsInHierarthy<YamaPlayer>())
             {
                 LatencyManager latencyManager = player.GetComponentInChildren<LatencyManager>();
@@ -88,8 +85,6 @@ namespace Yamadev.YamaStream.Script
 
                 Controller internalController = player.GetComponentInChildren<Controller>();
                 if (internalController != null) internalController.SetProgramVariable("_version", Utils.GetYamaPlayerVersion());
-
-                BuildPlaylists();
 
                 Transform internalTransform = player.Internal != null ? player.Internal : player.transform.Find("Internal");
                 if (internalTransform != null)
@@ -126,12 +121,6 @@ namespace Yamadev.YamaStream.Script
 
             foreach (InputController inputController in Utils.FindComponentsInHierarthy<InputController>())
             {
-                foreach (MouseHover component in inputController.GetComponentsInChildren<MouseHover>(true))
-                {
-                    if (component.GetProgramVariable("_inputController") == null)
-                        component.SetProgramVariable("_inputController", inputController);
-                }
-
                 foreach (SliderHelper component in inputController.GetComponentsInChildren<SliderHelper>(true))
                 {
                     if (component.GetProgramVariable("_inputController") == null)

@@ -2,7 +2,6 @@
 using System;
 using UdonSharp;
 using UnityEngine;
-using UnityEngine.UIElements;
 using VRC.SDK3.Components.Video;
 using VRC.SDKBase;
 
