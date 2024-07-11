@@ -116,7 +116,6 @@ namespace Yamadev.YamaStream.Script
             {
                 SerializedObject serializedObject = new SerializedObject(uiController);
                 serializedObject.FindProperty("_controller").objectReferenceValue = controller;
-                serializedObject.FindProperty("_i18n").objectReferenceValue = (_yamaPlayer.objectReferenceValue as YamaPlayer).GetComponentInChildren<i18n>();
                 serializedObject.ApplyModifiedProperties();
             }
             YamaPlayerScreen screen = _target.gameObject.GetComponentInChildren<YamaPlayerScreen>();
