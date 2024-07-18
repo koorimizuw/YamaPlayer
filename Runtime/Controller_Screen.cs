@@ -14,7 +14,7 @@ namespace Yamadev.YamaStream
         [SerializeField] Material _lod;
         MaterialPropertyBlock _properties;
 
-        void initializeScreen()
+        public void InitializeScreen()
         {
             MirrorInverse = _mirrorInverse;
             MaxResolution = _maxResolution;

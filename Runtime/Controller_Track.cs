@@ -13,7 +13,7 @@ namespace Yamadev.YamaStream
         Track _track;
         UdonEvent _resolveTrack;
 
-        void initializeTrack()
+        public void InitializeTrack()
         {
             _track = Track.New(_videoPlayerType, string.Empty, VRCUrl.Empty);
             _resolveTrack = UdonEvent.New(this, nameof(Resolve));

@@ -502,7 +502,7 @@ namespace Yamadev.YamaStream
         }
         public void SetPitch()
         {
-            // if (_pitchSlider != null) _controller.Pitch = _pitchSlider.value;
+            if (_pitchSlider != null) _controller.Pitch = _pitchSlider.value;
         }
         public void SetMirrorInverse() => _controller.MirrorInverse = true;
         public void SetMirrorInverseOff() => _controller.MirrorInverse = false;

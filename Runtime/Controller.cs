@@ -39,6 +39,7 @@ namespace Yamadev.YamaStream
             if (OutOfRepeat(VideoTime) && Time.time - _lastSetTime > _repeatCooling) 
                 SetTime(Repeat.ToRepeatStatus().GetStartTime());
             if (IsPlaying && Time.time - _syncFrequency > _lastSync) DoSync();
+            if (IsPlaying && VideoPlayerType == VideoPlayerType.AVProVideoPlayer && _pitch != 0) GetAVProAudio();
         }
 
         public string Version => _version;
@@ -51,8 +52,9 @@ namespace Yamadev.YamaStream
             if (_initialized) return;
             Loop = _loop;
             _videoPlayerAnimator.Rebind();
-            initializeTrack();
-            initializeScreen();
+            InitializeTrack();
+            InitializeScreen();
+            InitializePitchAudio();
             UpdateAudio();
             foreach (VideoPlayerHandle handle in _videoPlayerHandles)
                 handle.Listener = this;
