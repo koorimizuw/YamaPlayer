@@ -9,9 +9,10 @@ namespace Yamadev.YamaStream
         [SerializeField] int _maxResolution;
         [SerializeField] bool _mirrorInverse = true;
         [SerializeField, Range(0f, 1f)] float _emission = 1f;
-        [SerializeField] Renderer[] _renderScreens;
-        [SerializeField] RawImage[] _rawImageScreens;
-        [SerializeField] Material _lod;
+        [SerializeField] ScreenType[] _screenTypes;
+        [SerializeField] Object[] _screens;
+        [SerializeField] string[] _textureProperties;
+        [SerializeField] string[] _avProProperties;
         MaterialPropertyBlock _properties;
 
         void initializeScreen()
@@ -19,7 +20,6 @@ namespace Yamadev.YamaStream
             MirrorInverse = _mirrorInverse;
             MaxResolution = _maxResolution;
             Emission = _emission;
-            updateProperties();
         }
 
         public MaterialPropertyBlock MaterialProperty
@@ -30,18 +30,10 @@ namespace Yamadev.YamaStream
                 return _properties;
             }
         }
+
         public Texture Texture => VideoPlayerHandle.Texture;
 
-        public Renderer[] RenderScreens 
-        { 
-            get => _renderScreens; 
-            set => _renderScreens = value;
-        }
-        public RawImage[] RawImageScreens 
-        { 
-            get => _rawImageScreens; 
-            set => _rawImageScreens = value;
-        }
+        public Object[] Screens => _screens;
 
         public int MaxResolution
         {
@@ -83,22 +75,47 @@ namespace Yamadev.YamaStream
         {
             if (Texture == null) return;
 
-            MaterialProperty.SetTexture("_MainTex", Texture);
-            foreach (Renderer renderer in _renderScreens) renderer.SetPropertyBlock(_properties, 0);
-            foreach (RawImage image in _rawImageScreens) image.texture = Texture;
-            if (_lod != null) _lod.SetTexture("_MainTex", Texture);
-        }
-
-        void updateProperties()
-        {
 #if UNITY_STANDALONE_WIN
             int isAVPro = VideoPlayerType == VideoPlayerType.AVProVideoPlayer ? 1 : 0;
 #else
             int isAVPro = 0;
 #endif
-            MaterialProperty.SetInt("_AVPro", isAVPro);
-            foreach (RawImage image in _rawImageScreens) image.material.SetInt("_AVPro", isAVPro);
-            if (_lod != null) _lod.SetInt("_AVPro", isAVPro);
+            for (int i = 0; i < _screens.Length; i++)
+            {
+                Object screen = _screens[i];
+                if (screen == null) continue;
+
+                string textureProperty = _textureProperties[i];
+                string avProProperty = _avProProperties[i];
+                switch (_screenTypes[i])
+                {
+                    case ScreenType.Renderer:
+                        MaterialProperty.SetTexture(textureProperty, Texture);
+                        MaterialProperty.SetInt(avProProperty, isAVPro);
+                        ((Renderer)screen).SetPropertyBlock(MaterialProperty, 0);
+                        break;
+                    case ScreenType.RawImage:
+                        ((RawImage)screen).texture = Texture;
+                        ((RawImage)screen).material.SetInt(avProProperty, isAVPro);
+                        break;
+                    case ScreenType.Material:
+                        ((Material)screen).SetTexture(textureProperty, Texture);
+                        ((Material)screen).SetInt(avProProperty, isAVPro);
+                        break;
+                }
+            }
+        }
+
+        public void AddScreen(ScreenType screenType, Object screen, string textureProperty = "_MainTex", string avProProperty = "_AVPro")
+        {
+            foreach (Object obj in _screens)
+            {
+                if (obj == screen) return;
+            }
+            _screenTypes = _screenTypes.Add(screenType);
+            _screens = _screens.Add(screen);
+            _textureProperties = _textureProperties.Add(textureProperty);
+            _avProProperties = _avProProperties.Add(avProProperty);
         }
     }
 }

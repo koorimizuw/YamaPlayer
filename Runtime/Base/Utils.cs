@@ -144,19 +144,6 @@ namespace Yamadev.YamaStream
             udon.RequestSerialization();
         }
 
-        public static Toggle[] GetActiveToggles(this Toggle[] toggles)
-        {
-            Toggle[] results = new Toggle[0];
-            foreach (Toggle toggle in toggles) if (toggle.isOn) results = results.Add(toggle);
-            return results;
-        }
-        public static Toggle GetFirstActiveToggle(this Toggle[] toggles)
-        {
-            Toggle[] activeToggles = toggles.GetActiveToggles();
-            if (activeToggles.Length == 0) return null;
-            return activeToggles[0];
-        }
-
         public static Vector3 GetMousePosition(VRCPlayerApi.TrackingDataType type = VRCPlayerApi.TrackingDataType.Head)
         {
             var tracking = Networking.LocalPlayer.GetTrackingData(type);
@@ -185,7 +172,6 @@ namespace Yamadev.YamaStream
             return arr;
         }
 
-
         public static string GetLocalLanguage()
         {
             TimeZoneInfo tz = TimeZoneInfo.Local;
@@ -204,6 +190,12 @@ namespace Yamadev.YamaStream
                 default:
                     return "en";
             }
+        }
+
+        public static bool PickUpInHand(this VRCPlayerApi player)
+        {
+            return player.GetPickupInHand(VRC_Pickup.PickupHand.Left) != null ||
+                player.GetPickupInHand(VRC_Pickup.PickupHand.Right) != null;
         }
     }
 }

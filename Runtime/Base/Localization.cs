@@ -13,11 +13,7 @@ namespace Yamadev.YamaStream
             // 1. string current language
             object[] result = new object[] { null, null };
             if (VRCJson.TryDeserializeFromJson(translation, out DataToken data) &&
-                data.TokenType == TokenType.DataDictionary)
-            {
-                Debug.Log($"[<color=#ff70ab>YamaStream</color>] Failed deserialize translation json: {data}");
-                result[0] = data.DataDictionary;
-            }
+                data.TokenType == TokenType.DataDictionary) result[0] = data.DataDictionary;
             result[1] = Utils.GetLocalLanguage();
             return (Localization)(object)result;
         }

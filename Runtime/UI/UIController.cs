@@ -14,10 +14,11 @@ namespace Yamadev.YamaStream
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class UIController : Listener
     {
-        [Header("YamaPlayer Scripts")]
+        [Header("Settings")]
         [SerializeField] Controller _controller;
         [SerializeField] TextAsset _translation;
         [SerializeField] TextAsset _updateLogs;
+        [SerializeField] bool _disableUIInPickUp = true;
 
         [Header("Color")]
         [SerializeField] Color _primaryColor = new Color(240f / 256f, 98f / 256f, 146f / 256f, 1.0f);
@@ -116,7 +117,6 @@ namespace Yamadev.YamaStream
         [SerializeField] Toggle _maxResolution4320;
         [SerializeField] Toggle _mirrorInversion;
         [SerializeField] Toggle _mirrorInversionOff;
-        [SerializeField] RawImage _preview;
 
         [Header("Version")]
         [SerializeField] Text _versionText;
@@ -190,6 +190,7 @@ namespace Yamadev.YamaStream
         [SerializeField] Text _addLiveLink;
 
         Localization _i18n;
+        BoxCollider _uiBoxCollider;
         string _timeFormat = @"hh\:mm\:ss";
         bool _progressDrag = false;
         int _permissionIndex = -1;
@@ -205,16 +206,18 @@ namespace Yamadev.YamaStream
             SendCustomEventDelayedFrames(nameof(UpdateTranslation), 3);
             if (_versionText != null) _versionText.text = $"YamaPlayer v{_controller.Version}";
             if (_updateLog != null && _updateLogs != null) _updateLog.text = _updateLogs.text;
-            if (_preview != null) _controller.RawImageScreens = _controller.RawImageScreens.Add(_preview);
             if (_idle != null && _idleImage != null) _idle.sprite = _idleImage;
             if (_animator != null && _defaultPlaylistOpen) _animator.SetTrigger("TogglePlaylist");
+            _uiBoxCollider = GetComponentInChildren<BoxCollider>();
         }
+
         void Update()
         {
             if (_volumeHelper != null && _volumeTooltip != null)
                 _volumeTooltip.text = $"{Mathf.Ceil(_volumeHelper.Percent * 100)}%";
-            if (_controller.Stopped) return;
-            updateProgress();
+            if (!_controller.Stopped) updateProgress();
+            if (_disableUIInPickUp && _uiBoxCollider != null) 
+                _uiBoxCollider.enabled = !Networking.LocalPlayer.PickUpInHand();
         }
 
         Localization I18n
@@ -738,7 +741,6 @@ namespace Yamadev.YamaStream
             updateLoadingView();
             updateAudioView();
             if (_idle != null && _idleImage != null) _idle.gameObject.SetActive(_controller.Stopped);
-            if (_preview != null) _preview.enabled = _controller.IsPlaying;
         }
 
         void updateProgress()

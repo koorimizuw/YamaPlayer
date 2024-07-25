@@ -13,7 +13,7 @@ namespace Yamadev.YamaStream
         {
             if (_controller == null) return;
             Renderer screen = GetComponent<Renderer>();
-            _controller.RenderScreens = _controller.RenderScreens.Add(screen);
+            _controller.AddScreen(ScreenType.Renderer, screen);
         }
     }
 }

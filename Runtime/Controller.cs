@@ -75,7 +75,6 @@ namespace Yamadev.YamaStream
                 if (_videoPlayerType == value) return;
                 VideoPlayerHandle.Stop();
                 _videoPlayerType = value;
-                updateProperties();
                 if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
                 foreach (Listener listener in _listeners) listener.OnPlayerChanged();
             }

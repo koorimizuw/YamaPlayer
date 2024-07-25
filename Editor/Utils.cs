@@ -46,5 +46,28 @@ namespace Yamadev.YamaStream.Script
                 }
             return null;
         }
+
+        public static void AddScreenProperty(this Controller controller, ScreenType screenType, UnityEngine.Object screen, string textureProperty, string avProProperty)
+        {
+            if (controller == null) return;
+            SerializedObject serializedObject = new SerializedObject(controller);
+            SerializedProperty screenTypes = serializedObject.FindProperty("_screenTypes");
+            SerializedProperty screens = serializedObject.FindProperty("_screens");
+            SerializedProperty textureProperties = serializedObject.FindProperty("_textureProperties");
+            SerializedProperty avProProperties = serializedObject.FindProperty("_avProProperties");
+            for (int i = 0; i < screens.arraySize; i++)
+            {
+                if (screens.GetArrayElementAtIndex(i).objectReferenceValue == screen) return;
+            }
+            screenTypes.arraySize += 1;
+            screens.arraySize += 1;
+            textureProperties.arraySize += 1;
+            avProProperties.arraySize += 1;
+            screenTypes.GetArrayElementAtIndex(screenTypes.arraySize - 1).intValue = (int)screenType;
+            screens.GetArrayElementAtIndex(screenTypes.arraySize - 1).objectReferenceValue = screen;
+            textureProperties.GetArrayElementAtIndex(screenTypes.arraySize - 1).stringValue = textureProperty;
+            avProProperties.GetArrayElementAtIndex(screenTypes.arraySize - 1).stringValue = avProProperty;
+            serializedObject.ApplyModifiedProperties();
+        }
     }
 }
