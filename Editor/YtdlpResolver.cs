@@ -37,7 +37,6 @@ namespace Yamadev.YamaStream.Script
                 _ytdlpPath = path;
                 _exist = true;
             }
-            Debug.Log(_exist);
         }
 
         public static bool IsOriginal => _isOriginal;
