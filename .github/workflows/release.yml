@@ -32,10 +32,8 @@ jobs:
       - name: Make Package Folder
         run: |
           mkdir Packages
-          ls | grep -v Packages | xargs mv -t Packages
-          cd Packages
-          ls | grep -v ${{ env.packageName }} | xargs mv -t ${{ env.packageName }}
-          mv * ${{ env.packageName }}
+          mkdir Packages/${{ env.packageName }}
+          ls | grep -v Packages | xargs mv -t Packages/${{ env.packageName }}
         
       - name: Create Zip
         uses: thedoctor0/zip-release@09336613be18a8208dfa66bd57efafd9e2685657
