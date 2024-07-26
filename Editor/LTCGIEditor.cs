@@ -49,26 +49,24 @@ namespace Yamadev.YamaStream.Script
             }
             if (crt == null) return;
             Controller yamaplayerController = _player.GetComponentInChildren<Controller>();
-            if (yamaplayerController != null)
-            {
-                SerializedObject serializedObject = new SerializedObject(yamaplayerController);
-                serializedObject.FindProperty("_lod").objectReferenceValue = crt.material;
-                serializedObject.ApplyModifiedProperties();
-            }
+            if (yamaplayerController == null) return;
+
+            yamaplayerController.AddScreenProperty(ScreenType.Material, crt.material, "_MainTex", "_AVPro");
             Renderer[] renderers = new Renderer[] { };
             if (!_applyToAllScreens)
             {
-                Renderer mainScreen = _player.MainScreen;
-                if (mainScreen == null) mainScreen = _player.transform.GetComponentInChildren<YamaPlayerScreen>()?.GetComponent<Renderer>();
-                if (mainScreen != null) renderers = renderers.Add(mainScreen);
+                foreach (Renderer renderer in _player.GetComponentsInChildren<Renderer>())
+                {
+                    if (!renderer.enabled) continue;
+                    renderers = renderers.Add(renderer);
+                }
             }
             else
             {
-                YamaPlayerScreen[] screens = Utils.FindComponentsInHierarthy<YamaPlayerScreen>();
-                foreach (YamaPlayerScreen screen in screens)
+                UnityEngine.Object[] screens = yamaplayerController.Screens;
+                foreach (UnityEngine.Object screen in screens)
                 {
-                    if ((UnityEngine.Object)(screen.GetProgramVariable("_controller")) == yamaplayerController && screen.TryGetComponent<Renderer>(out var renderer))
-                        renderers = renderers.Add(renderer);
+                    if (screen is Renderer) renderers = renderers.Add((Renderer)screen);
                 }
             }
             foreach (Renderer renderer in renderers)

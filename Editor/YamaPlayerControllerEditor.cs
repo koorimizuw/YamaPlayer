@@ -18,6 +18,7 @@ namespace Yamadev.YamaStream.Script
         SerializedProperty _secondaryColor;
         SerializedProperty _idleImage;
         SerializedProperty _defaultOpen;
+        SerializedProperty _disableUI;
         YamaPlayerController _target;
         YamaPlayer[] _players;
         bool _uiOn;
@@ -40,6 +41,7 @@ namespace Yamadev.YamaStream.Script
                 _secondaryColor = _uiControllerSerializedObject.FindProperty("_secondaryColor");
                 _idleImage = _uiControllerSerializedObject.FindProperty("_idleImage");
                 _defaultOpen = _uiControllerSerializedObject.FindProperty("_defaultPlaylistOpen");
+                _disableUI = _uiControllerSerializedObject.FindProperty("_disableUIInPickUp");
             }
             _yamaPlayer = serializedObject.FindProperty("YamaPlayer");
             _players = Utils.FindComponentsInHierarthy<YamaPlayer>();
@@ -93,11 +95,20 @@ namespace Yamadev.YamaStream.Script
                         {
                             EditorGUILayout.LabelField("Playlist", _bold);
                             EditorGUILayout.PropertyField(_defaultOpen);
+                            EditorGUILayout.LabelField("　", "Open playlist UI after game started.");
                         }
                     }
                     EditorGUILayout.Space();
+
                     EditorGUILayout.LabelField("Idle", _bold);
                     EditorGUILayout.PropertyField(_idleImage);
+                    EditorGUILayout.LabelField("　", "Show image when video not playing.");
+                    EditorGUILayout.Space();
+
+                    EditorGUILayout.LabelField("Prevent Missoperation", _bold);
+                    EditorGUILayout.PropertyField(_disableUI);
+                    EditorGUILayout.LabelField("　", "Disable video player UI when user is picking up something.");
+                    EditorGUILayout.Space();
                 }
             }
 
@@ -116,7 +127,6 @@ namespace Yamadev.YamaStream.Script
             {
                 SerializedObject serializedObject = new SerializedObject(uiController);
                 serializedObject.FindProperty("_controller").objectReferenceValue = controller;
-                serializedObject.FindProperty("_i18n").objectReferenceValue = (_yamaPlayer.objectReferenceValue as YamaPlayer).GetComponentInChildren<i18n>();
                 serializedObject.ApplyModifiedProperties();
             }
             YamaPlayerScreen screen = _target.gameObject.GetComponentInChildren<YamaPlayerScreen>();

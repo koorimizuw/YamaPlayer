@@ -27,17 +27,24 @@ jobs:
       - name: Set Environment Variables
         run: |
           echo "zipFile=${{ env.packageName }}-${{ steps.version.outputs.prop }}".zip >> $GITHUB_ENV
-          echo "unityPackage=${{ env.packageName }}-${{ steps.version.outputs.prop }}.unitypackage" >> $GITHUB_ENV
+          echo "unityPackage=${{ env.packageName }}-${{ steps.version.outputs.prop }}.unitypackage" >> $GITHUB_ENV\
+      
+      - name: Make Package Folder
+        run: |
+          mkdir Packages
+          mkdir Packages/${{ env.packageName }}
+          ls | grep -v Packages | xargs mv -t Packages/${{ env.packageName }}
         
       - name: Create Zip
         uses: thedoctor0/zip-release@09336613be18a8208dfa66bd57efafd9e2685657
         with:
           type: "zip"
-          filename: "${{env.zipFile}}" # make the zip file two directories up, since we start two directories in above
+          directory: "Packages/${{ env.packageName }}/"
+          filename: "../../${{env.zipFile}}"
           exclusions: ".git*"
       
       - name: Track Package Meta Files
-        run: find "./" -name \*.meta >> metaList
+        run: find "Packages/${{ env.packageName }}/" -name \*.meta >> metaList
 
       - name: Create UnityPackage
         uses: pCYSl5EDgo/create-unitypackage@cfcd3cf0391a5ef1306342794866a9897c32af0b
@@ -53,7 +60,7 @@ jobs:
           files: |
             ${{ env.zipFile }}
             ${{ env.unityPackage }}
-            package.json
+            Packages/${{ env.packageName }}/package.json
 
       - name: Build Listing
         uses: peter-evans/repository-dispatch@v3
