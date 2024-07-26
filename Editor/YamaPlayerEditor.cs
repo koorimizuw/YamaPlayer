@@ -378,7 +378,7 @@ namespace Yamadev.YamaStream.Script
             EditorGUILayout.LabelField("　", "Disable when value is smaller then 0.");
             EditorGUILayout.Space();
 
-            EditorGUILayout.LabelField("Screens / スクリーン", _bold);
+            EditorGUILayout.LabelField("Screens", _bold);
             if (_screenList != null) _screenList.DoLayoutList();
 
         }

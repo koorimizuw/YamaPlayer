@@ -150,6 +150,7 @@ namespace Yamadev.YamaStream.Script
                 onAddCallback = (list) =>
                 {
                     ReorderableList.defaultBehaviours.DoAddButton(list);
+                    _selectedPlaylist.Tracks[_selectedPlaylist.Tracks.Count - 1].Mode = TrackMode.AVProPlayer;
                     _isDirty = true;
                 },
                 onRemoveCallback = (list) =>
