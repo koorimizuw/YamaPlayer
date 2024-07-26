@@ -241,11 +241,16 @@ namespace Yamadev.YamaStream.Script
             if (_selectedPlaylist == null) return;
             using (new GUILayout.VerticalScope(GUI.skin.box))
             {
-                using (new EditorGUI.ChangeCheckScope())
+                using (new EditorGUILayout.HorizontalScope())
                 {
                     _defaultTrackMode = (TrackMode)EditorGUILayout.Popup("Video Player Type", (int)_defaultTrackMode, Enum.GetNames(typeof(TrackMode)));
-                    _useYoutubePlaylistName = EditorGUILayout.Toggle("Overwrite Playlist Name", _useYoutubePlaylistName);
+                    if (GUILayout.Button("Apply for all", GUILayout.ExpandWidth(false)))
+                    {
+                        for (int i = 0; i < _selectedPlaylist.Tracks.Count; i++)
+                            _selectedPlaylist.Tracks[i].Mode = _defaultTrackMode;
+                    }
                 }
+                _useYoutubePlaylistName = EditorGUILayout.Toggle("Overwrite Playlist Name", _useYoutubePlaylistName);
                 EditorGUILayout.Space();
                 using (new EditorGUILayout.HorizontalScope())
                 {
