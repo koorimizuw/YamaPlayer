@@ -32,9 +32,9 @@ jobs:
       - name: Make Package Folder
         run: |
           mkdir Packages
-          mv * Packages
+          ls | grep -v Packages | xargs mv -t Packages
           cd Packages
-          mkdir ${{ env.packageName }}
+          ls | grep -v ${{ env.packageName }} | xargs mv -t ${{ env.packageName }}
           mv * ${{ env.packageName }}
         
       - name: Create Zip
