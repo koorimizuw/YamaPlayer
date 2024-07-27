@@ -7,6 +7,7 @@ public static class YamaPlayerMenu
     static string yamaplayerPrefabGuid = "0ca92d0fbf2bf3944bfeef01f4977da5";
     static string subScreenPrefabGuid = "1d1c026d8b023d04ea81f85594f05aec";
     static string controllerPrefabGuid = "ddf7f58d0d20d6843a79711f81f34bf2";
+    static string playlistPanelPrefabGuid = "32aa1985af9229540a44cf22406ee1a2";
 
     [MenuItem(menuPrefix + "Main")]
     public static void CreateYamaPlayer()
@@ -28,6 +29,14 @@ public static class YamaPlayerMenu
         string path = AssetDatabase.GUIDToAssetPath(controllerPrefabGuid);
         CreateGameObject(path);
     }
+
+    [MenuItem(menuPrefix + "Playlist Panel")]
+    public static void CreatePlaylistPanel()
+    {
+        string path = AssetDatabase.GUIDToAssetPath(playlistPanelPrefabGuid);
+        CreateGameObject(path);
+    }
+
     static void CreateGameObject(string path)
     {
         GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
