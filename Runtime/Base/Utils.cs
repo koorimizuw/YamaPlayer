@@ -194,6 +194,7 @@ namespace Yamadev.YamaStream
 
         public static bool PickUpInHand(this VRCPlayerApi player)
         {
+            if (!Utilities.IsValid(player)) return false;
             return player.GetPickupInHand(VRC_Pickup.PickupHand.Left) != null ||
                 player.GetPickupInHand(VRC_Pickup.PickupHand.Right) != null;
         }

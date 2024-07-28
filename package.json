@@ -14,5 +14,11 @@
   "vpmDependencies": {
     "com.vrchat.worlds": ">=3.6.0",
     "net.kwxxw.yamachan-web-unit": ">=1.0.0"
-  }
+  },
+  "samples": [
+    {
+      "displayName": "AVProHelper",
+      "path": "Samples~/AVProHelper"
+    }
+  ]
 }

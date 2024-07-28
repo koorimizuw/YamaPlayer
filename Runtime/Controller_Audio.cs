@@ -25,7 +25,7 @@ namespace Yamadev.YamaStream
                 if (audioSource == null) continue;
                 audioSource.volume = _volume;
                 audioSource.mute = _mute;
-                audioSource.pitch = _speed; // * Mathf.Pow(2, _pitch / 12f);
+                audioSource.pitch = IsLive ? 1 : _speed; // * Mathf.Pow(2, _pitch / 12f);
             }
             foreach (Listener listener in _listeners) listener.OnVolumeChanged();
         }

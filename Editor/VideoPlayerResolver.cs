@@ -38,9 +38,9 @@ namespace Yamadev.YamaStream.Script
         [MenuItem("YamaPlayer/Enable AVPro Debug")]
         public static void AVProDebug()
         {
-            if (Utils.FindType("RenderHeads.Media.AVProVideo.MediaPlayer", true) == null)
+            if (!EditorUtility.DisplayDialog("Notice", "Are you install full version AVPro?", "Yes", "No"))
             {
-                if (EditorUtility.DisplayDialog("AVPro not imported", "Download AVPro package?", "OK", "Cancel")) DownloadAVPro();
+                if (EditorUtility.DisplayDialog("Download AVPro", "Open download AVPro site?", "Yes", "No")) DownloadAVPro();
                 return;
             }
             foreach (var group in _targetGroups)

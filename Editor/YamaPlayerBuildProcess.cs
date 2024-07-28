@@ -8,6 +8,9 @@ using UnityEngine.SceneManagement;
 using VRC.SDKBase;
 using VRC.Utility;
 using Yamadev.YamaStream.UI;
+using UnityEditor.Compilation;
+using UnityEditor.PackageManager.UI;
+using System;
 
 namespace Yamadev.YamaStream.Script
 {
@@ -41,7 +44,7 @@ namespace Yamadev.YamaStream.Script
                 PlayList[] children = handle.transform.GetComponentsInChildren<PlayList>();
                 foreach (PlayList li in children)
                 {
-                    GameObject newObject = Object.Instantiate(template.gameObject, handle.TargetContent, false);
+                    GameObject newObject = UnityEngine.Object.Instantiate(template.gameObject, handle.TargetContent, false);
                     GameObjectUtility.EnsureUniqueNameForSibling(newObject);
 
                     Playlist udon = newObject.transform.GetComponent<Playlist>();
