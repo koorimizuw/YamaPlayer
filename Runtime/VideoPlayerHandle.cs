@@ -18,6 +18,7 @@ namespace Yamadev.YamaStream
         [SerializeField] bool _isAvPro;
         [SerializeField] bool _fixFlicker;
         [SerializeField] Material _blitMaterial;
+        BaseVRCVideoPlayer _baseVideoPlayer;
         Renderer _renderer;
         MaterialPropertyBlock _properties;
         Texture _texture;
@@ -37,14 +38,21 @@ namespace Yamadev.YamaStream
 #if UNITY_EDITOR && AVPRO_DEBUG
         private void Update()
         {
-            if (_isAvPro && _stopped && _baseVideoPlayer.IsPlaying)
+            if (_isAvPro && _stopped && BaseVideoPlayer.IsPlaying)
             {
                 OnVideoStart();
             }
         }
 #endif
 
-        BaseVRCVideoPlayer _baseVideoPlayer => GetComponent<BaseVRCVideoPlayer>();
+        BaseVRCVideoPlayer BaseVideoPlayer
+        {
+            get
+            {
+                if (_baseVideoPlayer == null) _baseVideoPlayer = GetComponent<BaseVRCVideoPlayer>();
+                return _baseVideoPlayer;
+            }
+        }
 
         public Listener Listener
         {
@@ -54,14 +62,14 @@ namespace Yamadev.YamaStream
 
         public bool Loop
         {
-            get => _baseVideoPlayer.Loop;
-            set => _baseVideoPlayer.Loop = value;
+            get => BaseVideoPlayer.Loop;
+            set => BaseVideoPlayer.Loop = value;
         }
 
         public float Time
         {
-            get => _baseVideoPlayer.GetTime();
-            set => _baseVideoPlayer.SetTime(value);
+            get => BaseVideoPlayer.GetTime();
+            set => BaseVideoPlayer.SetTime(value);
         }
 
         #region ListenerEvents
@@ -74,7 +82,7 @@ namespace Yamadev.YamaStream
         {
             if (_stopped && !_loading)
             {
-                _baseVideoPlayer.Stop();
+                BaseVideoPlayer.Stop();
                 return;
             }
             if (_listener != null && _stopped)
@@ -109,27 +117,27 @@ namespace Yamadev.YamaStream
         {
             _url = url;
             _loading = true;
-            _baseVideoPlayer.PlayURL(_url);
+            BaseVideoPlayer.PlayURL(_url);
         }
 
         public void Play()
         {
-            if (_stopped || _baseVideoPlayer.IsPlaying) return;
-            _baseVideoPlayer.Play();
+            if (_stopped || BaseVideoPlayer.IsPlaying) return;
+            BaseVideoPlayer.Play();
             if (_listener != null) _listener.OnVideoPlay();
         }
 
         public void Pause()
         {
-            if (_stopped || !_baseVideoPlayer.IsPlaying) return;
-            _baseVideoPlayer.Pause();
+            if (_stopped || !BaseVideoPlayer.IsPlaying) return;
+            BaseVideoPlayer.Pause();
             if (_listener != null) _listener.OnVideoPause();
         }
 
         public void Stop()
         {
             if (_stopped && !_loading) return;
-            _baseVideoPlayer.Stop();
+            BaseVideoPlayer.Stop();
             _stopped = true;
             _loading = false;
             if (_listener != null) _listener.OnVideoStop();
@@ -190,15 +198,15 @@ namespace Yamadev.YamaStream
         {
             get
             {
-                if (_baseVideoPlayer == null) return false;
-                return _baseVideoPlayer.IsPlaying;
+                if (BaseVideoPlayer == null) return false;
+                return BaseVideoPlayer.IsPlaying;
             }
         }
 
         public bool IsLive => float.IsInfinity(Duration);
         public float Duration
         {
-            get => _baseVideoPlayer.GetDuration();
+            get => BaseVideoPlayer.GetDuration();
         }
     }
 }

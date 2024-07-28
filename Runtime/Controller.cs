@@ -235,6 +235,7 @@ namespace Yamadev.YamaStream
             _stopped = false;
             if (_paused) VideoPlayerHandle.Pause();
             else VideoPlayerHandle.Play();
+            UpdateAudio();
             if (Networking.IsOwner(gameObject) && !_isLocal && !_isReload)
             {
                 SyncTime = 0f;

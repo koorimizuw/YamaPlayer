@@ -14,6 +14,7 @@ namespace Yamadev.YamaStream
 
         void Update()
         {
+            if (!Utilities.IsValid(Networking.LocalPlayer)) return;
             _mousePosition = Utils.GetMousePosition(Networking.LocalPlayer.IsUserInVR() ? _rightHand ? VRCPlayerApi.TrackingDataType.RightHand : VRCPlayerApi.TrackingDataType.LeftHand : VRCPlayerApi.TrackingDataType.Head);
         }
 
