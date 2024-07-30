@@ -19,7 +19,7 @@ namespace Yamadev.YamaStream.Script
             Settings,
             Playlist,
             Permission,
-            Other
+            Version
         }
 
         // controller
@@ -236,7 +236,7 @@ namespace Yamadev.YamaStream.Script
                 case Tab.Permission:
                     drawPermissionSettings();
                     break;
-                case Tab.Other:
+                case Tab.Version:
                     drawOtherView();
                     break;
             }
@@ -318,13 +318,6 @@ namespace Yamadev.YamaStream.Script
             if (_useLowLatency != null) EditorGUILayout.PropertyField(_useLowLatency);
             Styles.DrawDivider();
 
-            EditorGUILayout.LabelField("Playlist", Styles.Bold);
-            EditorGUILayout.PropertyField(_shuffle);
-            EditorGUILayout.PropertyField(_forwardInterval);
-            EditorGUILayout.LabelField("　", "Play next track after seconds.");
-            EditorGUILayout.LabelField("　", "Disable when value is smaller then 0.");
-            Styles.DrawDivider();
-
             if (_screenList != null) _screenList.DoLayoutList();
 
         }
@@ -335,6 +328,15 @@ namespace Yamadev.YamaStream.Script
         {
             EditorGUILayout.LabelField("Playlist / プレイリスト", Styles.Bold);
             if (GUILayout.Button("Edit Playlist")) PlaylistEditor.ShowPlaylistEditorWindow(_target);
+            Styles.DrawDivider();
+
+            EditorGUILayout.PropertyField(_shuffle);
+            EditorGUILayout.LabelField("　", "Default play tracks as random order.");
+            Styles.DrawDivider();
+
+            EditorGUILayout.PropertyField(_forwardInterval);
+            EditorGUILayout.LabelField("　", "Play next track after seconds.");
+            EditorGUILayout.LabelField("　", "Disable when value is smaller then 0.");
         }
         #endregion
 
