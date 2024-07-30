@@ -19,11 +19,7 @@ namespace Yamadev.YamaStream.Script
         private static readonly string _avProDebugSymbol = "AVPRO_DEBUG";
         private static readonly string _avProReleaseUrl = "https://github.com/RenderHeads/UnityPlugin-AVProVideo/releases/latest";
 
-        static AVProPlayerHelper()
-        {
-            AddAVProHelper();
-            AVProDebug();
-        }
+        static AVProPlayerHelper() => AddAVProHelper();
 
         public static void AddAVProHelper()
         {
@@ -42,15 +38,9 @@ namespace Yamadev.YamaStream.Script
             }
         }
 
+        [MenuItem("YamaPlayer/Enable AVPro Debug")]
         public static void AVProDebug()
         {
-            /*
-            if (!EditorUtility.DisplayDialog("Notice", "Are you install full version AVPro?", "Yes", "No"))
-            {
-                if (EditorUtility.DisplayDialog("Download AVPro", "Open download AVPro site?", "Yes", "No")) DownloadAVPro();
-                return;
-            }
-            */
             if (Utils.FindType("RenderHeads.Media.AVProVideo.MediaPlayer", true) == null) return;
             foreach (var group in _targetGroups)
             {
@@ -61,7 +51,7 @@ namespace Yamadev.YamaStream.Script
                     PlayerSettings.SetScriptingDefineSymbolsForGroup(group, string.Join(";", symbols.ToArray()));
                 }
             }
-            // EditorUtility.DisplayDialog("Success", "AVPro debug on.", "OK");
+            EditorUtility.DisplayDialog("Success", "AVPro debug on.", "OK");
         }
 
         public static void DownloadAVPro()
