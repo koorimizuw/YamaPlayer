@@ -41,7 +41,11 @@ namespace Yamadev.YamaStream.Script
         [MenuItem("YamaPlayer/Enable AVPro Debug")]
         public static void AVProDebug()
         {
-            if (Utils.FindType("RenderHeads.Media.AVProVideo.MediaPlayer", true) == null) return;
+            if (Utils.FindType("RenderHeads.Media.AVProVideo.MediaPlayer", true) == null)
+            {
+                if (EditorUtility.DisplayDialog("AVPro not included", "Open download AVPro site?", "Yes", "No")) DownloadAVPro();
+                return;
+            }
             foreach (var group in _targetGroups)
             {
                 List<string> symbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(group).Split(';').Select(s => s.Trim()).ToList();
