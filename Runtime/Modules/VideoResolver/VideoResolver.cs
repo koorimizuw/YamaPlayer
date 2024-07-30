@@ -3,14 +3,24 @@ using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.StringLoading;
 using VRC.SDKBase;
+#if WEB_UNIT_INCLUDED
 using Yamadev.YamachanWebUnit;
+#endif
 
 namespace Yamadev.YamaStream.Modules
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+#if WEB_UNIT_INCLUDED
     public class VideoResolver : Receiver
+#else
+    public class VideoResolver : UdonSharpBehaviour
+#endif
     {
+#if WEB_UNIT_INCLUDED
         [SerializeField] Client _client;
+#else
+        [SerializeField] object _client;
+#endif
         [SerializeField] Controller _controller;
         [SerializeField] VRCUrl _callbackYoutubeUrl;
         [SerializeField] VRCUrl _callbackNiconicoUrl;
@@ -48,22 +58,28 @@ namespace Yamadev.YamaStream.Modules
             _controller.Resolve();
         }
 
+#if WEB_UNIT_INCLUDED
         public override void OnRequestSuccess(IVRCStringDownload result) => _controller.VideoPlayerHandle.PlayUrl(_callbackUrl);
+#endif
 
         public void PlayYoutubeVideo(string url)
         {
+#if WEB_UNIT_INCLUDED
             Debug.Log($"[<color=#ff70ab>YamaStream</color>] Resolve youtube url: {url}");
             string id = url.Replace("https://youtube.com/watch?v=", "").Replace("https://www.youtube.com/watch?v=", "").Split('&')[0];
             _client.Request(VRCUrl.Empty, id, this);
             _callbackUrl = _callbackYoutubeUrl;
+#endif
         }
 
         public void PlayNicoVideo(string url)
         {
+#if WEB_UNIT_INCLUDED
             Debug.Log($"[<color=#ff70ab>YamaStream</color>] Resolve niconico url: {url}");
             string id = url.Replace("https://nicovideo.jp/watch/", "").Replace("https://www.nicovideo.jp/watch/", "").Split('?')[0];
             _client.Request(VRCUrl.Empty, id, this);
             _callbackUrl = _callbackNiconicoUrl;
+#endif
         }
     }
 }

@@ -2,6 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 using VRC.SDK3.Components;
+using Yamadev.YamaStream.UI;
 
 namespace Yamadev.YamaStream.Script
 {

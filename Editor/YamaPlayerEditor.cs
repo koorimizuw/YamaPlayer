@@ -6,6 +6,7 @@ using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDK3.Video.Components.AVPro;
+using Yamadev.YamaStream.UI;
 
 namespace Yamadev.YamaStream.Script
 {

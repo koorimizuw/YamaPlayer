@@ -8,9 +8,12 @@ using UnityEngine.SceneManagement;
 using VRC.SDKBase;
 using VRC.Utility;
 using Yamadev.YamaStream.UI;
-using UnityEditor.Compilation;
-using UnityEditor.PackageManager.UI;
-using System;
+using UdonSharpEditor;
+using Yamadev.YamaStream.Modules;
+using VRC.SDK3.Components;
+#if WEB_UNIT_INCLUDED
+using Yamadev.YamachanWebUnit;
+#endif
 
 namespace Yamadev.YamaStream.Script
 {
@@ -68,9 +71,20 @@ namespace Yamadev.YamaStream.Script
             }
         }
 
+        public void CreateWebUnitClient()
+        {
+#if WEB_UNIT_INCLUDED
+            GameObject go = new GameObject("WebUnitClient");
+            Client client = go.AddUdonSharpComponent<Client>();
+            foreach (VideoResolver resolver in Utils.FindComponentsInHierarthy<VideoResolver>())
+                resolver.SetProgramVariable("_client", client);
+#endif
+        }
+
         public void OnProcessScene(Scene scene, BuildReport report)
         {
             GeneratePlaylists();
+            CreateWebUnitClient();
 
             foreach (YamaPlayer player in Utils.FindComponentsInHierarthy<YamaPlayer>())
             {
@@ -120,6 +134,16 @@ namespace Yamadev.YamaStream.Script
                 foreach (UIColor component in uiController.GetComponentsInChildren<UIColor>(true))
                     if (component.GetProgramVariable("_uiController") == null)
                         component.SetProgramVariable("_uiController", uiController);
+
+                VRCUrlInputField dynamicUrlInputField = uiController.GetProgramVariable("_dynamicPlaylistUrlInput") as VRCUrlInputField;
+                if (dynamicUrlInputField != null)
+                {
+#if WEB_UNIT_INCLUDED
+                    dynamicUrlInputField.gameObject.SetActive(true);
+#else
+                    dynamicUrlInputField.gameObject.SetActive(false);
+#endif
+                }
             }
 
             foreach (InputController inputController in Utils.FindComponentsInHierarthy<InputController>())

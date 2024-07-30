@@ -7,9 +7,8 @@ using VRC.SDK3.Components;
 using VRC.SDK3.Components.Video;
 using VRC.SDK3.Data;
 using VRC.SDKBase;
-using Yamadev.YamaStream.UI;
 
-namespace Yamadev.YamaStream
+namespace Yamadev.YamaStream.UI
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class UIController : Listener
