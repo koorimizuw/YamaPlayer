@@ -19,16 +19,22 @@ namespace Yamadev.YamaStream.Script
     {
         public const string VPMID = "net.kwxxw.vpm";
         public const string VPMUrl = "https://vpm.kwxxw.net/index.json";
+        public const string AutoUpdateKey = "YamaPlayerAutoUpdate";
         public static string PackageName;
         public static string Version;
-        public static bool HasNewVersion = false;
+        public static bool HasNewVersion;
         public static string Newest;
-        public static bool AutoUpdate = false;
 
         static VersionManager()
         {
             CheckUpdate();
             if (HasNewVersion && AutoUpdate) UpdatePackage();
+        }
+
+        public static bool AutoUpdate
+        {
+            get => EditorPrefs.GetBool(AutoUpdateKey);
+            set => EditorPrefs.SetBool(AutoUpdateKey, value);
         }
 
         public static void GetVersionInfo()
@@ -52,11 +58,9 @@ namespace Yamadev.YamaStream.Script
                 Newest = version;
                 break;
             }
-            if (string.IsNullOrEmpty(Newest) ||
-                new SemanticVersioning.Version(Version) >= new SemanticVersioning.Version(Newest)) 
-                return false;
-            HasNewVersion = true;
-            return true;
+            if (string.IsNullOrEmpty(Newest)) return false;
+            HasNewVersion = new SemanticVersioning.Version(Version) < new SemanticVersioning.Version(Newest);
+            return HasNewVersion;
 #endif
         }
 
@@ -82,7 +86,7 @@ namespace Yamadev.YamaStream.Script
             {
                 dialogMsg.Insert(0, "This will update multiple packages:\n\n");
                 dialogMsg.AppendLine("\nAre you sure?");
-                if (!EditorUtility.DisplayDialog("Package Has Dependencies", dialogMsg.ToString(), "OK", "Cancel"))
+                if (!EditorUtility.DisplayDialog("Update YamaPlayer", dialogMsg.ToString(), "OK", "Cancel"))
                     return;
             }
 

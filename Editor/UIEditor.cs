@@ -56,7 +56,7 @@ namespace Yamadev.YamaStream.Script
             }
 
             EditorGUILayout.PropertyField(_disableUIOnPickUp);
-            EditorGUILayout.LabelField("Å@", "Disable video player UI when user is picking up something.");
+            EditorGUILayout.LabelField("Å@", "Disable UI when user is picking up something.");
 
             ApplyModifiedProperties();
         }
