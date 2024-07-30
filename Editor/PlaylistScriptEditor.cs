@@ -90,7 +90,7 @@ namespace Yamadev.YamaStream.Script
         {
             using (new GUILayout.VerticalScope(GUI.skin.box))
             {
-                EditorGUILayout.LabelField("Get Play List From YouTube", _bold);
+                EditorGUILayout.LabelField("Get Play List From YouTube", Styles.Bold);
 
                 _youTubePlayListID = serializedObject.FindProperty("YouTubePlayListID");
                 EditorGUILayout.PropertyField(_youTubePlayListID);
@@ -127,7 +127,7 @@ namespace Yamadev.YamaStream.Script
 
             serializedObject.Update();
 
-            EditorGUILayout.LabelField("Play List", _uiTitle);
+            EditorGUILayout.LabelField("Play List", Styles.Title);
 
             EditorGUILayout.Space();
 

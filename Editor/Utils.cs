@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -8,19 +9,8 @@ namespace Yamadev.YamaStream.Script
 {
     public static class Utils
     {
-        static string _packageInfoGuid = "b4c53d030728ff34098bd0ed5fc21c72";
-
-        [Serializable]
-        private struct PackageInfo
-        {
-            public string version;
-        }
-
-        public static string GetYamaPlayerVersion() =>
-            JsonUtility.FromJson<PackageInfo>(
-                System.IO.File.ReadAllText(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath),
-                AssetDatabase.GUIDToAssetPath(_packageInfoGuid)))
-                ).version ?? string.Empty;
+        public static UnityEditor.PackageManager.PackageInfo GetYamaPlayerPackageInfo() =>
+            UnityEditor.PackageManager.PackageInfo.FindForAssembly(typeof(Utils).Assembly);
 
         public static T[] FindComponentsInHierarthy<T>() where T : UnityEngine.Object
         {
@@ -68,6 +58,15 @@ namespace Yamadev.YamaStream.Script
             textureProperties.GetArrayElementAtIndex(screenTypes.arraySize - 1).stringValue = textureProperty;
             avProProperties.GetArrayElementAtIndex(screenTypes.arraySize - 1).stringValue = avProProperty;
             serializedObject.ApplyModifiedProperties();
+        }
+
+        public static void CopyFilesRecursively(string sourcePath, string targetPath)
+        {
+            foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+                Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+
+            foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
         }
     }
 }

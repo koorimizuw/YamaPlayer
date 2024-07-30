@@ -6,7 +6,6 @@ using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDK3.Video.Components.AVPro;
-using Yamadev.YamaStream.UI;
 
 namespace Yamadev.YamaStream.Script
 {
@@ -19,6 +18,7 @@ namespace Yamadev.YamaStream.Script
             Settings,
             Playlist,
             Permission,
+            Other
         }
 
         // controller
@@ -53,12 +53,7 @@ namespace Yamadev.YamaStream.Script
         SerializedProperty _ownerList;
         // UI
         UIController _uiController;
-        SerializedObject _uiControllerSerializedObject;
-        SerializedProperty _primaryColor;
-        SerializedProperty _secondaryColor;
-        SerializedProperty _idleImage;
-        SerializedProperty _defaultOpen;
-        SerializedProperty _disableUI;
+        UIEditor _uiEditor;
         // avpro
         VRCAVProVideoPlayer _avPro;
         SerializedObject _avProSerializedObject;
@@ -108,16 +103,8 @@ namespace Yamadev.YamaStream.Script
                 _defaultPermission = _permissionSerializedObject.FindProperty("_defaultPermission");
                 _ownerList = _permissionSerializedObject.FindProperty("_ownerList");
             }
-            _uiController = _target.GetComponentInChildren<UIController>();
-            if (_uiController != null)
-            {
-                _uiControllerSerializedObject = new SerializedObject(_uiController);
-                _primaryColor = _uiControllerSerializedObject.FindProperty("_primaryColor");
-                _secondaryColor = _uiControllerSerializedObject.FindProperty("_secondaryColor");
-                _idleImage = _uiControllerSerializedObject.FindProperty("_idleImage");
-                _defaultOpen = _uiControllerSerializedObject.FindProperty("_defaultPlaylistOpen");
-                _disableUI = _uiControllerSerializedObject.FindProperty("_disableUIInPickUp");
-            }
+            _uiController = _target.GetComponentInChildren<UIController>(true);
+            if (_uiController != null) _uiEditor = new UIEditor(_uiController);
             _avPro = _target.GetComponentInChildren<VRCAVProVideoPlayer>();
             if (_avPro != null )
             {
@@ -221,8 +208,8 @@ namespace Yamadev.YamaStream.Script
             base.OnInspectorGUI();
             serializedObject.Update();
 
-            EditorGUILayout.LabelField($"YamaPlayer v{Utils.GetYamaPlayerVersion()}", _uiTitle);
-            EditorGUILayout.Space();
+            EditorGUILayout.LabelField($"YamaPlayer v{Utils.GetYamaPlayerPackageInfo().version}", Styles.Title);
+            EditorGUILayout.Space(32f);
 
             if (EditorApplication.isPlaying) return;
 
@@ -232,11 +219,12 @@ namespace Yamadev.YamaStream.Script
                 _tab = (Tab)GUILayout.Toolbar((int)_tab, Enum.GetNames(typeof(Tab)).Select(x => new GUIContent(x)).ToArray(), "LargeButton", GUI.ToolbarButtonSize.Fixed);
                 EditorGUILayout.Space();
             }
+            EditorGUILayout.Space(16f);
 
             switch (_tab)
             {
                 case Tab.UI:
-                    drawUISettings();
+                    _uiEditor.DrawUISettings();
                     break;
                 case Tab.Settings:
                     drawDefaultSettings();
@@ -247,64 +235,22 @@ namespace Yamadev.YamaStream.Script
                 case Tab.Permission:
                     drawPermissionSettings();
                     break;
+                case Tab.Other:
+                    drawOtherView();
+                    break;
             }
 
-            if (serializedObject.ApplyModifiedProperties()
-                || (_autoPlaySerializedObject?.ApplyModifiedProperties() ?? false)
-                || (_permissionSerializedObject?.ApplyModifiedProperties() ?? false)
-                || (_uiControllerSerializedObject?.ApplyModifiedProperties() ?? false)
-                || (_controllerSerializedObject?.ApplyModifiedProperties() ?? false)
-                || (_avProSerializedObject?.ApplyModifiedProperties() ?? false)
-                ) ApplyModifiedProperties();
+            ApplyModifiedProperties();
         }
 
         internal void ApplyModifiedProperties()
         {
+            serializedObject.ApplyModifiedProperties();
+            _controllerSerializedObject?.ApplyModifiedProperties();
+            _autoPlaySerializedObject?.ApplyModifiedProperties();
+            _permissionSerializedObject?.ApplyModifiedProperties();
+            _avProSerializedObject?.ApplyModifiedProperties();
         }
-
-        #region UI Settings
-        void setUIColor()
-        {
-            foreach (UIColor component in _uiController.GetComponentsInChildren<UIColor>(true))
-            {
-                if (component.GetProgramVariable("_uiController") == null)
-                    component.SetProgramVariable("_uiController", _uiController);
-                component.Apply();
-            }
-        }
-
-        void drawUISettings()
-        {
-            if (_uiController == null) return;
-            EditorGUILayout.PropertyField(_primaryColor);
-            EditorGUILayout.PropertyField(_secondaryColor);
-            EditorGUILayout.Space();
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Preview")) setUIColor();
-            }
-            EditorGUILayout.Space();
-
-            EditorGUILayout.LabelField("Idle Image", _bold);
-            EditorGUILayout.PropertyField(_idleImage);
-            EditorGUILayout.LabelField("　", "Show image when video not playing.");
-            EditorGUILayout.Space();
-
-            if (_defaultOpen != null)
-            {
-                EditorGUILayout.LabelField("Playlist", _bold);
-                EditorGUILayout.PropertyField(_defaultOpen);
-                EditorGUILayout.LabelField("　", "Open playlist UI after game started.");
-                EditorGUILayout.Space();
-            }
-
-            EditorGUILayout.LabelField("Prevent Missoperation", _bold);
-            EditorGUILayout.PropertyField(_disableUI);
-            EditorGUILayout.LabelField("　", "Disable video player UI when user is picking up something.");
-            EditorGUILayout.Space();
-        }
-        #endregion
 
         #region Default Settings
         void drawPlaylistPopup()
@@ -328,11 +274,10 @@ namespace Yamadev.YamaStream.Script
         void drawDefaultSettings()
         {
             if (_controller == null) return;
-            EditorGUILayout.LabelField("Default player type", _bold);
             EditorGUILayout.PropertyField(_defaultPlayerEngine);
-            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("　", "Select the default player engine to play video.");
+            Styles.DrawDivider();
 
-            EditorGUILayout.LabelField("Auto Play", _bold);
             if (_autoPlay != null)
             {
                 EditorGUILayout.PropertyField(_autoPlayMode);
@@ -352,33 +297,33 @@ namespace Yamadev.YamaStream.Script
                             break;
                     }
                     EditorGUILayout.PropertyField(_autoPlayDelay);
+                    EditorGUILayout.LabelField("　", "Auto play video after seconds.");
                 }
             }
-            EditorGUILayout.Space();
+            Styles.DrawDivider();
 
-            EditorGUILayout.LabelField("Volume", _bold);
+            EditorGUILayout.LabelField("Volume", Styles.Bold);
             EditorGUILayout.PropertyField(_mute);
             EditorGUILayout.PropertyField(_volume);
-            EditorGUILayout.Space();
+            Styles.DrawDivider();
 
-            EditorGUILayout.LabelField("Display", _bold);
+            EditorGUILayout.LabelField("Display", Styles.Bold);
             EditorGUILayout.PropertyField(_mirrorInverse);
             EditorGUILayout.PropertyField(_emission);
-            EditorGUILayout.Space();
+            Styles.DrawDivider();
 
-            EditorGUILayout.LabelField("Playback", _bold);
+            EditorGUILayout.LabelField("Playback", Styles.Bold);
             EditorGUILayout.PropertyField(_loop);
-            EditorGUILayout.Space();
-
-            EditorGUILayout.LabelField("Playlist", _bold);
-            EditorGUILayout.PropertyField(_shuffle);
             if (_useLowLatency != null) EditorGUILayout.PropertyField(_useLowLatency);
+            Styles.DrawDivider();
+
+            EditorGUILayout.LabelField("Playlist", Styles.Bold);
+            EditorGUILayout.PropertyField(_shuffle);
             EditorGUILayout.PropertyField(_forwardInterval);
             EditorGUILayout.LabelField("　", "Play next track after seconds.");
             EditorGUILayout.LabelField("　", "Disable when value is smaller then 0.");
-            EditorGUILayout.Space();
+            Styles.DrawDivider();
 
-            EditorGUILayout.LabelField("Screens", _bold);
             if (_screenList != null) _screenList.DoLayoutList();
 
         }
@@ -387,7 +332,7 @@ namespace Yamadev.YamaStream.Script
         #region Playlist Settings
         void drawPlaylistSettings()
         {
-            EditorGUILayout.LabelField("Playlist / プレイリスト", _bold);
+            EditorGUILayout.LabelField("Playlist / プレイリスト", Styles.Bold);
             if (GUILayout.Button("Edit Playlist")) PlaylistEditor.ShowPlaylistEditorWindow(_target);
         }
         #endregion
@@ -395,9 +340,37 @@ namespace Yamadev.YamaStream.Script
         #region Permission Settings
         void drawPermissionSettings()
         {
-            EditorGUILayout.LabelField("Permission / 権限", _bold);
+            EditorGUILayout.LabelField("Permission / 権限", Styles.Bold);
             EditorGUILayout.PropertyField(_defaultPermission);
             EditorGUILayout.PropertyField(_ownerList);
+        }
+        #endregion
+
+        #region Other Settings
+        void drawOtherView()
+        {
+            VersionManager.AutoUpdate = EditorGUILayout.Toggle("Auto Update", VersionManager.AutoUpdate);
+            EditorGUILayout.LabelField("　", "Update to latest version automatically.");
+            Styles.DrawDivider();
+
+            EditorGUILayout.LabelField("Current Version", Utils.GetYamaPlayerPackageInfo().version);
+            EditorGUILayout.LabelField("Newest Version", VersionManager.Newest);
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                if (GUILayout.Button("Check Update"))
+                {
+                    if (VersionManager.CheckUpdate())
+                    {
+                        if (EditorUtility.DisplayDialog($"New version found", $"New version found: {VersionManager.Newest}.", "Update", "Cancel")) 
+                            VersionManager.UpdatePackage();
+                    }
+                    else EditorUtility.DisplayDialog($"No new version found", $"No new version found.", "OK");
+                }
+                EditorGUI.BeginDisabledGroup(!VersionManager.HasNewVersion);
+                if (GUILayout.Button("Update")) VersionManager.UpdatePackage();
+                EditorGUI.EndDisabledGroup();
+            }
+
         }
         #endregion
     }

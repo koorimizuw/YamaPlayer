@@ -87,7 +87,7 @@ namespace Yamadev.YamaStream.Script
                 }
 
                 Controller internalController = player.GetComponentInChildren<Controller>();
-                if (internalController != null) internalController.SetProgramVariable("_version", Utils.GetYamaPlayerVersion());
+                if (internalController != null) internalController.SetProgramVariable("_version", Utils.GetYamaPlayerPackageInfo().version);
 
                 Transform internalTransform = player.Internal != null ? player.Internal : player.transform.Find("Internal");
                 if (internalTransform != null)

@@ -10,7 +10,8 @@
         "GUID:1b3abf7e59395d84c84b48d69677daaa",
         "GUID:3ca842002c51d0a43b73e45298809a13",
         "GUID:6e9c6119ac4eb334284fb7b4bc6d1f05",
-        "GUID:21332e1f0d937794d916d2402ba1943a"
+        "GUID:21332e1f0d937794d916d2402ba1943a",
+        "GUID:d1e8c2ba944807d4a9213e2de6930a0b"
     ],
     "includePlatforms": [
         "Editor"
@@ -21,6 +22,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.vrchat.core.vpm-resolver",
+            "expression": "",
+            "define": "USE_VPM_RESOLVER"
+        }
+    ],
     "noEngineReferences": false
 }

@@ -14,13 +14,13 @@ namespace Yamadev.YamaStream
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class UIController : Listener
     {
-        [Header("Settings")]
+        // [Header("Settings")]
         [SerializeField] Controller _controller;
         [SerializeField] TextAsset _translation;
         [SerializeField] TextAsset _updateLogs;
-        [SerializeField] bool _disableUIInPickUp = true;
+        [SerializeField] bool _disableUIOnPickUp = true;
 
-        [Header("Color")]
+        // [Header("Color")]
         [SerializeField] Color _primaryColor = new Color(240f / 256f, 98f / 256f, 146f / 256f, 1.0f);
         [SerializeField] Color _secondaryColor = new Color(248f / 256f, 187f / 256f, 208f / 256f, 31f / 256f);
         [SerializeField] Color _ownerColor;
@@ -28,13 +28,13 @@ namespace Yamadev.YamaStream
         [SerializeField] Color _editorColor;
         [SerializeField] Color _viewerColor;
 
-        [Header("Modal")]
+        // [Header("Modal")]
         [SerializeField] Modal _modal;
         [SerializeField] ToggleGroup _modalVideoPlayerSelector;
         [SerializeField] Toggle _modalUnityPlayer;
         [SerializeField] Toggle _modalAVProPlayer;
 
-        [Header("Animation")]
+        // [Header("Animation")]
         [SerializeField] Animator _animator;
         [SerializeField] bool _defaultPlaylistOpen;
 
@@ -216,7 +216,7 @@ namespace Yamadev.YamaStream
             if (_volumeHelper != null && _volumeTooltip != null)
                 _volumeTooltip.text = $"{Mathf.Ceil(_volumeHelper.Percent * 100)}%";
             if (!_controller.Stopped) updateProgress();
-            if (_disableUIInPickUp && _uiBoxCollider != null) 
+            if (_disableUIOnPickUp && _uiBoxCollider != null) 
                 _uiBoxCollider.enabled = !Networking.LocalPlayer.PickUpInHand();
         }
 
