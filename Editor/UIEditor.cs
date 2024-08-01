@@ -35,28 +35,28 @@ namespace Yamadev.YamaStream.Script
             if (_uiControllerSerializedObject == null) return;
             _uiControllerSerializedObject.Update();
 
-            EditorGUILayout.PropertyField(_primaryColor);
-            EditorGUILayout.PropertyField(_secondaryColor);
+            EditorGUILayout.PropertyField(_primaryColor, Localization.GetLayout("primaryColor"));
+            EditorGUILayout.PropertyField(_secondaryColor, Localization.GetLayout("secondaryColor"));
             using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Preview")) SetUIColor();
+                if (GUILayout.Button(Localization.Get("preview"))) SetUIColor();
             }
             Styles.DrawDivider();
 
-            EditorGUILayout.PropertyField(_defaultOpen);
-            EditorGUILayout.LabelField("　", "Show playlist UI after game started.");
+            EditorGUILayout.PropertyField(_defaultOpen, Localization.GetLayout("defaultPlaylistOpen"));
+            EditorGUILayout.LabelField("　", Localization.Get("showPlaylistUIAafterStart"));
             Styles.DrawDivider();
 
             if (_idle.objectReferenceValue != null)
             {
-                EditorGUILayout.PropertyField(_idleImage);
-                EditorGUILayout.LabelField("　", "Show image when video not playing.");
+                EditorGUILayout.PropertyField(_idleImage, Localization.GetLayout("idleImage"));
+                EditorGUILayout.LabelField("　", Localization.Get("showIdleImage"));
                 Styles.DrawDivider();
             }
 
-            EditorGUILayout.PropertyField(_disableUIOnPickUp);
-            EditorGUILayout.LabelField("　", "Disable UI when user is picking up something.");
+            EditorGUILayout.PropertyField(_disableUIOnPickUp, Localization.GetLayout("disableUIOnPickUp"));
+            EditorGUILayout.LabelField("　", Localization.Get("disableUIOnPickUpDesc"));
 
             ApplyModifiedProperties();
         }

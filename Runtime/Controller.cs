@@ -15,7 +15,7 @@ namespace Yamadev.YamaStream
         [SerializeField] VideoPlayerHandle[] _videoPlayerHandles;
         [SerializeField] Permission _permission;
         [SerializeField] float _retryAfterSeconds = 5.1f;
-        [SerializeField] int _maxErrorRetry = 3;
+        [SerializeField] int _maxErrorRetry = 5;
         [SerializeField] string _timeFormat = @"hh\:mm\:ss";
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(VideoPlayerType))] VideoPlayerType _videoPlayerType;
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(Loop))] bool _loop = false;

@@ -67,6 +67,8 @@ namespace Yamadev.YamaStream.Script
 
         private void OnEnable()
         {
+            Title = $"YamaPlayer v{Utils.GetYamaPlayerPackageInfo().version}";
+
             _target = target as YamaPlayer;
             _controller = _target.GetComponentInChildren<Controller>();
             if (_controller != null )
@@ -114,7 +116,7 @@ namespace Yamadev.YamaStream.Script
             }
             _screenList = new ReorderableList(_controllerSerializedObject, _screens)
             {
-                drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, "Screen targets", EditorStyles.boldLabel),
+                drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, Localization.GetLayout("screenTargets"), EditorStyles.boldLabel),
                 onAddCallback = (list) =>
                 {
                     _screenTypes.arraySize += 1;
@@ -142,7 +144,7 @@ namespace Yamadev.YamaStream.Script
                     rect.height = EditorGUIUtility.singleLineHeight;
                     using (var check = new EditorGUI.ChangeCheckScope())
                     {
-                        EditorGUI.PropertyField(rect, screen, new GUIContent("Screen target"));
+                        EditorGUI.PropertyField(rect, screen, Localization.GetLayout("screen"));
                         if (check.changed)
                         {
                             if (screen.objectReferenceValue is Material) screenType.intValue = (int)ScreenType.Material;
@@ -194,9 +196,9 @@ namespace Yamadev.YamaStream.Script
                         }
                     }
                     rect.y += EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
-                    EditorGUI.PropertyField(rect, textureProperty, new GUIContent("Main texture property"));
+                    EditorGUI.PropertyField(rect, textureProperty, Localization.GetLayout("mainTextureProperty"));
                     rect.y += EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
-                    EditorGUI.PropertyField(rect, avProProperty, new GUIContent("AVPro flag property"));
+                    EditorGUI.PropertyField(rect, avProProperty, Localization.GetLayout("avProProperty"));
                 },
                 elementHeight = (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 3,
             };
@@ -209,15 +211,19 @@ namespace Yamadev.YamaStream.Script
             base.OnInspectorGUI();
             serializedObject.Update();
 
-            EditorGUILayout.LabelField($"YamaPlayer v{Utils.GetYamaPlayerPackageInfo().version}", Styles.Title);
-            EditorGUILayout.Space(32f);
+            EditorGUILayout.Space(16f);
 
             if (EditorApplication.isPlaying) return;
 
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.Space();
-                _tab = (Tab)GUILayout.Toolbar((int)_tab, Enum.GetNames(typeof(Tab)).Select(x => new GUIContent(x)).ToArray(), "LargeButton", GUI.ToolbarButtonSize.Fixed);
+                _tab = (Tab)GUILayout.Toolbar(
+                    (int)_tab, 
+                    Enum.GetNames(typeof(Tab)).Select(x => Localization.GetLayout(x.ToLower())).ToArray(), 
+                    "LargeButton", 
+                    GUI.ToolbarButtonSize.Fixed
+                    );
                 EditorGUILayout.Space();
             }
             EditorGUILayout.Space(16f);
@@ -258,7 +264,7 @@ namespace Yamadev.YamaStream.Script
         {
             string[] playlistNames = _playlists.Select(i => i.PlayListName.Replace("/", "|")).ToArray();
             _autoPlayPlaylistIndex.intValue = EditorGUILayout.Popup(
-                label: new GUIContent("Playlist"),
+                label: Localization.GetLayout("playlist"),
                 selectedIndex: _autoPlayPlaylistIndex.intValue,
                 displayedOptions: playlistNames
             );
@@ -266,7 +272,7 @@ namespace Yamadev.YamaStream.Script
             string[] playlistItemNames = _playlists[_autoPlayPlaylistIndex.intValue].Tracks.Select(i => i.Title.Replace("/", "|")).ToArray();
             if (_autoPlayPlaylistTrackIndex.intValue >= playlistItemNames.Length) _autoPlayPlaylistTrackIndex.intValue = playlistItemNames.Length - 1;
             _autoPlayPlaylistTrackIndex.intValue = EditorGUILayout.Popup(
-                label: new GUIContent("Track"),
+                label: Localization.GetLayout("track"),
                 selectedIndex: _autoPlayPlaylistTrackIndex.intValue,
                 displayedOptions: playlistItemNames
             );
@@ -275,47 +281,47 @@ namespace Yamadev.YamaStream.Script
         void drawDefaultSettings()
         {
             if (_controller == null) return;
-            EditorGUILayout.PropertyField(_defaultPlayerEngine);
-            EditorGUILayout.LabelField("　", "Select the default player engine to play video.");
+            EditorGUILayout.PropertyField(_defaultPlayerEngine, Localization.GetLayout("videoPlayerType"));
+            EditorGUILayout.LabelField("　", Localization.Get("selectDefaultVideoPlayerType"));
             Styles.DrawDivider();
 
             if (_autoPlay != null)
             {
-                EditorGUILayout.PropertyField(_autoPlayMode);
+                EditorGUILayout.PropertyField(_autoPlayMode, Localization.GetLayout("autoPlay"));
                 if ((AutoPlayMode)_autoPlayMode.intValue != AutoPlayMode.Off)
                 {
                     switch ((AutoPlayMode)_autoPlayMode.intValue)
                     {
                         case AutoPlayMode.FromTrack:
-                            EditorGUILayout.PropertyField(_autoPlayVideoPlayerType);
-                            EditorGUILayout.PropertyField(_autoPlayVideoTitle);
+                            EditorGUILayout.PropertyField(_autoPlayVideoPlayerType, Localization.GetLayout("videoPlayerType"));
+                            EditorGUILayout.PropertyField(_autoPlayVideoTitle, Localization.GetLayout("title"));
                             EditorGUILayout.PropertyField(_autoPlayVideoUrl);
                             break;
                         case AutoPlayMode.FromPlaylist:
                             _playlists = _target.GetComponentsInChildren<PlayList>();
                             if (_playlists.Length > 0) drawPlaylistPopup();
-                            else EditorGUILayout.HelpBox("No Playlist.", MessageType.Error, false);
+                            else EditorGUILayout.HelpBox(Localization.Get("noPlaylist"), MessageType.Error, false);
                             break;
                     }
-                    EditorGUILayout.PropertyField(_autoPlayDelay);
-                    EditorGUILayout.LabelField("　", "Auto play video after seconds.");
+                    EditorGUILayout.PropertyField(_autoPlayDelay, Localization.GetLayout("delay"));
+                    EditorGUILayout.LabelField("　", Localization.Get("autoPlayAfterSeconds"));
                 }
             }
             Styles.DrawDivider();
 
-            EditorGUILayout.LabelField("Volume", Styles.Bold);
-            EditorGUILayout.PropertyField(_mute);
-            EditorGUILayout.PropertyField(_volume);
+            EditorGUILayout.LabelField(Localization.Get("audioSettings"), Styles.Bold);
+            EditorGUILayout.PropertyField(_mute, Localization.GetLayout("mute"));
+            EditorGUILayout.PropertyField(_volume, Localization.GetLayout("volume"));
             Styles.DrawDivider();
 
-            EditorGUILayout.LabelField("Display", Styles.Bold);
-            EditorGUILayout.PropertyField(_mirrorInverse);
-            EditorGUILayout.PropertyField(_emission);
+            EditorGUILayout.LabelField(Localization.Get("videoSettings"), Styles.Bold);
+            EditorGUILayout.PropertyField(_mirrorInverse, Localization.GetLayout("mirrorInverse"));
+            EditorGUILayout.PropertyField(_emission, Localization.GetLayout("emission"));
             Styles.DrawDivider();
 
-            EditorGUILayout.LabelField("Playback", Styles.Bold);
-            EditorGUILayout.PropertyField(_loop);
-            if (_useLowLatency != null) EditorGUILayout.PropertyField(_useLowLatency);
+            EditorGUILayout.LabelField(Localization.Get("playbackSettings"), Styles.Bold);
+            EditorGUILayout.PropertyField(_loop, Localization.GetLayout("loop"));
+            if (_useLowLatency != null) EditorGUILayout.PropertyField(_useLowLatency, Localization.GetLayout("useLowLatency"));
             Styles.DrawDivider();
 
             if (_screenList != null) _screenList.DoLayoutList();
@@ -326,26 +332,25 @@ namespace Yamadev.YamaStream.Script
         #region Playlist Settings
         void drawPlaylistSettings()
         {
-            EditorGUILayout.LabelField("Playlist / プレイリスト", Styles.Bold);
-            if (GUILayout.Button("Edit Playlist")) PlaylistEditor.ShowPlaylistEditorWindow(_target);
+            EditorGUILayout.LabelField(Localization.Get("playlist"), Styles.Bold);
+            if (GUILayout.Button(Localization.Get("editPlaylist"))) PlaylistEditor.ShowPlaylistEditorWindow(_target);
             Styles.DrawDivider();
 
-            EditorGUILayout.PropertyField(_shuffle);
-            EditorGUILayout.LabelField("　", "Default play tracks as random order.");
+            EditorGUILayout.PropertyField(_shuffle, Localization.GetLayout("shuffle"));
+            EditorGUILayout.LabelField("　", Localization.Get("playInRandomOrder"));
             Styles.DrawDivider();
 
-            EditorGUILayout.PropertyField(_forwardInterval);
-            EditorGUILayout.LabelField("　", "Play next track after seconds.");
-            EditorGUILayout.LabelField("　", "Disable when value is smaller then 0.");
+            EditorGUILayout.PropertyField(_forwardInterval, Localization.GetLayout("forwardInterval"));
+            EditorGUILayout.LabelField("　", Localization.Get("playTrackAfterSeconds"));
+            EditorGUILayout.LabelField("　", Localization.Get("disableSmallerThen0"));
         }
         #endregion
 
         #region Permission Settings
         void drawPermissionSettings()
         {
-            EditorGUILayout.LabelField("Permission / 権限", Styles.Bold);
-            EditorGUILayout.PropertyField(_defaultPermission);
-            EditorGUILayout.PropertyField(_ownerList);
+            EditorGUILayout.PropertyField(_defaultPermission, Localization.GetLayout("defaultPermission"));
+            EditorGUILayout.PropertyField(_ownerList, Localization.GetLayout("ownerList"));
         }
         #endregion
 
@@ -353,10 +358,11 @@ namespace Yamadev.YamaStream.Script
         void drawOtherView()
         {
 #if USE_VPM_RESOLVER
-            VersionManager.AutoUpdate = EditorGUILayout.Toggle("Auto Update", VersionManager.AutoUpdate);
-            EditorGUILayout.LabelField("　", "Update to latest version automatically.");
+            VersionManager.AutoUpdate = EditorGUILayout.Toggle(Localization.Get("autoUpdate"), VersionManager.AutoUpdate);
+            EditorGUILayout.LabelField("　", Localization.Get("autoUpdateToLatestVersion"));
             Styles.DrawDivider();
 
+            VersionManager.CheckBetaVersion = EditorGUILayout.Toggle("Check Beta Version", VersionManager.CheckBetaVersion);
             EditorGUILayout.LabelField("Current Version", Utils.GetYamaPlayerPackageInfo().version);
             EditorGUILayout.LabelField("Newest Version", VersionManager.Newest);
             using (new EditorGUILayout.HorizontalScope())

@@ -19,11 +19,12 @@ namespace Yamadev.YamaStream.Script
     {
         public const string VPMID = "net.kwxxw.vpm";
         public const string VPMUrl = "https://vpm.kwxxw.net/index.json";
-        public const string AutoUpdateKey = "YamaPlayer_AutoUpdate";
         public static string PackageName;
         public static string Version;
         public static bool HasNewVersion;
         public static string Newest;
+        const string _autoUpdateKey = "YamaPlayer_AutoUpdate";
+        const string _checkBetaKey = "YamaPlayer_CheckBetaUpdate";
 
         static VersionManager()
         {
@@ -33,8 +34,14 @@ namespace Yamadev.YamaStream.Script
 
         public static bool AutoUpdate
         {
-            get => EditorPrefs.GetBool(AutoUpdateKey);
-            set => EditorPrefs.SetBool(AutoUpdateKey, value);
+            get => EditorPrefs.GetBool(_autoUpdateKey);
+            set => EditorPrefs.SetBool(_autoUpdateKey, value);
+        }
+
+        public static bool CheckBetaVersion
+        {
+            get => EditorPrefs.GetBool(_checkBetaKey);
+            set => EditorPrefs.SetBool(_checkBetaKey, value);
         }
 
         public static void GetVersionInfo()
@@ -54,7 +61,7 @@ namespace Yamadev.YamaStream.Script
             List<string> versions = Resolver.GetAllVersionsOf(PackageName);
             foreach (string version in versions)
             {
-                if (version.IndexOf("beta") >= 0) continue;
+                if (!CheckBetaVersion && version.IndexOf("beta") >= 0) continue;
                 Newest = version;
                 break;
             }

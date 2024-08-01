@@ -58,5 +58,24 @@ namespace Yamadev.YamaStream.Script
         }
 
         public static string Get(string key) => GetValue(key, CurrentLanguage) ?? GetValue(key, _defaultLanguage) ?? key;
+        public static GUIContent GetLayout(string key) => new GUIContent(Get(key));
+
+        public static string GetLanguageName(string language)
+        {
+            switch (language)
+            {
+                case "ja-JP":
+                    return "日本語";
+                case "en-US":
+                    return "English";
+                case "ko-KR":
+                    return "한국어";
+                case "zh-CN":
+                    return "简体中文";
+                case "zh-TW":
+                    return "繁體中文";
+            }
+            return string.Empty;
+        }
     }
 }

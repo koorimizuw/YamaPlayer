@@ -18294,7 +18294,7 @@ MonoBehaviour:
   - {fileID: 3829684556507490501}
   _permission: {fileID: 590097079215279574}
   _retryAfterSeconds: 5.1
-  _maxErrorRetry: 3
+  _maxErrorRetry: 5
   _timeFormat: hh\:mm\:ss
   _videoPlayerType: 1
   _loop: 0

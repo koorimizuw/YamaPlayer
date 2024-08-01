@@ -21,6 +21,7 @@ namespace Yamadev.YamaStream.Script
 
         void OnEnable()
         {
+            Title = target.name;
             _target = target as YamaPlayerController;
 
             _uiController = _target.GetComponentInChildren<UIController>(true);
@@ -41,24 +42,23 @@ namespace Yamadev.YamaStream.Script
             base.OnInspectorGUI();
             serializedObject.Update();
 
-            EditorGUILayout.LabelField(_target.name, Styles.Title);
-            EditorGUILayout.Space(48f);
+            EditorGUILayout.Space(32f);
 
             EditorGUILayout.PropertyField(_yamaPlayer);
-            EditorGUILayout.LabelField("　", "Target video player.");
+            EditorGUILayout.LabelField("　", Localization.Get("targetPlayer"));
             Styles.DrawDivider();
 
             VRCPickup vrcPickup = _target.GetComponentInChildren<VRCPickup>();
             if (vrcPickup != null)
             {
-                EditorGUILayout.PropertyField(_pickup);
-                EditorGUILayout.LabelField("　", "User could pick up this object in game.");
+                EditorGUILayout.PropertyField(_pickup, Localization.GetLayout("pickUp"));
+                EditorGUILayout.LabelField("　", Localization.Get("pickUpDesc"));
                 if (_pickup.boolValue)
                 {
                     VRCObjectSync objectSync = vrcPickup.gameObject.GetComponent<VRCObjectSync>();
                     _globalSync = objectSync != null;
-                    _globalSync = EditorGUILayout.Toggle("Global Sync", _globalSync);
-                    EditorGUILayout.LabelField("　", "Object position will synced globally.");
+                    _globalSync = EditorGUILayout.Toggle(Localization.Get("globalSync"), _globalSync);
+                    EditorGUILayout.LabelField("　", Localization.Get("globalSyncDesc"));
                     if (_globalSync && objectSync == null) vrcPickup.gameObject.AddComponent<VRCObjectSync>();
                     if (!_globalSync && objectSync != null) GameObject.DestroyImmediate(objectSync);
                 }
@@ -69,9 +69,14 @@ namespace Yamadev.YamaStream.Script
             if (uiSharp == null) return;
 
             _disableUI = !uiSharp.gameObject.activeSelf;
-            _disableUI = EditorGUILayout.Toggle("Disable UI", _disableUI);
+            _disableUI = EditorGUILayout.Toggle(Localization.Get("disableUI"), _disableUI);
             uiSharp.gameObject.SetActive(!_disableUI);
-            if (_disableUI) return;
+            if (_disableUI)
+            {
+                EditorGUILayout.Space(12f);
+                EditorGUILayout.HelpBox(Localization.Get("shouldEnableUIFirst"), MessageType.Info);
+                return;
+            }
             Styles.DrawDivider();
 
             _uiEditor.DrawUISettings();

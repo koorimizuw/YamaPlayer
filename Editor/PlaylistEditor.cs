@@ -79,7 +79,7 @@ namespace Yamadev.YamaStream.Script
         {
             _playlistsTable = new ReorderableList(_playlists, typeof(Playlist))
             {
-                drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, "Playlists / プレイリスト", EditorStyles.boldLabel),
+                drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, Localization.Get("playlists"), EditorStyles.boldLabel),
                 onAddCallback = (list) =>
                 {
                     _playlists.Add(new Playlist { Active = true, Name = "New Playlist", Tracks = new List<Track>() });
@@ -104,7 +104,7 @@ namespace Yamadev.YamaStream.Script
                     btnRect.xMin = nameRect.xMax;
                     if (playlist.IsEdit)
                     {
-                        if (GUI.Button(btnRect, "Save"))
+                        if (GUI.Button(btnRect, Localization.Get("save")))
                         {
                             playlist.IsEdit = false;
                             _isDirty = true;
@@ -112,14 +112,14 @@ namespace Yamadev.YamaStream.Script
                     }
                     else
                     {
-                        if (GUI.Button(btnRect, "Edit")) playlist.IsEdit = true;
+                        if (GUI.Button(btnRect, Localization.Get("edit"))) playlist.IsEdit = true;
                     }
                     rect.y += EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
                     Rect activeRect = rect;
                     activeRect.xMax = rect.width;
                     EditorGUI.LabelField(
                         activeRect,
-                        playlist.Active ? "Active" : "Inactive",
+                        playlist.Active ? Localization.Get("active") : Localization.Get("inactive"),
                         new GUIStyle() { normal = new GUIStyleState() { textColor = playlist.Active ? Color.green : Color.red } }
                     );
                     Rect toggleRect = rect;
@@ -146,7 +146,7 @@ namespace Yamadev.YamaStream.Script
             _selectedPlaylist = _playlists[selected.index];
             _playlistTracksTable = new ReorderableList(_selectedPlaylist.Tracks, typeof(Track))
             {
-                drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, "Playlists Tracks / トラック一覧", EditorStyles.boldLabel),
+                drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, Localization.Get("playlistTracks"), EditorStyles.boldLabel),
                 onAddCallback = (list) =>
                 {
                     ReorderableList.defaultBehaviours.DoAddButton(list);
@@ -168,9 +168,9 @@ namespace Yamadev.YamaStream.Script
                     {
                         Rect playerRect = rect;
                         playerRect.xMax = 240;
-                        TrackMode mode = (TrackMode)EditorGUI.Popup(playerRect, "Player", (int)track.Mode, Enum.GetNames(typeof(TrackMode)));
+                        TrackMode mode = (TrackMode)EditorGUI.Popup(playerRect, Localization.Get("videoPlayerType"), (int)track.Mode, Enum.GetNames(typeof(TrackMode)));
                         rect.y += EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
-                        string title = EditorGUI.TextField(rect, "Title", track.Title);
+                        string title = EditorGUI.TextField(rect, Localization.Get("title"), track.Title);
                         rect.y += EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
                         string url = EditorGUI.TextField(rect, "Url", track.Url);
                         if (check.changed)
@@ -192,9 +192,9 @@ namespace Yamadev.YamaStream.Script
             using (new EditorGUILayout.HorizontalScope(EditorStyles.toolbar))
             {
                 YamaPlayer = EditorGUILayout.ObjectField(YamaPlayer, typeof(YamaPlayer), true) as YamaPlayer;
-                if (GUILayout.Button("Import from json", EditorStyles.toolbarButton, GUILayout.ExpandWidth(false))) Import();
-                if (GUILayout.Button("Export to json", EditorStyles.toolbarButton, GUILayout.ExpandWidth(false))) Export();
-                if (GUILayout.Button("Save", EditorStyles.toolbarButton, GUILayout.ExpandWidth(false))) save();
+                if (GUILayout.Button(Localization.Get("importFromJson"), EditorStyles.toolbarButton, GUILayout.ExpandWidth(false))) Import();
+                if (GUILayout.Button(Localization.Get("exportToJson"), EditorStyles.toolbarButton, GUILayout.ExpandWidth(false))) Export();
+                if (GUILayout.Button(Localization.Get("save"), EditorStyles.toolbarButton, GUILayout.ExpandWidth(false))) save();
             }
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -205,7 +205,7 @@ namespace Yamadev.YamaStream.Script
                     if (_player != null) _playlistsTable?.DoLayoutList();
                     GUILayout.FlexibleSpace();
                     EditorGUILayout.EndScrollView();
-                    EditorGUILayout.HelpBox("Drag iwaSync3 or kinel playlist here to import.", MessageType.Info);
+                    EditorGUILayout.HelpBox(Localization.Get("importFromPlayer"), MessageType.Info);
                 }
                 using (new EditorGUILayout.VerticalScope())
                 {
@@ -243,19 +243,19 @@ namespace Yamadev.YamaStream.Script
             {
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    _defaultTrackMode = (TrackMode)EditorGUILayout.Popup("Video Player Type", (int)_defaultTrackMode, Enum.GetNames(typeof(TrackMode)));
-                    if (GUILayout.Button("Apply for all", GUILayout.ExpandWidth(false)))
+                    _defaultTrackMode = (TrackMode)EditorGUILayout.Popup(Localization.Get("videoPlayerType"), (int)_defaultTrackMode, Enum.GetNames(typeof(TrackMode)));
+                    if (GUILayout.Button(Localization.Get("applyForAll"), GUILayout.ExpandWidth(false)))
                     {
                         for (int i = 0; i < _selectedPlaylist.Tracks.Count; i++)
                             _selectedPlaylist.Tracks[i].Mode = _defaultTrackMode;
                     }
                 }
-                _useYoutubePlaylistName = EditorGUILayout.Toggle("Overwrite Playlist Name", _useYoutubePlaylistName);
+                _useYoutubePlaylistName = EditorGUILayout.Toggle(Localization.Get("overwritePlaylistName"), _useYoutubePlaylistName);
                 EditorGUILayout.Space();
                 using (new EditorGUILayout.HorizontalScope())
                 {
                     _selectedPlaylist.YoutubeListId = EditorGUILayout.TextField(_selectedPlaylist.YoutubeListId);
-                    if (GUILayout.Button("Load Youtube Playlist", GUILayout.ExpandWidth(false)))
+                    if (GUILayout.Button(Localization.Get("loadYoutubePlaylist"), GUILayout.ExpandWidth(false)))
                     {
                         _selectedPlaylist.YoutubeListId = getYoutubePlaylistIdFromUrl(_selectedPlaylist.YoutubeListId);
                         getPlayListItem(_selectedPlaylist.YoutubeListId);
@@ -266,7 +266,7 @@ namespace Yamadev.YamaStream.Script
 
         void confirmSave()
         {
-            if (_isDirty && EditorUtility.DisplayDialog("Unsaved Changes", "Do you want to save the changes you made before quitting?", "Save", "Don't Save"))
+            if (_isDirty && EditorUtility.DisplayDialog(Localization.Get("notSaved"), Localization.Get("confirmSave"), Localization.Get("save"), Localization.Get("notSave")))
                 save();
         }
 
@@ -337,7 +337,7 @@ namespace Yamadev.YamaStream.Script
             WebRequest request = WebRequest.Create(url);
             request.Method = "Get";
             WebResponse response;
-            EditorUtility.DisplayProgressBar("Getting playlist tracks", "Getting playlist tracks", 0);
+            EditorUtility.DisplayProgressBar(Localization.Get("getPlaylist"), Localization.Get("getPlaylist") + "...", 0);
             response = request.GetResponse();
 
             if (response != null)
