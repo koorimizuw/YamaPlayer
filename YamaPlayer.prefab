@@ -18160,11 +18160,9 @@ MonoBehaviour:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes:
-    - Name: _client
-      Entry: 6
-      Data: 
+    SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 399913007439746876}
+  _client: {fileID: 0}
   _controller: {fileID: 5554431595894281846}
   _callbackYoutubeUrl:
     url: https://api.yamachan.moe/vrchat/play?target=youtube
@@ -18295,7 +18293,7 @@ MonoBehaviour:
   - {fileID: 1163590527724620157}
   - {fileID: 3829684556507490501}
   _permission: {fileID: 590097079215279574}
-  _retryAfterSeconds: 5
+  _retryAfterSeconds: 5.1
   _maxErrorRetry: 3
   _timeFormat: hh\:mm\:ss
   _videoPlayerType: 1
