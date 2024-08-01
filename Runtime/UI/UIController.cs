@@ -517,11 +517,11 @@ namespace Yamadev.YamaStream.UI
         public void SetMaxResolution2160() => _controller.MaxResolution = 2160;
         public void SetMaxResolution4320() => _controller.MaxResolution = 4320;
         public void SetLanguageAuto() => SetLanguage(Utils.GetLocalLanguage());
-        public void SetLanguageJapanese() => SetLanguage("ja");
+        public void SetLanguageJapanese() => SetLanguage("ja-JP");
         public void SetLanguageChineseChina() => SetLanguage("zh-CN");
         public void SetLanguageChineseTaiwan() => SetLanguage("zh-TW");
-        public void SetLanguageKorean() => SetLanguage("ko");
-        public void SetLanguageEnglish() =>SetLanguage("en");
+        public void SetLanguageKorean() => SetLanguage("ko-KR");
+        public void SetLanguageEnglish() =>SetLanguage("en-US");
         public void SetLanguage(string language)
         {
             I18n.SetLanguage(language);
@@ -1016,6 +1016,7 @@ namespace Yamadev.YamaStream.UI
             updateLoadingView();
             GeneratePlaylistTracks();
         }
+        public override void OnVideoRetry() => updateLoadingView();
         public override void OnVideoInfoLoaded()
         {
             if (_isQueuePage) GeneratePlaylistTracks();

@@ -1,4 +1,5 @@
 ﻿
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -75,11 +76,7 @@ namespace Yamadev.YamaStream
         {
             if (Texture == null) return;
 
-#if UNITY_STANDALONE_WIN
             int isAVPro = VideoPlayerType == VideoPlayerType.AVProVideoPlayer ? 1 : 0;
-#else
-            int isAVPro = 0;
-#endif
             for (int i = 0; i < _screens.Length; i++)
             {
                 Object screen = _screens[i];
@@ -93,17 +90,29 @@ namespace Yamadev.YamaStream
                         MaterialProperty.SetTexture(textureProperty, Texture);
                         MaterialProperty.SetInt(avProProperty, isAVPro);
                         ((Renderer)screen).SetPropertyBlock(MaterialProperty, 0);
+                        SetST(((Renderer)screen).sharedMaterial, textureProperty);
                         break;
                     case ScreenType.RawImage:
                         ((RawImage)screen).texture = Texture;
                         ((RawImage)screen).material.SetInt(avProProperty, isAVPro);
+                        SetST(((RawImage)screen).material, textureProperty);
                         break;
                     case ScreenType.Material:
                         ((Material)screen).SetTexture(textureProperty, Texture);
                         ((Material)screen).SetInt(avProProperty, isAVPro);
+                        SetST((Material)screen, textureProperty);
                         break;
                 }
             }
+        }
+
+        public void SetST(Material material, string textureProperty)
+        {
+#if UNITY_STANDALONE_WIN
+            bool isAVPro = VideoPlayerType == VideoPlayerType.AVProVideoPlayer;
+            material.SetTextureScale(textureProperty, isAVPro ?  new Vector2(1, -1) : new Vector2(1, 1));
+            material.SetTextureOffset(textureProperty, isAVPro ? new Vector2(0, 1) : new Vector2(0, 0));
+#endif
         }
 
         public void AddScreen(ScreenType screenType, Object screen, string textureProperty = "_MainTex", string avProProperty = "_AVPro")

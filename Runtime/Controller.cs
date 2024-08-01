@@ -14,7 +14,7 @@ namespace Yamadev.YamaStream
         [SerializeField] Animator _videoPlayerAnimator;
         [SerializeField] VideoPlayerHandle[] _videoPlayerHandles;
         [SerializeField] Permission _permission;
-        [SerializeField] float _retryAfterSeconds = 5;
+        [SerializeField] float _retryAfterSeconds = 5.1f;
         [SerializeField] int _maxErrorRetry = 3;
         [SerializeField] string _timeFormat = @"hh\:mm\:ss";
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(VideoPlayerType))] VideoPlayerType _videoPlayerType;
@@ -172,6 +172,8 @@ namespace Yamadev.YamaStream
                 foreach (Listener listener in _listeners) listener.OnRepeatChanged();
             }
         }
+
+        public float LastLoaded => VideoPlayerHandle.LastLoaded;
         public bool IsPlaying => VideoPlayerHandle.IsPlaying;
         public float Duration => VideoPlayerHandle.Duration;
         public float VideoTime => VideoPlayerHandle.Time;
@@ -187,6 +189,12 @@ namespace Yamadev.YamaStream
         public void ErrorRetry()
         {
             if (IsPlaying) return;
+            if (Time.time - LastLoaded < _retryAfterSeconds)
+            {
+                SendCustomEventDelayedFrames(nameof(ErrorRetry), 0);
+                return;
+            }
+            _loading = true;
             _resolveTrack.Invoke();
             foreach (Listener listener in _listeners) listener.OnVideoRetry();
         }
@@ -298,12 +306,12 @@ namespace Yamadev.YamaStream
         public override void OnVideoError(VideoError videoError)
         {
             _loading = false;
-            if (videoError != VideoError.InvalidURL && videoError != VideoError.AccessDenied)
+            if (videoError != VideoError.AccessDenied)
             {
                 if (_errorRetryCount < _maxErrorRetry)
                 {
                     _errorRetryCount++;
-                    SendCustomEventDelayedSeconds(nameof(ErrorRetry), _retryAfterSeconds);
+                    SendCustomEventDelayedFrames(nameof(ErrorRetry), 0);
                 } else _errorRetryCount = 0;
             }
             foreach (Listener listener in _listeners) listener.OnVideoError(videoError);

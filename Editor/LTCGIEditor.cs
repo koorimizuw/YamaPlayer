@@ -8,7 +8,7 @@ namespace Yamadev.YamaStream.Script
     public class LTCGIEditor : EditorWindow
     {
         static string _url = "https://github.com/PiMaker/ltcgi/releases/latest";
-        static string _crtPath = "Assets/Yamadev/YamaStream/Assets/Textures/YamaPlayerCRT.asset";
+        static string _crtPath = "Packages/net.kwxxw.yama-stream/Assets/Textures/YamaPlayerCRT.asset";
         static string _crtGuid = "a9024879323f03444be1a5332baee58e";
         static string _ltcgiControllerPath = "Packages/at.pimaker.ltcgi/LTCGI Controller.prefab";
         static string _ltcgiControllerGuid = "4b1aac09caa0ea54ba902102643bb545";

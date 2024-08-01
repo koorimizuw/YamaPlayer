@@ -352,6 +352,7 @@ namespace Yamadev.YamaStream.Script
         #region Other Settings
         void drawOtherView()
         {
+#if USE_VPM_RESOLVER
             VersionManager.AutoUpdate = EditorGUILayout.Toggle("Auto Update", VersionManager.AutoUpdate);
             EditorGUILayout.LabelField("　", "Update to latest version automatically.");
             Styles.DrawDivider();
@@ -373,7 +374,9 @@ namespace Yamadev.YamaStream.Script
                 if (GUILayout.Button("Update")) VersionManager.UpdatePackage();
                 EditorGUI.EndDisabledGroup();
             }
-
+#else
+            EditorGUILayout.LabelField("Version update only works in VCC project.");
+#endif
         }
         #endregion
     }

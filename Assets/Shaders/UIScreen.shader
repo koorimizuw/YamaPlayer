@@ -59,8 +59,6 @@ Shader "Yamadev/YamaStream/UIScreen"
                     OUT.texcoord = v.texcoord;
                     OUT.color = v.color;
 
-                    if (_AVPro) OUT.texcoord.y = 1 - OUT.texcoord.y;
-
                     float aspect = _MainTex_TexelSize.z / 1.77777778;
                     if (_MainTex_TexelSize.w > aspect) OUT.texcoord.x = ((OUT.texcoord.x - 0.5) / (aspect / _MainTex_TexelSize.w)) + 0.5;
                     if (_MainTex_TexelSize.w < aspect) OUT.texcoord.y = ((OUT.texcoord.y - 0.5) / (_MainTex_TexelSize.w / aspect)) + 0.5;

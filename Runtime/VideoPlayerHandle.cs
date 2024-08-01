@@ -28,6 +28,7 @@ namespace Yamadev.YamaStream
         VRCUrl _url = VRCUrl.Empty;
         bool _stopped = true;
         bool _loading;
+        float _lastLoaded;
 
         void Start()
         {
@@ -59,6 +60,8 @@ namespace Yamadev.YamaStream
             get => _listener;
             set => _listener = value;
         }
+
+        public float LastLoaded => _lastLoaded;
 
         public bool Loop
         {
@@ -117,6 +120,7 @@ namespace Yamadev.YamaStream
         {
             _url = url;
             _loading = true;
+            _lastLoaded = UnityEngine.Time.time;
             BaseVideoPlayer.PlayURL(_url);
         }
 

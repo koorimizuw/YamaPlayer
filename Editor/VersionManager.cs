@@ -19,7 +19,7 @@ namespace Yamadev.YamaStream.Script
     {
         public const string VPMID = "net.kwxxw.vpm";
         public const string VPMUrl = "https://vpm.kwxxw.net/index.json";
-        public const string AutoUpdateKey = "YamaPlayerAutoUpdate";
+        public const string AutoUpdateKey = "YamaPlayer_AutoUpdate";
         public static string PackageName;
         public static string Version;
         public static bool HasNewVersion;
