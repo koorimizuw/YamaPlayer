@@ -10,6 +10,7 @@ namespace Yamadev.YamaStream.Script
 
         private void OnEnable()
         {
+            Title = "Playlist Container";
         }
 
         public override void OnInspectorGUI()
@@ -20,8 +21,6 @@ namespace Yamadev.YamaStream.Script
 
             using (new GUILayout.VerticalScope(GUI.skin.box))
             {
-                EditorGUILayout.LabelField("Play List", Styles.Title);
-                EditorGUILayout.Space();
                 EditorGUILayout.HelpBox(string.Join("\n",
                     "このObjectの下のTemplateをコピー、編集してください",
                     "ゲーム内に適用するにはPlayListをActiveにする必要があります"

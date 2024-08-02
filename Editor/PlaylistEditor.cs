@@ -29,6 +29,21 @@ namespace Yamadev.YamaStream.Script
             }
         }
 
+        [Serializable]
+        class YoutubePlayListItem
+        {
+            public string title;
+            public string id;
+            public bool live;
+        }
+
+        [Serializable]
+        class YoutubePlayList
+        {
+            public string title;
+            public YoutubePlayListItem[] items;
+        }
+
         YamaPlayer _player;
         List<Playlist> _playlists = new List<Playlist>();
         ReorderableList _playlistsTable;
@@ -82,7 +97,7 @@ namespace Yamadev.YamaStream.Script
                 drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, Localization.Get("playlists"), EditorStyles.boldLabel),
                 onAddCallback = (list) =>
                 {
-                    _playlists.Add(new Playlist { Active = true, Name = "New Playlist", Tracks = new List<Track>() });
+                    _playlists.Add(new Playlist { Active = true, Name = Localization.Get("newPlaylist"), Tracks = new List<Track>() });
                     _isDirty = true;
                 },
                 onRemoveCallback = (list) =>
@@ -163,7 +178,7 @@ namespace Yamadev.YamaStream.Script
                     Track track = _selectedPlaylist.Tracks[index];
                     rect.height = EditorGUIUtility.singleLineHeight;
                     float labelWidth = EditorGUIUtility.labelWidth;
-                    EditorGUIUtility.labelWidth = 60;
+                    EditorGUIUtility.labelWidth = 80;
                     using (var check = new EditorGUI.ChangeCheckScope())
                     {
                         Rect playerRect = rect;
@@ -337,7 +352,7 @@ namespace Yamadev.YamaStream.Script
             WebRequest request = WebRequest.Create(url);
             request.Method = "Get";
             WebResponse response;
-            EditorUtility.DisplayProgressBar(Localization.Get("getPlaylist"), Localization.Get("getPlaylist") + "...", 0);
+            EditorUtility.DisplayProgressBar(Localization.Get("getPlaylist"), Localization.Get("getPlaylistPleaseWhit"), 0);
             response = request.GetResponse();
 
             if (response != null)

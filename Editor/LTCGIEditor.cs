@@ -22,6 +22,20 @@ namespace Yamadev.YamaStream.Script
             window.Show();
         }
 
+        static CustomRenderTexture _yamaPlayerCRT
+        {
+            get
+            {
+                CustomRenderTexture crt = AssetDatabase.LoadAssetAtPath<CustomRenderTexture>(_crtPath);
+                if (crt == null)
+                {
+                    string crtPath = AssetDatabase.GUIDToAssetPath(_crtGuid);
+                    crt = AssetDatabase.LoadAssetAtPath<CustomRenderTexture>(crtPath);
+                }
+                return crt;
+            }
+        }
+
         static void clearCurrentSettings()
         {
 #if LTCGI_INCLUDED
@@ -32,7 +46,7 @@ namespace Yamadev.YamaStream.Script
             foreach (YamaPlayer player in players)
             {
                 Controller yamaplayerController = _player.GetComponentInChildren<Controller>();
-                if (yamaplayerController != null) yamaplayerController.SetProgramVariable("_lod", null);
+                if (yamaplayerController != null) yamaplayerController.RemoveScreenProperty(_yamaPlayerCRT.material);
             }
 #endif
         }
@@ -41,17 +55,11 @@ namespace Yamadev.YamaStream.Script
         {
 #if LTCGI_INCLUDED
             clearCurrentSettings();
-            CustomRenderTexture crt = AssetDatabase.LoadAssetAtPath<CustomRenderTexture>(_crtPath);
-            if (crt == null)
-            {
-                string crtPath = AssetDatabase.GUIDToAssetPath(_crtGuid);
-                crt = AssetDatabase.LoadAssetAtPath<CustomRenderTexture>(crtPath);
-            }
-            if (crt == null) return;
+            if (_yamaPlayerCRT == null) return;
             Controller yamaplayerController = _player.GetComponentInChildren<Controller>();
             if (yamaplayerController == null) return;
 
-            yamaplayerController.AddScreenProperty(ScreenType.Material, crt.material, "_MainTex", "_AVPro");
+            yamaplayerController.AddScreenProperty(ScreenType.Material, _yamaPlayerCRT.material, "_MainTex", "_AVPro");
             Renderer[] renderers = new Renderer[] { };
             if (!_applyToAllScreens)
             {
@@ -94,7 +102,7 @@ namespace Yamadev.YamaStream.Script
                     controller = obj.GetComponent(ltcgiController);
                 }
             }
-            if (controller != null) ((dynamic)controller).VideoTexture = crt;
+            if (controller != null) ((dynamic)controller).VideoTexture = _yamaPlayerCRT;
 #endif
         }
 

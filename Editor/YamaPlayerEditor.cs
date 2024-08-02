@@ -204,8 +204,6 @@ namespace Yamadev.YamaStream.Script
             };
         }
 
-
-
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
@@ -304,7 +302,7 @@ namespace Yamadev.YamaStream.Script
                             break;
                     }
                     EditorGUILayout.PropertyField(_autoPlayDelay, Localization.GetLayout("delay"));
-                    EditorGUILayout.LabelField("　", Localization.Get("autoPlayAfterSeconds"));
+                    EditorGUILayout.LabelField("　", string.Format(Localization.Get("autoPlayAfterSeconds"), _autoPlayDelay.floatValue));
                 }
             }
             Styles.DrawDivider();
@@ -341,7 +339,7 @@ namespace Yamadev.YamaStream.Script
             Styles.DrawDivider();
 
             EditorGUILayout.PropertyField(_forwardInterval, Localization.GetLayout("forwardInterval"));
-            EditorGUILayout.LabelField("　", Localization.Get("playTrackAfterSeconds"));
+            EditorGUILayout.LabelField("　", string.Format(Localization.Get("playTrackAfterSeconds"), _forwardInterval.floatValue));
             EditorGUILayout.LabelField("　", Localization.Get("disableSmallerThen0"));
         }
         #endregion
@@ -349,12 +347,17 @@ namespace Yamadev.YamaStream.Script
         #region Permission Settings
         void drawPermissionSettings()
         {
+            EditorGUILayout.LabelField("Owner:\t\t" + Localization.Get("ownerPermission"));
+            EditorGUILayout.LabelField("Admin:\t\t" + Localization.Get("adminPermission"));
+            EditorGUILayout.LabelField("Editor:\t\t" + Localization.Get("editorPermission"));
+            EditorGUILayout.LabelField("Viewer:\t\t" + Localization.Get("viewerPermission"));
+            EditorGUILayout.Space(12f);
             EditorGUILayout.PropertyField(_defaultPermission, Localization.GetLayout("defaultPermission"));
             EditorGUILayout.PropertyField(_ownerList, Localization.GetLayout("ownerList"));
         }
         #endregion
 
-        #region Other Settings
+        #region Version Settings
         void drawOtherView()
         {
 #if USE_VPM_RESOLVER
@@ -362,26 +365,31 @@ namespace Yamadev.YamaStream.Script
             EditorGUILayout.LabelField("　", Localization.Get("autoUpdateToLatestVersion"));
             Styles.DrawDivider();
 
-            VersionManager.CheckBetaVersion = EditorGUILayout.Toggle("Check Beta Version", VersionManager.CheckBetaVersion);
-            EditorGUILayout.LabelField("Current Version", Utils.GetYamaPlayerPackageInfo().version);
-            EditorGUILayout.LabelField("Newest Version", VersionManager.Newest);
+            VersionManager.CheckBetaVersion = EditorGUILayout.Toggle(Localization.Get("checkBetaVersion"), VersionManager.CheckBetaVersion);
+            EditorGUILayout.LabelField(Localization.Get("currentVersion"), Utils.GetYamaPlayerPackageInfo().version);
+            EditorGUILayout.LabelField(Localization.Get("newestVersion"), VersionManager.Newest);
             using (new EditorGUILayout.HorizontalScope())
             {
-                if (GUILayout.Button("Check Update"))
+                if (GUILayout.Button(Localization.Get("checkUpdate")))
                 {
                     if (VersionManager.CheckUpdate())
                     {
-                        if (EditorUtility.DisplayDialog($"New version found", $"New version found: {VersionManager.Newest}.", "Update", "Cancel")) 
+                        if (EditorUtility.DisplayDialog(
+                            Localization.Get("newVersionFound"), 
+                            string.Format(Localization.Get("newVersionUpdateConfirm"), VersionManager.Newest),
+                            Localization.Get("doUpdate"),
+                            Localization.Get("cancel"))
+                            ) 
                             VersionManager.UpdatePackage();
                     }
-                    else EditorUtility.DisplayDialog($"No new version found", $"No new version found.", "OK");
+                    else EditorUtility.DisplayDialog(Localization.Get("noNewVersionFound"), Localization.Get("youUseNewest"), "OK");
                 }
                 EditorGUI.BeginDisabledGroup(!VersionManager.HasNewVersion);
-                if (GUILayout.Button("Update")) VersionManager.UpdatePackage();
+                if (GUILayout.Button(Localization.Get("update"))) VersionManager.UpdatePackage();
                 EditorGUI.EndDisabledGroup();
             }
 #else
-            EditorGUILayout.LabelField("Version update only works in VCC project.");
+            EditorGUILayout.LabelField(Localization.Get("onlyWorksOnVCCProject"));
 #endif
         }
         #endregion

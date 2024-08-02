@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Yamadev.YamaStream.Script
 {
-    public static class Utils
+    internal static class Utils
     {
         public static UnityEditor.PackageManager.PackageInfo GetYamaPlayerPackageInfo() =>
             UnityEditor.PackageManager.PackageInfo.FindForAssembly(typeof(Utils).Assembly);
@@ -58,6 +58,26 @@ namespace Yamadev.YamaStream.Script
             textureProperties.GetArrayElementAtIndex(screenTypes.arraySize - 1).stringValue = textureProperty;
             avProProperties.GetArrayElementAtIndex(screenTypes.arraySize - 1).stringValue = avProProperty;
             serializedObject.ApplyModifiedProperties();
+        }
+
+        public static void RemoveScreenProperty(this Controller controller, UnityEngine.Object screen)
+        {
+            if (controller == null) return;
+            SerializedObject serializedObject = new SerializedObject(controller);
+            SerializedProperty screenTypes = serializedObject.FindProperty("_screenTypes");
+            SerializedProperty screens = serializedObject.FindProperty("_screens");
+            SerializedProperty textureProperties = serializedObject.FindProperty("_textureProperties");
+            SerializedProperty avProProperties = serializedObject.FindProperty("_avProProperties");
+            for (int i = 0; i < screens.arraySize; i++)
+            {
+                if (screens.GetArrayElementAtIndex(i).objectReferenceValue != screen) continue;
+                screenTypes.DeleteArrayElementAtIndex(i);
+                screens.DeleteArrayElementAtIndex(i);
+                textureProperties.DeleteArrayElementAtIndex(i);
+                avProProperties.DeleteArrayElementAtIndex(i);
+                serializedObject.ApplyModifiedProperties();
+                break;
+            }
         }
 
         public static void CopyFilesRecursively(string sourcePath, string targetPath)
