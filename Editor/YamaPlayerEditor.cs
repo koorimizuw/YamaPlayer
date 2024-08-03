@@ -7,6 +7,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDK3.Video.Components.AVPro;
 using Yamadev.YamaStream.UI;
+using pi.LTCGI;
+using UnityEngine.Device;
 
 namespace Yamadev.YamaStream.Script
 {
@@ -60,10 +62,14 @@ namespace Yamadev.YamaStream.Script
         SerializedObject _avProSerializedObject;
         SerializedProperty _useLowLatency;
 
+        static string _crtGuid = "a9024879323f03444be1a5332baee58e";
+        static string _ltcgiControllerGuid = "4b1aac09caa0ea54ba902102643bb545";
+
         YamaPlayer _target;
         ReorderableList _screenList;
         PlayList[] _playlists;
         Tab _tab = Tab.UI;
+        bool _useLTCGI;
 
         private void OnEnable()
         {
@@ -114,6 +120,21 @@ namespace Yamadev.YamaStream.Script
                 _avProSerializedObject = new SerializedObject(_avPro);
                 _useLowLatency = _avProSerializedObject.FindProperty("useLowLatency");
             }
+
+            for (int i = 0; i < _screens.arraySize; i++)
+            {
+                if (_screens.GetArrayElementAtIndex(i).objectReferenceValue == _yamaPlayerCRT.material)
+                    _useLTCGI = true;
+            }
+
+            GenerateScreenList();
+        }
+
+        static CustomRenderTexture _yamaPlayerCRT => 
+            AssetDatabase.LoadAssetAtPath<CustomRenderTexture>(AssetDatabase.GUIDToAssetPath(_crtGuid));
+
+        public void GenerateScreenList()
+        {
             _screenList = new ReorderableList(_controllerSerializedObject, _screens)
             {
                 drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, Localization.GetLayout("screenTargets"), EditorStyles.boldLabel),
@@ -232,16 +253,16 @@ namespace Yamadev.YamaStream.Script
                     _uiEditor.DrawUISettings();
                     break;
                 case Tab.Settings:
-                    drawDefaultSettings();
+                    DrawPlayerSettings();
                     break;
                 case Tab.Playlist:
-                    drawPlaylistSettings(); 
+                    DrawPlaylistSettings(); 
                     break;
                 case Tab.Permission:
-                    drawPermissionSettings();
+                    DrawPermissionSettings();
                     break;
                 case Tab.Version:
-                    drawOtherView();
+                    DrawVersionSettings();
                     break;
             }
 
@@ -257,8 +278,8 @@ namespace Yamadev.YamaStream.Script
             _avProSerializedObject?.ApplyModifiedProperties();
         }
 
-        #region Default Settings
-        void drawPlaylistPopup()
+        #region Player Settings
+        public void DrawPlaylistPopup()
         {
             string[] playlistNames = _playlists.Select(i => i.PlayListName.Replace("/", "|")).ToArray();
             _autoPlayPlaylistIndex.intValue = EditorGUILayout.Popup(
@@ -276,7 +297,91 @@ namespace Yamadev.YamaStream.Script
             );
         }
 
-        void drawDefaultSettings()
+        public void ClearLTCGISettings()
+        {
+#if LTCGI_INCLUDED
+            foreach (Controller controller in Utils.FindComponentsInHierarthy<Controller>())
+                controller.RemoveScreenProperty(_yamaPlayerCRT.material);
+            foreach (LTCGI_Screen ltcgiScreen in Utils.FindComponentsInHierarthy<LTCGI_Screen>())
+                DestroyImmediate(ltcgiScreen);
+#endif
+        }
+
+        public void SetUpLTCGI()
+        {
+#if LTCGI_INCLUDED
+            if (_controller == null) return;
+            foreach (Controller controller in Utils.FindComponentsInHierarthy<Controller>())
+            {
+                if (Array.IndexOf(controller.Screens, _yamaPlayerCRT.material) >= 0 &&
+                    controller != _controller &&
+                    !EditorUtility.DisplayDialog(
+                        Localization.Get("ltcgiSetOnOtherPlayer"),
+                        Localization.Get("clearLTCGISettings"),
+                        Localization.Get("yes"),
+                        Localization.Get("no")
+                        )
+                    ) return;
+            }
+            ClearLTCGISettings();
+            _controller.AddScreenProperty(ScreenType.Material, _yamaPlayerCRT.material);
+            LTCGI_Controller[] ltcgiControllers = Utils.FindComponentsInHierarthy<LTCGI_Controller>();
+            LTCGI_Controller ltcgiController = null;
+            if (ltcgiControllers.Length > 0)
+                ltcgiController = ltcgiControllers[0];
+            else
+            {
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(_ltcgiControllerGuid));
+                if (prefab != null)
+                {
+                    GameObject obj = Instantiate(prefab, new Vector3(0f, 0f, 0f), Quaternion.identity);
+                    obj.transform.SetParent(null, true);
+                    ltcgiController = obj.GetComponent<LTCGI_Controller>();
+                }
+            }
+            if (ltcgiController != null) ltcgiController.VideoTexture = _yamaPlayerCRT;
+            bool applyToSubScreens = EditorUtility.DisplayDialog(
+                Localization.Get("applyToSubScreens"),
+                Localization.Get("applyToSubScreensConfirm"),
+                Localization.Get("yes"),
+                Localization.Get("no")
+                );
+            YamaPlayerScreen mainScreen = _target.GetComponentInChildren<YamaPlayerScreen>();
+            foreach (YamaPlayerScreen screen in Utils.FindComponentsInHierarthy<YamaPlayerScreen>())
+            {
+                if (screen.GetProgramVariable("_controller") != (object)_controller) continue;
+                if (applyToSubScreens || screen == mainScreen)
+                {
+                    LTCGI_Screen ltcgiScreen = screen.gameObject.GetComponent<LTCGI_Screen>();
+                    if (ltcgiScreen == null) ltcgiScreen = screen.gameObject.AddComponent<LTCGI_Screen>();
+                    ltcgiScreen.ColorMode = ColorMode.Texture;
+                }
+            }
+            _useLTCGI = true;
+            GenerateScreenList();
+#endif
+        }
+
+        public void RemoveLTCGI()
+        {
+#if LTCGI_INCLUDED
+            if (_controller == null) return;
+            if (EditorUtility.DisplayDialog(
+                Localization.Get("removeLTCGI"),
+                Localization.Get("removeLTCGIConfirm"),
+                Localization.Get("yes"),
+                Localization.Get("no")
+                )
+            )
+            {
+                ClearLTCGISettings();
+                _useLTCGI = false;
+                GenerateScreenList();
+            }
+#endif
+        }
+
+        public void DrawPlayerSettings()
         {
             if (_controller == null) return;
             EditorGUILayout.PropertyField(_defaultPlayerEngine, Localization.GetLayout("videoPlayerType"));
@@ -297,7 +402,7 @@ namespace Yamadev.YamaStream.Script
                             break;
                         case AutoPlayMode.FromPlaylist:
                             _playlists = _target.GetComponentsInChildren<PlayList>();
-                            if (_playlists.Length > 0) drawPlaylistPopup();
+                            if (_playlists.Length > 0) DrawPlaylistPopup();
                             else EditorGUILayout.HelpBox(Localization.Get("noPlaylist"), MessageType.Error, false);
                             break;
                     }
@@ -314,7 +419,7 @@ namespace Yamadev.YamaStream.Script
 
             EditorGUILayout.LabelField(Localization.Get("videoSettings"), Styles.Bold);
             EditorGUILayout.PropertyField(_mirrorInverse, Localization.GetLayout("mirrorInverse"));
-            EditorGUILayout.PropertyField(_emission, Localization.GetLayout("emission"));
+            EditorGUILayout.PropertyField(_emission, Localization.GetLayout("brightness"));
             Styles.DrawDivider();
 
             EditorGUILayout.LabelField(Localization.Get("playbackSettings"), Styles.Bold);
@@ -322,13 +427,29 @@ namespace Yamadev.YamaStream.Script
             if (_useLowLatency != null) EditorGUILayout.PropertyField(_useLowLatency, Localization.GetLayout("useLowLatency"));
             Styles.DrawDivider();
 
-            if (_screenList != null) _screenList.DoLayoutList();
+            EditorGUILayout.LabelField(Localization.Get("externalSettings"), Styles.Bold);
+#if LTCGI_INCLUDED
+            if (EditorGUILayout.Toggle(Localization.Get("useLTCGI"), _useLTCGI))
+            {
+                if (!_useLTCGI) SetUpLTCGI();
+            }
+            else
+            {
+                if (_useLTCGI) RemoveLTCGI();
+            }
+            EditorGUILayout.LabelField("　", Localization.Get("useLTCGIDesc"));
+#else
+            EditorGUILayout.LabelField(Localization.Get("useLTCGI"), Localization.Get("ltcgiNotImported"));
+#endif
+            Styles.DrawDivider();
+
+            _screenList?.DoLayoutList();
 
         }
-        #endregion
+#endregion
 
         #region Playlist Settings
-        void drawPlaylistSettings()
+        public void DrawPlaylistSettings()
         {
             EditorGUILayout.LabelField(Localization.Get("playlist"), Styles.Bold);
             if (GUILayout.Button(Localization.Get("editPlaylist"))) PlaylistEditor.ShowPlaylistEditorWindow(_target);
@@ -345,7 +466,7 @@ namespace Yamadev.YamaStream.Script
         #endregion
 
         #region Permission Settings
-        void drawPermissionSettings()
+        public void DrawPermissionSettings()
         {
             EditorGUILayout.LabelField("Owner:\t\t" + Localization.Get("ownerPermission"));
             EditorGUILayout.LabelField("Admin:\t\t" + Localization.Get("adminPermission"));
@@ -358,7 +479,7 @@ namespace Yamadev.YamaStream.Script
         #endregion
 
         #region Version Settings
-        void drawOtherView()
+        public void DrawVersionSettings()
         {
 #if USE_VPM_RESOLVER
             VersionManager.AutoUpdate = EditorGUILayout.Toggle(Localization.Get("autoUpdate"), VersionManager.AutoUpdate);

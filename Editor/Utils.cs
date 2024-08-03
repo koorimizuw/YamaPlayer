@@ -37,7 +37,7 @@ namespace Yamadev.YamaStream.Script
             return null;
         }
 
-        public static void AddScreenProperty(this Controller controller, ScreenType screenType, UnityEngine.Object screen, string textureProperty, string avProProperty)
+        public static void AddScreenProperty(this Controller controller, ScreenType screenType, UnityEngine.Object screen, string textureProperty = "_MainTex", string avProProperty = "_AVPro")
         {
             if (controller == null) return;
             SerializedObject serializedObject = new SerializedObject(controller);
