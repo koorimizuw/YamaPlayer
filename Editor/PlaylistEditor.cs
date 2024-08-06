@@ -148,6 +148,7 @@ namespace Yamadev.YamaStream.Script
                     }
                 },
                 onSelectCallback = GeneratePlaylistTracksView,
+                onReorderCallback = (ReorderableList list) => _isDirty = true,
                 elementHeight = (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 2,
             };
         }
@@ -200,6 +201,7 @@ namespace Yamadev.YamaStream.Script
                     }
                     EditorGUIUtility.labelWidth = labelWidth;
                 },
+                onReorderCallback = (ReorderableList list) => _isDirty = true,
                 elementHeight = (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 3,
             };
         }
@@ -211,7 +213,8 @@ namespace Yamadev.YamaStream.Script
                 YamaPlayer = EditorGUILayout.ObjectField(YamaPlayer, typeof(YamaPlayer), true) as YamaPlayer;
                 if (GUILayout.Button(Localization.Get("importFromJson"), EditorStyles.toolbarButton, GUILayout.ExpandWidth(false))) Import();
                 if (GUILayout.Button(Localization.Get("exportToJson"), EditorStyles.toolbarButton, GUILayout.ExpandWidth(false))) Export();
-                if (GUILayout.Button(Localization.Get("save"), EditorStyles.toolbarButton, GUILayout.ExpandWidth(false))) save();
+                using (new EditorGUI.DisabledGroupScope(!_isDirty))
+                    if (GUILayout.Button(Localization.Get("save"), EditorStyles.toolbarButton, GUILayout.ExpandWidth(false))) save();
             }
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -265,6 +268,7 @@ namespace Yamadev.YamaStream.Script
                     {
                         for (int i = 0; i < _selectedPlaylist.Tracks.Count; i++)
                             _selectedPlaylist.Tracks[i].Mode = _defaultTrackMode;
+                        _isDirty = true;
                     }
                 }
                 _useYoutubePlaylistName = EditorGUILayout.Toggle(Localization.Get("overwritePlaylistName"), _useYoutubePlaylistName);
