@@ -6,9 +6,11 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using UdonSharp;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
+using VRC.SDKBase;
 
 namespace Yamadev.YamaStream.Script
 {
@@ -414,6 +416,14 @@ namespace Yamadev.YamaStream.Script
                             case "Kinel.VideoPlayer.Scripts.KinelPlaylistGroupManagerScript":
                                 results.AddRange(readPlaylistsFromKinelVideoPlayer(script));
                                 break;
+                            case "JLChnToZ.VRC.VVMW.FrontendHandler":
+                                results.AddRange(readPlaylistsFromVizVid(script));
+                                break;
+                            case "JLChnToZ.VRC.VVMW.Core":
+                                Type frontendHandler = Utils.FindType("JLChnToZ.VRC.VVMW.FrontendHandler");
+                                if (frontendHandler != null)
+                                    results.AddRange(readPlaylistsFromVizVid(script.GetComponentInChildren(frontendHandler)));
+                                break;
                         }
                     }
                 } 
@@ -514,9 +524,7 @@ namespace Yamadev.YamaStream.Script
                 Transform trans = ((MonoBehaviour)group).transform.Find("Playlist");
                 for (int i = 0; i < group.playlists.Length; i++)
                 {
-                    Debug.Log(group.playlists[i]);
                     dynamic script = trans.GetChild(i+1)?.GetComponent(Utils.FindType("Kinel.VideoPlayer.Scripts.KinelPlaylistScript"));
-                    Debug.Log(script);
                     if (script == null) continue;
                     Playlist li = readPlaylistFromKinelVideoPlayer(script);
                     if (li != null)
@@ -524,6 +532,47 @@ namespace Yamadev.YamaStream.Script
                         li.Name = group.playlists[i];
                         results.Add(li);
                     }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
+            return results;
+        }
+
+        List<Playlist> readPlaylistsFromVizVid(dynamic handler)
+        {
+            List<Playlist> results = new List<Playlist>();
+            try
+            {
+                string[] playListTitles = (string[])((UdonSharpBehaviour)handler).GetProgramVariable("playListTitles");
+                int[] playListUrlOffsets = (int[])((UdonSharpBehaviour)handler).GetProgramVariable("playListUrlOffsets");
+                VRCUrl[] playListUrls = (VRCUrl[])((UdonSharpBehaviour)handler).GetProgramVariable("playListUrls");
+                string[] playListEntryTitles = (string[])((UdonSharpBehaviour)handler).GetProgramVariable("playListEntryTitles");
+                byte[] playListPlayerIndex = (byte[])((UdonSharpBehaviour)handler).GetProgramVariable("playListPlayerIndex");
+                string[] playerHandlers = ((dynamic[])((UdonSharpBehaviour)(handler.core)).GetProgramVariable("playerHandlers")).Select(i => (string)i.playerName).ToArray();
+                for (int i = 0; i < playListTitles.Length; i++)
+                {
+                    var urlOffset = playListUrlOffsets[i];
+                    var urlCount = (i < playListTitles.Length - 1 ? playListUrlOffsets[i + 1] : playListUrls.Length) - urlOffset;
+                    var playList = new Playlist
+                    {
+                        Active = true,
+                        Name = playListTitles[i],
+                        Tracks = new List<Track>(urlCount)
+                    };
+                    for (int j = 0; j < urlCount; j++)
+                    {
+                        if (playerHandlers[playListPlayerIndex[urlOffset + j] - 1] == "ImageViewer") continue;
+                        playList.Tracks.Add(new Track
+                        {
+                            Title = playListEntryTitles[urlOffset + j],
+                            Url = playListUrls[urlOffset + j].Get(),
+                            Mode = playerHandlers[playListPlayerIndex[urlOffset + j] - 1] == "BuiltInPlayer" ? TrackMode.UnityVideoPlayer : TrackMode.AVProPlayer,
+                        });
+                    }
+                    results.Add(playList);
                 }
             }
             catch (Exception ex)
