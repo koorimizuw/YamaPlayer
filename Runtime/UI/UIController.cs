@@ -1063,6 +1063,7 @@ namespace Yamadev.YamaStream.UI
         public override void OnPlaylistsUpdated() => GeneratePlaylistView();
         public override void OnVolumeChanged() => updateAudioView();
         public override void OnMuteChanged() => updateAudioView();
+        public override void OnUseAudioLinkChanged() => updateAudioView();
         public override void OnMaxResolutionChanged() => updateScreenView();
         public override void OnMirrorInversionChanged() => updateScreenView();
         public override void OnEmissionChanged() => updateScreenView();
