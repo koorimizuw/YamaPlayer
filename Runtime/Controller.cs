@@ -1,10 +1,13 @@
 ﻿
-using AudioLink;
 using System;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Components.Video;
 using VRC.SDKBase;
+
+#if AUDIOLINK_V1
+using AudioLink;
+#endif
 
 namespace Yamadev.YamaStream
 {

@@ -390,6 +390,7 @@ namespace Yamadev.YamaStream.Script
 
         public void SetUpAudioLink()
         {
+#if AUDIOLINK_V1
             if (!EditorUtility.DisplayDialog(
                 Localization.Get("setUpAudioLink"),
                 Localization.Get("setUpAudioLinkConfirm"),
@@ -417,6 +418,7 @@ namespace Yamadev.YamaStream.Script
             }
 
             _audioLink.objectReferenceValue = audioLink;
+#endif
         }
 
         public void DrawPlayerSettings()

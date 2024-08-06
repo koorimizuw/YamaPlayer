@@ -45,6 +45,7 @@ namespace Yamadev.YamaStream
 
         public void UpdateAudioLink()
         {
+#if AUDIOLINK_V1
             if (_audioLink == null) return;
             if (_useAudioLink)
             {
@@ -58,6 +59,7 @@ namespace Yamadev.YamaStream
                 _audioLink.audioSource = null;
                 _audioLink.DisableAudioLink();
             }
+#endif
         }
 
 #if AUDIOLINK_V1
