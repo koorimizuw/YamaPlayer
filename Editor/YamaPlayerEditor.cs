@@ -7,7 +7,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDK3.Video.Components.AVPro;
 using Yamadev.YamaStream.UI;
+
+#if LTCGI_INCLUDED
 using pi.LTCGI;
+#endif
 
 namespace Yamadev.YamaStream.Script
 {
