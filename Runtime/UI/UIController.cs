@@ -66,6 +66,9 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] Text _volumeTooltip;
         [SerializeField] Slider _pitchSlider;
         [SerializeField] Text _pitchText;
+        [SerializeField] GameObject _audioLinkSettings;
+        [SerializeField] Toggle _audioLinkOn;
+        [SerializeField] Toggle _audioLinkOff;
 
         [Header("Main UI - Playlist")]
         [SerializeField] Transform _playlistSelector;
@@ -165,6 +168,9 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] Text _mirrorInversionOffText;
         [SerializeField] Text _brightness;
         [SerializeField] Text _brightnessDesc;
+        [SerializeField] Text _audioLinkDesc;
+        [SerializeField] Text _audioLinkOnText;
+        [SerializeField] Text _audioLinkOffText;
         [SerializeField] Text _karaokeModeText;
         [SerializeField] Text _karaokeModeDesc;
         [SerializeField] Text _karaokeModeOnText;
@@ -487,6 +493,17 @@ namespace Yamadev.YamaStream.UI
             _controller.SetMeOwner();
             if (_speedSlider != null) _controller.Speed = _speedSlider.value / 20f;
         }
+
+        public void SetAudioLinkOn()
+        {
+            if (_audioLinkOn == null || !_audioLinkOn.isOn) return;
+            _controller.UseAudioLink = true;
+        }
+        public void SetAudioLinkOff()
+        {
+            if (_audioLinkOff == null || !_audioLinkOff.isOn) return;
+            _controller.UseAudioLink = false;
+        }
         public void Mute() => _controller.Mute = true;
         public void MuteOff() => _controller.Mute = false;
         public void SetVolume() => _controller.Volume = _volume.value;
@@ -506,8 +523,16 @@ namespace Yamadev.YamaStream.UI
         {
             // if (_pitchSlider != null) _controller.Pitch = _pitchSlider.value;
         }
-        public void SetMirrorInverse() => _controller.MirrorInverse = true;
-        public void SetMirrorInverseOff() => _controller.MirrorInverse = false;
+        public void SetMirrorInverse()
+        {
+            if (_mirrorInversion == null || !_mirrorInversion.isOn) return;
+            _controller.MirrorInverse = true;
+        }
+        public void SetMirrorInverseOff()
+        {
+            if (_mirrorInversionOff == null || !_mirrorInversionOff.isOn) return;
+            _controller.MirrorInverse = false;
+        }
         public void SetMaxResolution144() => _controller.MaxResolution = 144;
         public void SetMaxResolution240() => _controller.MaxResolution = 240;
         public void SetMaxResolution360() => _controller.MaxResolution = 360;
@@ -798,6 +823,9 @@ namespace Yamadev.YamaStream.UI
             if (_mute != null) _mute.gameObject.SetActive(!_controller.Mute);
             if (_muteOff != null) _muteOff.gameObject.SetActive(_controller.Mute);
             if (_volume != null) _volume.SetValueWithoutNotify(_controller.Volume);
+            if (_audioLinkSettings != null) _audioLinkSettings.gameObject.SetActive(_controller.AudioLink != null);
+            if (_audioLinkOn != null) _audioLinkOn.SetIsOnWithoutNotify(_controller.UseAudioLink);
+            if (_audioLinkOff != null) _audioLinkOff.SetIsOnWithoutNotify(!_controller.UseAudioLink);
         }
 
         void updateScreenView()
@@ -951,6 +979,9 @@ namespace Yamadev.YamaStream.UI
             if (_mirrorInversionOffText != null) _mirrorInversionOffText.text = I18n.GetValue("mirrorInversionOff");
             if (_brightness != null) _brightness.text = I18n.GetValue("brightness");
             if (_brightnessDesc != null) _brightnessDesc.text = I18n.GetValue("brightnessDesc");
+            if (_audioLinkDesc != null) _audioLinkDesc.text = I18n.GetValue("audioLinkDesc");
+            if (_audioLinkOnText != null) _audioLinkOnText.text = I18n.GetValue("audioLinkOn");
+            if (_audioLinkOffText != null) _audioLinkOffText.text = I18n.GetValue("audioLinkOff");
             if (_karaokeModeText != null) _karaokeModeText.text = $"{I18n.GetValue("karaokeMode")}<size=100>(Global)</size>";
             if (_karaokeModeDesc != null) _karaokeModeDesc.text = I18n.GetValue("karaokeModeDesc");
             if (_karaokeModeOnText != null) _karaokeModeOnText.text = I18n.GetValue("karaokeModeOn");

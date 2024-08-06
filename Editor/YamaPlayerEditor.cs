@@ -8,7 +8,6 @@ using UnityEngine.UI;
 using VRC.SDK3.Video.Components.AVPro;
 using Yamadev.YamaStream.UI;
 using pi.LTCGI;
-using UnityEngine.Device;
 
 namespace Yamadev.YamaStream.Script
 {
@@ -27,6 +26,8 @@ namespace Yamadev.YamaStream.Script
         // controller
         Controller _controller;
         SerializedObject _controllerSerializedObject;
+        SerializedProperty _useAudioLink;
+        SerializedProperty _audioLink;
         SerializedProperty _volume;
         SerializedProperty _mirrorInverse;
         SerializedProperty _emission;
@@ -62,6 +63,7 @@ namespace Yamadev.YamaStream.Script
         SerializedObject _avProSerializedObject;
         SerializedProperty _useLowLatency;
 
+        static string _audioLinkGuid = "8c1f201f848804f42aa401d0647f8902";
         static string _crtGuid = "a9024879323f03444be1a5332baee58e";
         static string _ltcgiControllerGuid = "4b1aac09caa0ea54ba902102643bb545";
 
@@ -80,6 +82,8 @@ namespace Yamadev.YamaStream.Script
             if (_controller != null )
             {
                 _controllerSerializedObject = new SerializedObject(_controller);
+                _useAudioLink = _controllerSerializedObject.FindProperty("_useAudioLink");
+                _audioLink = _controllerSerializedObject.FindProperty("_audioLink");
                 _volume = _controllerSerializedObject.FindProperty("_volume");
                 _mirrorInverse = _controllerSerializedObject.FindProperty("_mirrorInverse");
                 _emission = _controllerSerializedObject.FindProperty("_emission");
@@ -334,12 +338,15 @@ namespace Yamadev.YamaStream.Script
                 GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(_ltcgiControllerGuid));
                 if (prefab != null)
                 {
-                    GameObject obj = Instantiate(prefab, new Vector3(0f, 0f, 0f), Quaternion.identity);
-                    obj.transform.SetParent(null, true);
+                    GameObject obj = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
                     ltcgiController = obj.GetComponent<LTCGI_Controller>();
                 }
             }
-            if (ltcgiController != null) ltcgiController.VideoTexture = _yamaPlayerCRT;
+            if (ltcgiController == null)
+            {
+                EditorUtility.DisplayDialog(Localization.Get("setUpFailed"), Localization.Get("setUpLTCGIFailed"), "OK");
+            }
+            ltcgiController.VideoTexture = _yamaPlayerCRT;
             bool applyToSubScreens = EditorUtility.DisplayDialog(
                 Localization.Get("applyToSubScreens"),
                 Localization.Get("applyToSubScreensConfirm"),
@@ -379,6 +386,37 @@ namespace Yamadev.YamaStream.Script
                 GenerateScreenList();
             }
 #endif
+        }
+
+        public void SetUpAudioLink()
+        {
+            if (!EditorUtility.DisplayDialog(
+                Localization.Get("setUpAudioLink"),
+                Localization.Get("setUpAudioLinkConfirm"),
+                Localization.Get("yes"),
+                Localization.Get("no")
+                )
+            ) return;
+            AudioLink.AudioLink[] audioLinks = Utils.FindComponentsInHierarthy<AudioLink.AudioLink>();
+            AudioLink.AudioLink audioLink = null;
+            if (audioLinks.Length > 0)
+                audioLink = audioLinks[0];
+            else
+            {
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(_audioLinkGuid));
+                if (prefab != null)
+                {
+                    GameObject obj = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+                    audioLink = obj.GetComponent<AudioLink.AudioLink>();
+                }
+            }
+            if (audioLink == null)
+            {
+                EditorUtility.DisplayDialog(Localization.Get("setUpFailed"), Localization.Get("setUpAudioLinkFailed"), "OK");
+                return;
+            }
+
+            _audioLink.objectReferenceValue = audioLink;
         }
 
         public void DrawPlayerSettings()
@@ -428,6 +466,23 @@ namespace Yamadev.YamaStream.Script
             Styles.DrawDivider();
 
             EditorGUILayout.LabelField(Localization.Get("externalSettings"), Styles.Bold);
+#if AUDIOLINK_V1
+            EditorGUILayout.PropertyField(_useAudioLink, Localization.GetLayout("useAudioLink"));
+            if (_useAudioLink.boolValue)
+            {
+                EditorGUILayout.PropertyField(_audioLink);
+                if (_audioLink.objectReferenceValue == null)
+                {
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        GUILayout.FlexibleSpace();
+                        if (GUILayout.Button(Localization.Get("setUpAudioLink"))) SetUpAudioLink();
+                    }
+                }
+            }
+#else
+            EditorGUILayout.LabelField("Audio Link", Localization.Get("audioLinkNotImported"));
+#endif
 #if LTCGI_INCLUDED
             if (EditorGUILayout.Toggle(Localization.Get("useLTCGI"), _useLTCGI))
             {
@@ -437,9 +492,9 @@ namespace Yamadev.YamaStream.Script
             {
                 if (_useLTCGI) RemoveLTCGI();
             }
-            EditorGUILayout.LabelField("　", Localization.Get("useLTCGIDesc"));
+            // EditorGUILayout.LabelField("　", Localization.Get("useLTCGIDesc"));
 #else
-            EditorGUILayout.LabelField(Localization.Get("useLTCGI"), Localization.Get("ltcgiNotImported"));
+            EditorGUILayout.LabelField("LTCGI", Localization.Get("ltcgiNotImported"));
 #endif
             Styles.DrawDivider();
 

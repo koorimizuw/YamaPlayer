@@ -112,6 +112,9 @@ namespace Yamadev.YamaStream
             bool isAVPro = VideoPlayerType == VideoPlayerType.AVProVideoPlayer;
             material.SetTextureScale(textureProperty, isAVPro ?  new Vector2(1, -1) : new Vector2(1, 1));
             material.SetTextureOffset(textureProperty, isAVPro ? new Vector2(0, 1) : new Vector2(0, 0));
+#else
+            material.SetTextureScale(textureProperty, new Vector2(1, 1));
+            material.SetTextureOffset(textureProperty, new Vector2(0, 0));
 #endif
         }
 
