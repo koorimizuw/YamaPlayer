@@ -178,17 +178,17 @@ namespace Yamadev.YamaStream
             switch (tz.Id)
             {
                 case "Tokyo Standard Time":
-                    return "ja";
+                    return "ja-JP";
                 case "Taipei Standard Time":
                     return "zh-TW";
                 case "China Standard Time":
                     return "zh-CN";
                 case "Korea Standard Time":
-                    return "ko";
+                    return "ko-KR";
                 case "North Korea Standard Time":
-                    return "ko";
+                    return "ko-KR";
                 default:
-                    return "en";
+                    return "en-US";
             }
         }
 

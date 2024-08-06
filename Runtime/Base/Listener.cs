@@ -50,6 +50,7 @@ namespace Yamadev.YamaStream
         public virtual void OnPlayerChanged() { }
         public virtual void OnVideoRetry() { }
         public virtual void OnLanguageChanged() { }
+        public virtual void OnUseAudioLinkChanged() { }
         public virtual void OnKaraokeModeChanged() { }
         public virtual void OnKaraokeMemberChanged() { }
         public virtual void OnPermissionChanged() { }

@@ -47,7 +47,7 @@ namespace Yamadev.YamaStream.Script
         {
             get
             {
-                Texture frame = MediaPlayer.TextureProducer.GetTexture(0);
+                Texture frame = MediaPlayer.TextureProducer?.GetTexture(0);
                 return frame.width;
             }
         }

@@ -5207,7 +5207,7 @@ MonoBehaviour:
   _controller: {fileID: 0}
   _translation: {fileID: 4900000, guid: 02e2b6ce10f26f94fb504aba7ccd2bfe, type: 3}
   _updateLogs: {fileID: 4900000, guid: 011c1aa791634cf45b66a6811ad47c8a, type: 3}
-  _disableUIInPickUp: 1
+  _disableUIOnPickUp: 1
   _primaryColor: {r: 0.9372549, g: 0.38431373, b: 0.5686275, a: 1}
   _secondaryColor: {r: 0.96862745, g: 0.7294118, b: 0.8117647, a: 0.12109375}
   _ownerColor: {r: 0.39215687, g: 0.70980394, b: 0.9647059, a: 1}
@@ -6189,7 +6189,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &7827759820572206833
 RectTransform:
   m_ObjectHideFlags: 0

@@ -19,18 +19,18 @@ namespace Yamadev.YamaStream.UI
         int[] _lastIndexes;
         int[] _indexes;
         UdonEvent _callback;
-        void Start() => initialize();
+        void Start() => Initialize();
 
         public UdonEvent CallbackEvent
         {
             get
             {
-                if (!_initialized) initialize();
+                if (!_initialized) Initialize();
                 return _callback;
             }
             set
             {
-                if (!_initialized) initialize();
+                if (!_initialized) Initialize();
                 _callback = value;
             }
         }
@@ -42,7 +42,7 @@ namespace Yamadev.YamaStream.UI
             get => _length;
             set
             {
-                if (!_initialized) initialize();
+                if (!_initialized) Initialize();
                 _length = value;
                 ResetValues();
                 Render();
@@ -73,7 +73,7 @@ namespace Yamadev.YamaStream.UI
         public int[] LastIndexes => _lastIndexes;
         public int[] Indexes => _indexes;
 
-        void initialize()
+        public void Initialize()
         {
             if (_initialized) return;
             _scrollRect = GetComponent<ScrollRect>();
@@ -98,7 +98,7 @@ namespace Yamadev.YamaStream.UI
 
         public void AdjustHeight()
         {
-            if (!_initialized) initialize();
+            if (!_initialized) Initialize();
             Vector2 size = _scrollRect.content.sizeDelta;
             size.y = _length * _lineHeight;
 
@@ -106,7 +106,7 @@ namespace Yamadev.YamaStream.UI
             {
                 RectTransform child = _scrollRect.content.GetChild(i).GetComponent<RectTransform>();
                 child.anchoredPosition = new Vector2(child.anchoredPosition.x, -size.y);
-                size.y += child.rect.height;
+                if (child.gameObject.activeSelf) size.y += child.rect.height;
             }
             _scrollRect.content.sizeDelta = size;
         }
@@ -138,7 +138,7 @@ namespace Yamadev.YamaStream.UI
 
         public void OnScroll()
         {
-            if (!_initialized) initialize();
+            if (!_initialized) Initialize();
             if ((_position - _scrollRect.content.anchoredPosition).sqrMagnitude <= 0.003f) return;
             _position = _scrollRect.content.anchoredPosition;
             UpdateIndexes();

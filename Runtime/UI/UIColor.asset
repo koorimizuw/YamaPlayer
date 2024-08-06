@@ -62,7 +62,7 @@ MonoBehaviour:
       Data: 3|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: Yamadev.YamaStream.UIController, Yamadev.YamaStream.Runtime
+      Data: Yamadev.YamaStream.UI.UIController, Yamadev.YamaStream.Runtime
     - Name: 
       Entry: 8
       Data: 

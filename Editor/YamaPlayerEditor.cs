@@ -8,6 +8,10 @@ using UnityEngine.UI;
 using VRC.SDK3.Video.Components.AVPro;
 using Yamadev.YamaStream.UI;
 
+#if LTCGI_INCLUDED
+using pi.LTCGI;
+#endif
+
 namespace Yamadev.YamaStream.Script
 {
     [CustomEditor(typeof(YamaPlayer))]
@@ -19,11 +23,14 @@ namespace Yamadev.YamaStream.Script
             Settings,
             Playlist,
             Permission,
+            Version
         }
 
         // controller
         Controller _controller;
         SerializedObject _controllerSerializedObject;
+        SerializedProperty _useAudioLink;
+        SerializedProperty _audioLink;
         SerializedProperty _volume;
         SerializedProperty _mirrorInverse;
         SerializedProperty _emission;
@@ -53,29 +60,33 @@ namespace Yamadev.YamaStream.Script
         SerializedProperty _ownerList;
         // UI
         UIController _uiController;
-        SerializedObject _uiControllerSerializedObject;
-        SerializedProperty _primaryColor;
-        SerializedProperty _secondaryColor;
-        SerializedProperty _idleImage;
-        SerializedProperty _defaultOpen;
-        SerializedProperty _disableUI;
+        UIEditor _uiEditor;
         // avpro
         VRCAVProVideoPlayer _avPro;
         SerializedObject _avProSerializedObject;
         SerializedProperty _useLowLatency;
 
+        static string _audioLinkGuid = "8c1f201f848804f42aa401d0647f8902";
+        static string _crtGuid = "a9024879323f03444be1a5332baee58e";
+        static string _ltcgiControllerGuid = "4b1aac09caa0ea54ba902102643bb545";
+
         YamaPlayer _target;
         ReorderableList _screenList;
         PlayList[] _playlists;
         Tab _tab = Tab.UI;
+        bool _useLTCGI;
 
         private void OnEnable()
         {
+            Title = $"YamaPlayer v{Utils.GetYamaPlayerPackageInfo().version}";
+
             _target = target as YamaPlayer;
             _controller = _target.GetComponentInChildren<Controller>();
             if (_controller != null )
             {
                 _controllerSerializedObject = new SerializedObject(_controller);
+                _useAudioLink = _controllerSerializedObject.FindProperty("_useAudioLink");
+                _audioLink = _controllerSerializedObject.FindProperty("_audioLink");
                 _volume = _controllerSerializedObject.FindProperty("_volume");
                 _mirrorInverse = _controllerSerializedObject.FindProperty("_mirrorInverse");
                 _emission = _controllerSerializedObject.FindProperty("_emission");
@@ -108,25 +119,32 @@ namespace Yamadev.YamaStream.Script
                 _defaultPermission = _permissionSerializedObject.FindProperty("_defaultPermission");
                 _ownerList = _permissionSerializedObject.FindProperty("_ownerList");
             }
-            _uiController = _target.GetComponentInChildren<UIController>();
-            if (_uiController != null)
-            {
-                _uiControllerSerializedObject = new SerializedObject(_uiController);
-                _primaryColor = _uiControllerSerializedObject.FindProperty("_primaryColor");
-                _secondaryColor = _uiControllerSerializedObject.FindProperty("_secondaryColor");
-                _idleImage = _uiControllerSerializedObject.FindProperty("_idleImage");
-                _defaultOpen = _uiControllerSerializedObject.FindProperty("_defaultPlaylistOpen");
-                _disableUI = _uiControllerSerializedObject.FindProperty("_disableUIInPickUp");
-            }
+            _uiController = _target.GetComponentInChildren<UIController>(true);
+            if (_uiController != null) _uiEditor = new UIEditor(_uiController);
             _avPro = _target.GetComponentInChildren<VRCAVProVideoPlayer>();
             if (_avPro != null )
             {
                 _avProSerializedObject = new SerializedObject(_avPro);
                 _useLowLatency = _avProSerializedObject.FindProperty("useLowLatency");
             }
+
+            for (int i = 0; i < _screens.arraySize; i++)
+            {
+                if (_screens.GetArrayElementAtIndex(i).objectReferenceValue == _yamaPlayerCRT.material)
+                    _useLTCGI = true;
+            }
+
+            GenerateScreenList();
+        }
+
+        static CustomRenderTexture _yamaPlayerCRT => 
+            AssetDatabase.LoadAssetAtPath<CustomRenderTexture>(AssetDatabase.GUIDToAssetPath(_crtGuid));
+
+        public void GenerateScreenList()
+        {
             _screenList = new ReorderableList(_controllerSerializedObject, _screens)
             {
-                drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, "Screen targets", EditorStyles.boldLabel),
+                drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, Localization.GetLayout("screenTargets"), EditorStyles.boldLabel),
                 onAddCallback = (list) =>
                 {
                     _screenTypes.arraySize += 1;
@@ -154,7 +172,7 @@ namespace Yamadev.YamaStream.Script
                     rect.height = EditorGUIUtility.singleLineHeight;
                     using (var check = new EditorGUI.ChangeCheckScope())
                     {
-                        EditorGUI.PropertyField(rect, screen, new GUIContent("Screen target"));
+                        EditorGUI.PropertyField(rect, screen, Localization.GetLayout("screen"));
                         if (check.changed)
                         {
                             if (screen.objectReferenceValue is Material) screenType.intValue = (int)ScreenType.Material;
@@ -206,112 +224,73 @@ namespace Yamadev.YamaStream.Script
                         }
                     }
                     rect.y += EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
-                    EditorGUI.PropertyField(rect, textureProperty, new GUIContent("Main texture property"));
+                    EditorGUI.PropertyField(rect, textureProperty, Localization.GetLayout("mainTextureProperty"));
                     rect.y += EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
-                    EditorGUI.PropertyField(rect, avProProperty, new GUIContent("AVPro flag property"));
+                    EditorGUI.PropertyField(rect, avProProperty, Localization.GetLayout("avProProperty"));
                 },
                 elementHeight = (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 3,
             };
         }
-
-
 
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
             serializedObject.Update();
 
-            EditorGUILayout.LabelField($"YamaPlayer v{Utils.GetYamaPlayerVersion()}", _uiTitle);
-            EditorGUILayout.Space();
+            EditorGUILayout.Space(16f);
 
             if (EditorApplication.isPlaying) return;
 
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.Space();
-                _tab = (Tab)GUILayout.Toolbar((int)_tab, Enum.GetNames(typeof(Tab)).Select(x => new GUIContent(x)).ToArray(), "LargeButton", GUI.ToolbarButtonSize.Fixed);
+                _tab = (Tab)GUILayout.Toolbar(
+                    (int)_tab, 
+                    Enum.GetNames(typeof(Tab)).Select(x => Localization.GetLayout(x.ToLower())).ToArray(), 
+                    "LargeButton", 
+                    GUI.ToolbarButtonSize.Fixed
+                    );
                 EditorGUILayout.Space();
             }
+            EditorGUILayout.Space(16f);
 
             switch (_tab)
             {
                 case Tab.UI:
-                    drawUISettings();
+                    _uiEditor.DrawUISettings();
                     break;
                 case Tab.Settings:
-                    drawDefaultSettings();
+                    DrawPlayerSettings();
                     break;
                 case Tab.Playlist:
-                    drawPlaylistSettings(); 
+                    DrawPlaylistSettings(); 
                     break;
                 case Tab.Permission:
-                    drawPermissionSettings();
+                    DrawPermissionSettings();
+                    break;
+                case Tab.Version:
+                    DrawVersionSettings();
                     break;
             }
 
-            if (serializedObject.ApplyModifiedProperties()
-                || (_autoPlaySerializedObject?.ApplyModifiedProperties() ?? false)
-                || (_permissionSerializedObject?.ApplyModifiedProperties() ?? false)
-                || (_uiControllerSerializedObject?.ApplyModifiedProperties() ?? false)
-                || (_controllerSerializedObject?.ApplyModifiedProperties() ?? false)
-                || (_avProSerializedObject?.ApplyModifiedProperties() ?? false)
-                ) ApplyModifiedProperties();
+            ApplyModifiedProperties();
         }
 
         internal void ApplyModifiedProperties()
         {
+            serializedObject.ApplyModifiedProperties();
+            _controllerSerializedObject?.ApplyModifiedProperties();
+            _autoPlaySerializedObject?.ApplyModifiedProperties();
+            _permissionSerializedObject?.ApplyModifiedProperties();
+            _avProSerializedObject?.ApplyModifiedProperties();
         }
 
-        #region UI Settings
-        void setUIColor()
-        {
-            foreach (UIColor component in _uiController.GetComponentsInChildren<UIColor>(true))
-            {
-                if (component.GetProgramVariable("_uiController") == null)
-                    component.SetProgramVariable("_uiController", _uiController);
-                component.Apply();
-            }
-        }
-
-        void drawUISettings()
-        {
-            if (_uiController == null) return;
-            EditorGUILayout.PropertyField(_primaryColor);
-            EditorGUILayout.PropertyField(_secondaryColor);
-            EditorGUILayout.Space();
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Preview")) setUIColor();
-            }
-            EditorGUILayout.Space();
-
-            EditorGUILayout.LabelField("Idle Image", _bold);
-            EditorGUILayout.PropertyField(_idleImage);
-            EditorGUILayout.LabelField("　", "Show image when video not playing.");
-            EditorGUILayout.Space();
-
-            if (_defaultOpen != null)
-            {
-                EditorGUILayout.LabelField("Playlist", _bold);
-                EditorGUILayout.PropertyField(_defaultOpen);
-                EditorGUILayout.LabelField("　", "Open playlist UI after game started.");
-                EditorGUILayout.Space();
-            }
-
-            EditorGUILayout.LabelField("Prevent Missoperation", _bold);
-            EditorGUILayout.PropertyField(_disableUI);
-            EditorGUILayout.LabelField("　", "Disable video player UI when user is picking up something.");
-            EditorGUILayout.Space();
-        }
-        #endregion
-
-        #region Default Settings
-        void drawPlaylistPopup()
+        #region Player Settings
+        public void DrawPlaylistPopup()
         {
             string[] playlistNames = _playlists.Select(i => i.PlayListName.Replace("/", "|")).ToArray();
             _autoPlayPlaylistIndex.intValue = EditorGUILayout.Popup(
-                label: new GUIContent("Playlist"),
+                label: Localization.GetLayout("playlist"),
                 selectedIndex: _autoPlayPlaylistIndex.intValue,
                 displayedOptions: playlistNames
             );
@@ -319,85 +298,280 @@ namespace Yamadev.YamaStream.Script
             string[] playlistItemNames = _playlists[_autoPlayPlaylistIndex.intValue].Tracks.Select(i => i.Title.Replace("/", "|")).ToArray();
             if (_autoPlayPlaylistTrackIndex.intValue >= playlistItemNames.Length) _autoPlayPlaylistTrackIndex.intValue = playlistItemNames.Length - 1;
             _autoPlayPlaylistTrackIndex.intValue = EditorGUILayout.Popup(
-                label: new GUIContent("Track"),
+                label: Localization.GetLayout("track"),
                 selectedIndex: _autoPlayPlaylistTrackIndex.intValue,
                 displayedOptions: playlistItemNames
             );
         }
 
-        void drawDefaultSettings()
+        public void ClearLTCGISettings()
+        {
+#if LTCGI_INCLUDED
+            foreach (Controller controller in Utils.FindComponentsInHierarthy<Controller>())
+                controller.RemoveScreenProperty(_yamaPlayerCRT.material);
+            foreach (LTCGI_Screen ltcgiScreen in Utils.FindComponentsInHierarthy<LTCGI_Screen>())
+                DestroyImmediate(ltcgiScreen);
+#endif
+        }
+
+        public void SetUpLTCGI()
+        {
+#if LTCGI_INCLUDED
+            if (_controller == null) return;
+            foreach (Controller controller in Utils.FindComponentsInHierarthy<Controller>())
+            {
+                if (Array.IndexOf(controller.Screens, _yamaPlayerCRT.material) >= 0 &&
+                    controller != _controller &&
+                    !EditorUtility.DisplayDialog(
+                        Localization.Get("ltcgiSetOnOtherPlayer"),
+                        Localization.Get("clearLTCGISettings"),
+                        Localization.Get("yes"),
+                        Localization.Get("no")
+                        )
+                    ) return;
+            }
+            ClearLTCGISettings();
+            _controller.AddScreenProperty(ScreenType.Material, _yamaPlayerCRT.material);
+            LTCGI_Controller[] ltcgiControllers = Utils.FindComponentsInHierarthy<LTCGI_Controller>();
+            LTCGI_Controller ltcgiController = null;
+            if (ltcgiControllers.Length > 0)
+                ltcgiController = ltcgiControllers[0];
+            else
+            {
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(_ltcgiControllerGuid));
+                if (prefab != null)
+                {
+                    GameObject obj = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+                    ltcgiController = obj.GetComponent<LTCGI_Controller>();
+                }
+            }
+            if (ltcgiController == null)
+            {
+                EditorUtility.DisplayDialog(Localization.Get("setUpFailed"), Localization.Get("setUpLTCGIFailed"), "OK");
+            }
+            ltcgiController.VideoTexture = _yamaPlayerCRT;
+            bool applyToSubScreens = EditorUtility.DisplayDialog(
+                Localization.Get("applyToSubScreens"),
+                Localization.Get("applyToSubScreensConfirm"),
+                Localization.Get("yes"),
+                Localization.Get("no")
+                );
+            YamaPlayerScreen mainScreen = _target.GetComponentInChildren<YamaPlayerScreen>();
+            foreach (YamaPlayerScreen screen in Utils.FindComponentsInHierarthy<YamaPlayerScreen>())
+            {
+                if (screen.GetProgramVariable("_controller") != (object)_controller) continue;
+                if (applyToSubScreens || screen == mainScreen)
+                {
+                    LTCGI_Screen ltcgiScreen = screen.gameObject.GetComponent<LTCGI_Screen>();
+                    if (ltcgiScreen == null) ltcgiScreen = screen.gameObject.AddComponent<LTCGI_Screen>();
+                    ltcgiScreen.ColorMode = ColorMode.Texture;
+                }
+            }
+            _useLTCGI = true;
+            GenerateScreenList();
+#endif
+        }
+
+        public void RemoveLTCGI()
+        {
+#if LTCGI_INCLUDED
+            if (_controller == null) return;
+            if (EditorUtility.DisplayDialog(
+                Localization.Get("removeLTCGI"),
+                Localization.Get("removeLTCGIConfirm"),
+                Localization.Get("yes"),
+                Localization.Get("no")
+                )
+            )
+            {
+                ClearLTCGISettings();
+                _useLTCGI = false;
+                GenerateScreenList();
+            }
+#endif
+        }
+
+        public void SetUpAudioLink()
+        {
+#if AUDIOLINK_V1
+            if (!EditorUtility.DisplayDialog(
+                Localization.Get("setUpAudioLink"),
+                Localization.Get("setUpAudioLinkConfirm"),
+                Localization.Get("yes"),
+                Localization.Get("no")
+                )
+            ) return;
+            AudioLink.AudioLink[] audioLinks = Utils.FindComponentsInHierarthy<AudioLink.AudioLink>();
+            AudioLink.AudioLink audioLink = null;
+            if (audioLinks.Length > 0)
+                audioLink = audioLinks[0];
+            else
+            {
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(_audioLinkGuid));
+                if (prefab != null)
+                {
+                    GameObject obj = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+                    audioLink = obj.GetComponent<AudioLink.AudioLink>();
+                }
+            }
+            if (audioLink == null)
+            {
+                EditorUtility.DisplayDialog(Localization.Get("setUpFailed"), Localization.Get("setUpAudioLinkFailed"), "OK");
+                return;
+            }
+
+            _audioLink.objectReferenceValue = audioLink;
+#endif
+        }
+
+        public void DrawPlayerSettings()
         {
             if (_controller == null) return;
-            EditorGUILayout.LabelField("Default player type", _bold);
-            EditorGUILayout.PropertyField(_defaultPlayerEngine);
-            EditorGUILayout.Space();
+            EditorGUILayout.PropertyField(_defaultPlayerEngine, Localization.GetLayout("videoPlayerType"));
+            EditorGUILayout.LabelField("　", Localization.Get("selectDefaultVideoPlayerType"));
+            Styles.DrawDivider();
 
-            EditorGUILayout.LabelField("Auto Play", _bold);
             if (_autoPlay != null)
             {
-                EditorGUILayout.PropertyField(_autoPlayMode);
+                EditorGUILayout.PropertyField(_autoPlayMode, Localization.GetLayout("autoPlay"));
                 if ((AutoPlayMode)_autoPlayMode.intValue != AutoPlayMode.Off)
                 {
                     switch ((AutoPlayMode)_autoPlayMode.intValue)
                     {
                         case AutoPlayMode.FromTrack:
-                            EditorGUILayout.PropertyField(_autoPlayVideoPlayerType);
-                            EditorGUILayout.PropertyField(_autoPlayVideoTitle);
+                            EditorGUILayout.PropertyField(_autoPlayVideoPlayerType, Localization.GetLayout("videoPlayerType"));
+                            EditorGUILayout.PropertyField(_autoPlayVideoTitle, Localization.GetLayout("title"));
                             EditorGUILayout.PropertyField(_autoPlayVideoUrl);
                             break;
                         case AutoPlayMode.FromPlaylist:
                             _playlists = _target.GetComponentsInChildren<PlayList>();
-                            if (_playlists.Length > 0) drawPlaylistPopup();
-                            else EditorGUILayout.HelpBox("No Playlist.", MessageType.Error, false);
+                            if (_playlists.Length > 0) DrawPlaylistPopup();
+                            else EditorGUILayout.HelpBox(Localization.Get("noPlaylist"), MessageType.Error, false);
                             break;
                     }
-                    EditorGUILayout.PropertyField(_autoPlayDelay);
+                    EditorGUILayout.PropertyField(_autoPlayDelay, Localization.GetLayout("delay"));
+                    EditorGUILayout.LabelField("　", string.Format(Localization.Get("autoPlayAfterSeconds"), _autoPlayDelay.floatValue));
                 }
             }
-            EditorGUILayout.Space();
+            Styles.DrawDivider();
 
-            EditorGUILayout.LabelField("Volume", _bold);
-            EditorGUILayout.PropertyField(_mute);
-            EditorGUILayout.PropertyField(_volume);
-            EditorGUILayout.Space();
+            EditorGUILayout.LabelField(Localization.Get("audioSettings"), Styles.Bold);
+            EditorGUILayout.PropertyField(_mute, Localization.GetLayout("mute"));
+            EditorGUILayout.PropertyField(_volume, Localization.GetLayout("volume"));
+            Styles.DrawDivider();
 
-            EditorGUILayout.LabelField("Display", _bold);
-            EditorGUILayout.PropertyField(_mirrorInverse);
-            EditorGUILayout.PropertyField(_emission);
-            EditorGUILayout.Space();
+            EditorGUILayout.LabelField(Localization.Get("videoSettings"), Styles.Bold);
+            EditorGUILayout.PropertyField(_mirrorInverse, Localization.GetLayout("mirrorInverse"));
+            EditorGUILayout.PropertyField(_emission, Localization.GetLayout("brightness"));
+            Styles.DrawDivider();
 
-            EditorGUILayout.LabelField("Playback", _bold);
-            EditorGUILayout.PropertyField(_loop);
-            EditorGUILayout.Space();
+            EditorGUILayout.LabelField(Localization.Get("playbackSettings"), Styles.Bold);
+            EditorGUILayout.PropertyField(_loop, Localization.GetLayout("loop"));
+            if (_useLowLatency != null) EditorGUILayout.PropertyField(_useLowLatency, Localization.GetLayout("useLowLatency"));
+            Styles.DrawDivider();
 
-            EditorGUILayout.LabelField("Playlist", _bold);
-            EditorGUILayout.PropertyField(_shuffle);
-            if (_useLowLatency != null) EditorGUILayout.PropertyField(_useLowLatency);
-            EditorGUILayout.PropertyField(_forwardInterval);
-            EditorGUILayout.LabelField("　", "Play next track after seconds.");
-            EditorGUILayout.LabelField("　", "Disable when value is smaller then 0.");
-            EditorGUILayout.Space();
+            EditorGUILayout.LabelField(Localization.Get("externalSettings"), Styles.Bold);
+#if AUDIOLINK_V1
+            EditorGUILayout.PropertyField(_useAudioLink, Localization.GetLayout("useAudioLink"));
+            if (_useAudioLink.boolValue)
+            {
+                EditorGUILayout.PropertyField(_audioLink);
+                if (_audioLink.objectReferenceValue == null)
+                {
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        GUILayout.FlexibleSpace();
+                        if (GUILayout.Button(Localization.Get("setUpAudioLink"))) SetUpAudioLink();
+                    }
+                }
+            }
+#else
+            EditorGUILayout.LabelField("Audio Link", Localization.Get("audioLinkNotImported"));
+#endif
+#if LTCGI_INCLUDED
+            if (EditorGUILayout.Toggle(Localization.Get("useLTCGI"), _useLTCGI))
+            {
+                if (!_useLTCGI) SetUpLTCGI();
+            }
+            else
+            {
+                if (_useLTCGI) RemoveLTCGI();
+            }
+            // EditorGUILayout.LabelField("　", Localization.Get("useLTCGIDesc"));
+#else
+            EditorGUILayout.LabelField("LTCGI", Localization.Get("ltcgiNotImported"));
+#endif
+            Styles.DrawDivider();
 
-            EditorGUILayout.LabelField("Screens", _bold);
-            if (_screenList != null) _screenList.DoLayoutList();
+            _screenList?.DoLayoutList();
 
         }
-        #endregion
+#endregion
 
         #region Playlist Settings
-        void drawPlaylistSettings()
+        public void DrawPlaylistSettings()
         {
-            EditorGUILayout.LabelField("Playlist / プレイリスト", _bold);
-            if (GUILayout.Button("Edit Playlist")) PlaylistEditor.ShowPlaylistEditorWindow(_target);
+            EditorGUILayout.LabelField(Localization.Get("playlist"), Styles.Bold);
+            if (GUILayout.Button(Localization.Get("editPlaylist"))) PlaylistEditor.ShowPlaylistEditorWindow(_target);
+            Styles.DrawDivider();
+
+            EditorGUILayout.PropertyField(_shuffle, Localization.GetLayout("shuffle"));
+            EditorGUILayout.LabelField("　", Localization.Get("playInRandomOrder"));
+            Styles.DrawDivider();
+
+            EditorGUILayout.PropertyField(_forwardInterval, Localization.GetLayout("forwardInterval"));
+            EditorGUILayout.LabelField("　", string.Format(Localization.Get("playTrackAfterSeconds"), _forwardInterval.floatValue));
+            EditorGUILayout.LabelField("　", Localization.Get("disableSmallerThen0"));
         }
         #endregion
 
         #region Permission Settings
-        void drawPermissionSettings()
+        public void DrawPermissionSettings()
         {
-            EditorGUILayout.LabelField("Permission / 権限", _bold);
-            EditorGUILayout.PropertyField(_defaultPermission);
-            EditorGUILayout.PropertyField(_ownerList);
+            EditorGUILayout.LabelField("Owner:\t\t" + Localization.Get("ownerPermission"));
+            EditorGUILayout.LabelField("Admin:\t\t" + Localization.Get("adminPermission"));
+            EditorGUILayout.LabelField("Editor:\t\t" + Localization.Get("editorPermission"));
+            EditorGUILayout.LabelField("Viewer:\t\t" + Localization.Get("viewerPermission"));
+            EditorGUILayout.Space(12f);
+            EditorGUILayout.PropertyField(_defaultPermission, Localization.GetLayout("defaultPermission"));
+            EditorGUILayout.PropertyField(_ownerList, Localization.GetLayout("ownerList"));
+        }
+        #endregion
+
+        #region Version Settings
+        public void DrawVersionSettings()
+        {
+#if USE_VPM_RESOLVER
+            VersionManager.AutoUpdate = EditorGUILayout.Toggle(Localization.Get("autoUpdate"), VersionManager.AutoUpdate);
+            EditorGUILayout.LabelField("　", Localization.Get("autoUpdateToLatestVersion"));
+            Styles.DrawDivider();
+
+            VersionManager.CheckBetaVersion = EditorGUILayout.Toggle(Localization.Get("checkBetaVersion"), VersionManager.CheckBetaVersion);
+            EditorGUILayout.LabelField(Localization.Get("currentVersion"), Utils.GetYamaPlayerPackageInfo().version);
+            EditorGUILayout.LabelField(Localization.Get("newestVersion"), VersionManager.Newest);
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                if (GUILayout.Button(Localization.Get("checkUpdate")))
+                {
+                    if (VersionManager.CheckUpdate())
+                    {
+                        if (EditorUtility.DisplayDialog(
+                            Localization.Get("newVersionFound"), 
+                            string.Format(Localization.Get("newVersionUpdateConfirm"), VersionManager.Newest),
+                            Localization.Get("doUpdate"),
+                            Localization.Get("cancel"))
+                            ) 
+                            VersionManager.UpdatePackage();
+                    }
+                    else EditorUtility.DisplayDialog(Localization.Get("noNewVersionFound"), Localization.Get("youUseNewest"), "OK");
+                }
+                EditorGUI.BeginDisabledGroup(!VersionManager.HasNewVersion);
+                if (GUILayout.Button(Localization.Get("update"))) VersionManager.UpdatePackage();
+                EditorGUI.EndDisabledGroup();
+            }
+#else
+            EditorGUILayout.LabelField(Localization.Get("onlyWorksOnVCCProject"));
+#endif
         }
         #endregion
     }

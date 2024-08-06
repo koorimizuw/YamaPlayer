@@ -1,26 +1,16 @@
 ﻿
 using System;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
 namespace Yamadev.YamaStream.Script
 {
-    public static class Utils
+    internal static class Utils
     {
-        static string _packageInfoGuid = "b4c53d030728ff34098bd0ed5fc21c72";
-
-        [Serializable]
-        private struct PackageInfo
-        {
-            public string version;
-        }
-
-        public static string GetYamaPlayerVersion() =>
-            JsonUtility.FromJson<PackageInfo>(
-                System.IO.File.ReadAllText(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath),
-                AssetDatabase.GUIDToAssetPath(_packageInfoGuid)))
-                ).version ?? string.Empty;
+        public static UnityEditor.PackageManager.PackageInfo GetYamaPlayerPackageInfo() =>
+            UnityEditor.PackageManager.PackageInfo.FindForAssembly(typeof(Utils).Assembly);
 
         public static T[] FindComponentsInHierarthy<T>() where T : UnityEngine.Object
         {
@@ -47,7 +37,7 @@ namespace Yamadev.YamaStream.Script
             return null;
         }
 
-        public static void AddScreenProperty(this Controller controller, ScreenType screenType, UnityEngine.Object screen, string textureProperty, string avProProperty)
+        public static void AddScreenProperty(this Controller controller, ScreenType screenType, UnityEngine.Object screen, string textureProperty = "_MainTex", string avProProperty = "_AVPro")
         {
             if (controller == null) return;
             SerializedObject serializedObject = new SerializedObject(controller);
@@ -68,6 +58,35 @@ namespace Yamadev.YamaStream.Script
             textureProperties.GetArrayElementAtIndex(screenTypes.arraySize - 1).stringValue = textureProperty;
             avProProperties.GetArrayElementAtIndex(screenTypes.arraySize - 1).stringValue = avProProperty;
             serializedObject.ApplyModifiedProperties();
+        }
+
+        public static void RemoveScreenProperty(this Controller controller, UnityEngine.Object screen)
+        {
+            if (controller == null) return;
+            SerializedObject serializedObject = new SerializedObject(controller);
+            SerializedProperty screenTypes = serializedObject.FindProperty("_screenTypes");
+            SerializedProperty screens = serializedObject.FindProperty("_screens");
+            SerializedProperty textureProperties = serializedObject.FindProperty("_textureProperties");
+            SerializedProperty avProProperties = serializedObject.FindProperty("_avProProperties");
+            for (int i = 0; i < screens.arraySize; i++)
+            {
+                if (screens.GetArrayElementAtIndex(i).objectReferenceValue != screen) continue;
+                screenTypes.DeleteArrayElementAtIndex(i);
+                screens.DeleteArrayElementAtIndex(i);
+                textureProperties.DeleteArrayElementAtIndex(i);
+                avProProperties.DeleteArrayElementAtIndex(i);
+                serializedObject.ApplyModifiedProperties();
+                break;
+            }
+        }
+
+        public static void CopyFilesRecursively(string sourcePath, string targetPath)
+        {
+            foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+                Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+
+            foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
         }
     }
 }

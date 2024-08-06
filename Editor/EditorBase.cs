@@ -1,31 +1,34 @@
 ﻿
+using System;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace Yamadev.YamaStream
+namespace Yamadev.YamaStream.Script
 {
     public abstract class EditorBase : Editor
     {
-        protected GUIStyle _uiTitle;
-        protected GUIStyle _bold;
-
-        protected virtual void Initilize()
-        {
-            _uiTitle = new GUIStyle()
-            {
-                alignment = TextAnchor.MiddleCenter,
-                fontSize = 18,
-            };
-            _uiTitle.normal.textColor = Color.white;
-
-            _bold = new GUIStyle(GUI.skin.label);
-            _bold.fontStyle = FontStyle.Bold;
-        }
+        public string Title;
 
         public override void OnInspectorGUI()
         {
-            Initilize();
+            EditorGUILayout.Space(16f);
+            EditorGUILayout.LabelField($"{Title}", Styles.Title);
+            EditorGUILayout.Space(16f);
+            DrawLanguageSelector();
+        }
+
+        public void DrawLanguageSelector()
+        {
+            string[] languages = Localization.AvailableLanguages.Select(i => Localization.GetLanguageName(i)).ToArray();
+            int index = Array.IndexOf(Localization.AvailableLanguages, Localization.CurrentLanguage);
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.Space();
+                int selected = EditorGUILayout.Popup(index, languages, GUILayout.Width(200));
+                Localization.CurrentLanguage = Localization.AvailableLanguages[selected];
+                EditorGUILayout.Space();
+            }
         }
     }
 }
