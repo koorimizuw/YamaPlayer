@@ -19,7 +19,7 @@
     "showIdleImage": "動画が再生されてないときにこちらの画像が表示される。",
     "disableUIOnPickUp": "ピックアップ中UIオフ",
     "disableUIOnPickUpDesc": "ピックアップ中にUIが触られないようにする。",
-    "videoPlayerType": "プレイヤーエンジン",
+    "videoPlayerType": "プレイヤー",
     "selectDefaultVideoPlayerType": "デフォルトで使用される動画プレイヤーエンジンを選択する。",
     "autoPlay": "自動再生",
     "title": "タイトル",
