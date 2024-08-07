@@ -201,7 +201,7 @@ namespace Yamadev.YamaStream
 
         public void ErrorRetry()
         {
-            if (IsPlaying) return;
+            if (IsPlaying || !Track.GetUrl().IsValidUrl()) return;
             if (Time.time - LastLoaded < _retryAfterSeconds)
             {
                 SendCustomEventDelayedFrames(nameof(ErrorRetry), 0);

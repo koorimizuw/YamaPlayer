@@ -11,6 +11,7 @@ using Yamadev.YamaStream.UI;
 using UdonSharpEditor;
 using Yamadev.YamaStream.Modules;
 using VRC.SDK3.Components;
+using UnityEngine.UI;
 #if WEB_UNIT_INCLUDED
 using Yamadev.YamachanWebUnit;
 #endif
@@ -134,6 +135,9 @@ namespace Yamadev.YamaStream.Script
                 foreach (UIColor component in uiController.GetComponentsInChildren<UIColor>(true))
                     if (component.GetProgramVariable("_uiController") == null)
                         component.SetProgramVariable("_uiController", uiController);
+
+                Font font = (Font)uiController.GetProgramVariable("_font");
+                if (font != null) foreach (Text text in uiController.GetComponentsInChildren<Text>(true)) text.font = font;
 
                 VRCUrlInputField dynamicUrlInputField = uiController.GetProgramVariable("_dynamicPlaylistUrlInput") as VRCUrlInputField;
                 if (dynamicUrlInputField != null)

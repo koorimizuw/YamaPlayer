@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 using Yamadev.YamaStream.UI;
 
 namespace Yamadev.YamaStream.Script
@@ -9,6 +10,7 @@ namespace Yamadev.YamaStream.Script
         UIController _uiController;
         SerializedObject _uiControllerSerializedObject;
         SerializedProperty _controller;
+        SerializedProperty _font;
         SerializedProperty _primaryColor;
         SerializedProperty _secondaryColor;
         SerializedProperty _idle;
@@ -21,6 +23,7 @@ namespace Yamadev.YamaStream.Script
             _uiController = uiController;
             _uiControllerSerializedObject = new SerializedObject(uiController);
             _controller = _uiControllerSerializedObject.FindProperty("_controller");
+            _font = _uiControllerSerializedObject.FindProperty("_font");
             _primaryColor = _uiControllerSerializedObject.FindProperty("_primaryColor");
             _primaryColor = _uiControllerSerializedObject.FindProperty("_primaryColor");
             _secondaryColor = _uiControllerSerializedObject.FindProperty("_secondaryColor");
@@ -37,10 +40,11 @@ namespace Yamadev.YamaStream.Script
 
             EditorGUILayout.PropertyField(_primaryColor, Localization.GetLayout("primaryColor"));
             EditorGUILayout.PropertyField(_secondaryColor, Localization.GetLayout("secondaryColor"));
+            EditorGUILayout.PropertyField(_font, Localization.GetLayout("font"));
             using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button(Localization.Get("preview"))) SetUIColor();
+                if (GUILayout.Button(Localization.Get("preview"))) Preview();
             }
             Styles.DrawDivider();
 
@@ -61,7 +65,7 @@ namespace Yamadev.YamaStream.Script
             ApplyModifiedProperties();
         }
 
-        void SetUIColor()
+        public void Preview()
         {
             foreach (UIColor component in _uiController.GetComponentsInChildren<UIColor>(true))
             {
@@ -69,6 +73,9 @@ namespace Yamadev.YamaStream.Script
                     component.SetProgramVariable("_uiController", _uiController);
                 component.Apply();
             }
+
+            if (_font.objectReferenceValue != null) 
+                foreach (Text text in _uiController.GetComponentsInChildren<Text>(true)) text.font = _font.objectReferenceValue as Font;
         }
 
 

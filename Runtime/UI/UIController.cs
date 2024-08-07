@@ -18,6 +18,7 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] TextAsset _translation;
         [SerializeField] TextAsset _updateLogs;
         [SerializeField] bool _disableUIOnPickUp = true;
+        [SerializeField] Font _font;
 
         // [Header("Color")]
         [SerializeField] Color _primaryColor = new Color(240f / 256f, 98f / 256f, 146f / 256f, 1.0f);
