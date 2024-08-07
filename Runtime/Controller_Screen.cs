@@ -95,7 +95,11 @@ namespace Yamadev.YamaStream
                     case ScreenType.RawImage:
                         ((RawImage)screen).texture = Texture;
                         ((RawImage)screen).material.SetInt(avProProperty, isAVPro);
-                        SetST(((RawImage)screen).material, textureProperty);
+#if UNITY_STANDALONE_WIN
+                        ((RawImage)screen).uvRect = isAVPro == 1 ? new Rect(0, 1, 1, -1) : new Rect(0, 0, 1, 1);
+#else
+                        ((RawImage)screen).uvRect = new Rect(0, 0, 1, 1);
+#endif
                         break;
                     case ScreenType.Material:
                         ((Material)screen).SetTexture(textureProperty, Texture);

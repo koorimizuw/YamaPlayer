@@ -2,7 +2,7 @@ Shader "Yamadev/YamaStream/UIScreen"
 {
     Properties
     {
-        [PerRendererData] _MainTex("Main Texture", 2D) = "black" {}
+        _MainTex("Main Texture", 2D) = "black" {}
         [Toggle] _AVPro("AVPro", Int) = 0
     }
 
