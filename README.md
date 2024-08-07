@@ -1,3 +1,7 @@
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/koorimizuw/YamaPlayer?label=release)](https://github.com/koorimizuw/YamaPlayer/releases)
+![GitHub release (by tag)](https://img.shields.io/github/downloads/koorimizuw/YamaPlayer/latest/total)
+![GitHub all releases](https://img.shields.io/github/downloads/koorimizuw/YamaPlayer/total?label=total%20downloads)
+
 # YamaPlayer
 
 ![image](https://github.com/user-attachments/assets/fc345e20-8c4d-4218-b7f5-f5efe5d055a0)
@@ -19,9 +23,9 @@ YamaPlayerはVRChatで使うことを想定して作られた動画プレイヤ�
 🌟再生キュー  
 🌟再生履歴  
 🌟再生プレイリスト  
-🌟シークバーヘルパー
-🌟ダイナミックプレイリスト
-🌟トランジションアニメーション
+🌟シークバーヘルパー  
+🌟ダイナミックプレイリスト  
+🌟トランジションアニメーション  
 🌟LTCGIサポート  
 🌟英語・中国語・韓国語対応  
 🌟信用できる再生同期(ユーザ間の遅延を内部で計算する)  
@@ -54,10 +58,4 @@ YamaPlayerはVRChatで使うことを想定して作られた動画プレイヤ�
 ワールドの一部としてVRChatでの公開  
 有償・無償問わず販売ワールドアセットへの取り組み  
 
-禁止：  
-自作発言  
-apiを本アセット以外の場所での利用  
-
 クレジット記載は任意です、ただし販売ワールドアセットへ取り組む場合クレジット記載は必須です。  
-
-本アセットの著作権はやま@kwxxwに帰属します。  
