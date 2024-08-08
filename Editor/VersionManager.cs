@@ -68,6 +68,8 @@ namespace Yamadev.YamaStream.Script
             if (string.IsNullOrEmpty(Newest)) return false;
             HasNewVersion = new SemanticVersioning.Version(Version) < new SemanticVersioning.Version(Newest);
             return HasNewVersion;
+#else
+            return false;
 #endif
         }
 
@@ -105,7 +107,7 @@ namespace Yamadev.YamaStream.Script
                 Debug.Log($"Update YamaPlayer to version: {Newest}");
             }
             catch (Exception ex) { 
-                Debug.LogError($"Update YamaPlayer faild: {ex}"); 
+                Debug.LogError($"Update YamaPlayer failed: {ex}"); 
             }
             Resolver.ForceRefresh();
 #endif
