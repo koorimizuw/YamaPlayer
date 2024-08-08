@@ -68,6 +68,8 @@ namespace Yamadev.YamaStream.Script
             if (string.IsNullOrEmpty(Newest)) return false;
             HasNewVersion = new SemanticVersioning.Version(Version) < new SemanticVersioning.Version(Newest);
             return HasNewVersion;
+#else
+            return false;
 #endif
         }
 
