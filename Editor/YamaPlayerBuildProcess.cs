@@ -20,7 +20,7 @@ namespace Yamadev.YamaStream.Script
 {
     public class YamaPlayerBuildProcess : IProcessSceneWithReport
     {
-        public int callbackOrder => -1;
+        public int callbackOrder => -2;
 
         private void SetAngle(Transform trans)
         {
