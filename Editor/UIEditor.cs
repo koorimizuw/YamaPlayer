@@ -1,6 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using VRC.SDK3.Components;
 using Yamadev.YamaStream.UI;
 
 namespace Yamadev.YamaStream.Script
@@ -17,6 +18,7 @@ namespace Yamadev.YamaStream.Script
         SerializedProperty _idleImage;
         SerializedProperty _defaultOpen;
         SerializedProperty _disableUIOnPickUp;
+        bool _disableUI;
 
         public UIEditor(UIController uiController)
         {
@@ -37,6 +39,20 @@ namespace Yamadev.YamaStream.Script
         {
             if (_uiControllerSerializedObject == null) return;
             _uiControllerSerializedObject.Update();
+
+            VRCUiShape uiSharp = _uiController.GetComponentInChildren<VRCUiShape>(true);
+            if (uiSharp == null) return;
+
+            _disableUI = !uiSharp.gameObject.activeSelf;
+            _disableUI = EditorGUILayout.Toggle(Localization.Get("disableUI"), _disableUI);
+            uiSharp.gameObject.SetActive(!_disableUI);
+            if (_disableUI)
+            {
+                EditorGUILayout.Space(12f);
+                EditorGUILayout.HelpBox(Localization.Get("shouldEnableUIFirst"), MessageType.Info);
+                return;
+            }
+            Styles.DrawDivider();
 
             EditorGUILayout.PropertyField(_primaryColor, Localization.GetLayout("primaryColor"));
             EditorGUILayout.PropertyField(_secondaryColor, Localization.GetLayout("secondaryColor"));
