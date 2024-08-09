@@ -67,12 +67,18 @@ namespace Yamadev.YamaStream.Script
                 case "ja-JP":
                     return "日本語";
                 case "en-US":
+                case "en-GB​":
+                case "en-CA":
+                case "en-AU":
+                case "en-SG":
+                case "en-IN":
                     return "English";
                 case "ko-KR":
                     return "한국어";
                 case "zh-CN":
                     return "简体中文";
                 case "zh-TW":
+                case "zh-HK":
                     return "繁體中文";
             }
             return string.Empty;

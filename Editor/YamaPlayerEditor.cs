@@ -73,7 +73,7 @@ namespace Yamadev.YamaStream.Script
         YamaPlayer _target;
         ReorderableList _screenList;
         PlayList[] _playlists;
-        Tab _tab = Tab.UI;
+        Tab _tab = Tab.Settings;
         bool _useLTCGI;
 
         private void OnEnable()
@@ -120,7 +120,11 @@ namespace Yamadev.YamaStream.Script
                 _ownerList = _permissionSerializedObject.FindProperty("_ownerList");
             }
             _uiController = _target.GetComponentInChildren<UIController>(true);
-            if (_uiController != null) _uiEditor = new UIEditor(_uiController);
+            if (_uiController != null)
+            {
+                _uiEditor = new UIEditor(_uiController);
+                _tab = Tab.UI;
+            }
             _avPro = _target.GetComponentInChildren<VRCAVProVideoPlayer>();
             if (_avPro != null )
             {
@@ -257,7 +261,8 @@ namespace Yamadev.YamaStream.Script
             switch (_tab)
             {
                 case Tab.UI:
-                    _uiEditor.DrawUISettings();
+                    if (_uiEditor != null) _uiEditor.DrawUISettings();
+                    else EditorGUILayout.LabelField(Localization.Get("noUIController"));
                     break;
                 case Tab.Settings:
                     DrawPlayerSettings();
