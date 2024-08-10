@@ -27,7 +27,6 @@ namespace Yamadev.YamaStream.Script
         SerializedProperty _idleImage;
         SerializedProperty _defaultOpen;
         SerializedProperty _disableUIOnPickUp;
-        List<ColorPattern> _colorPatterns;
         bool _disableUI;
 
         public UIEditor(UIController uiController)
@@ -42,15 +41,6 @@ namespace Yamadev.YamaStream.Script
             _idleImage = _uiControllerSerializedObject.FindProperty("_idleImage");
             _defaultOpen = _uiControllerSerializedObject.FindProperty("_defaultPlaylistOpen");
             _disableUIOnPickUp = _uiControllerSerializedObject.FindProperty("_disableUIOnPickUp");
-            _colorPatterns = new List<ColorPattern>()
-            {
-                new ColorPattern{ Name = Localization.Get("pinkColor"), PrimaryColor = new Color(0.9372549f, 0.3843137f, 0.5686275f), SecondaryColor = new Color(0.9686275f, 0.7294118f, 0.8117647f, 0.1215686f) },
-                new ColorPattern{ Name = Localization.Get("blueColor"), PrimaryColor = new Color(0.01176471f, 0.6627451f, 0.9568627f), SecondaryColor = new Color(0.5058824f, 0.8313726f, 0.9803922f, 0.1215686f) },
-                new ColorPattern{ Name = Localization.Get("greenColor"), PrimaryColor = new Color(0.2980392f, 0.6862745f, 0.3137255f), SecondaryColor = new Color(0.6470588f, 0.8392157f, 0.654902f, 0.1215686f) },
-                new ColorPattern{ Name = Localization.Get("orangeColor"), PrimaryColor = new Color(1f, 0.5960785f, 0f), SecondaryColor = new Color(1f, 0.8f, 0.5019608f, 0.1215686f) },
-                new ColorPattern{ Name = Localization.Get("purpleColor"), PrimaryColor = new Color(0.6117647f, 0.1529412f, 0.6901961f), SecondaryColor = new Color(0.8078431f, 0.5764706f, 0.8470588f, 0.1215686f) },
-                new ColorPattern{ Name = Localization.Get("customColor"), PrimaryColor = new Color(1f, 1f, 1f), SecondaryColor = new Color(1f, 1f, 1f, 0.1215686f) },
-            };
         }
 
         public void DrawUISettings()
@@ -72,11 +62,21 @@ namespace Yamadev.YamaStream.Script
             }
             Styles.DrawDivider();
 
-            int colorPatternIndex = _colorPatterns.Count - 1;
-            for (int i = 0; i < _colorPatterns.Count; i++)
+            List<ColorPattern> colorPatterns = new List<ColorPattern>()
             {
-                if (_colorPatterns[i].PrimaryColor == _primaryColor.colorValue &&
-                    _colorPatterns[i].SecondaryColor == _secondaryColor.colorValue)
+                new ColorPattern{ Name = Localization.Get("pinkColor"), PrimaryColor = new Color(0.9372549f, 0.3843137f, 0.5686275f), SecondaryColor = new Color(0.9686275f, 0.7294118f, 0.8117647f, 0.1215686f) },
+                new ColorPattern{ Name = Localization.Get("blueColor"), PrimaryColor = new Color(0.01176471f, 0.6627451f, 0.9568627f), SecondaryColor = new Color(0.5058824f, 0.8313726f, 0.9803922f, 0.1215686f) },
+                new ColorPattern{ Name = Localization.Get("greenColor"), PrimaryColor = new Color(0.2980392f, 0.6862745f, 0.3137255f), SecondaryColor = new Color(0.6470588f, 0.8392157f, 0.654902f, 0.1215686f) },
+                new ColorPattern{ Name = Localization.Get("orangeColor"), PrimaryColor = new Color(1f, 0.5960785f, 0f), SecondaryColor = new Color(1f, 0.8f, 0.5019608f, 0.1215686f) },
+                new ColorPattern{ Name = Localization.Get("purpleColor"), PrimaryColor = new Color(0.6117647f, 0.1529412f, 0.6901961f), SecondaryColor = new Color(0.8078431f, 0.5764706f, 0.8470588f, 0.1215686f) },
+                new ColorPattern{ Name = Localization.Get("customColor"), PrimaryColor = new Color(1f, 1f, 1f), SecondaryColor = new Color(1f, 1f, 1f, 0.1215686f) },
+            };
+
+            int colorPatternIndex = colorPatterns.Count - 1;
+            for (int i = 0; i < colorPatterns.Count; i++)
+            {
+                if (colorPatterns[i].PrimaryColor == _primaryColor.colorValue &&
+                    colorPatterns[i].SecondaryColor == _secondaryColor.colorValue)
                 {
                     colorPatternIndex = i;
                     break;
@@ -86,12 +86,12 @@ namespace Yamadev.YamaStream.Script
             int selectedColorIndex = EditorGUILayout.Popup(
                 label: Localization.GetLayout("colorPattern"),
                 selectedIndex: colorPatternIndex,
-                displayedOptions: _colorPatterns.Select(i => i.Name).ToArray()
+                displayedOptions: colorPatterns.Select(i => i.Name).ToArray()
             );
             if (selectedColorIndex != colorPatternIndex)
             {
-                _primaryColor.colorValue = _colorPatterns[selectedColorIndex].PrimaryColor;
-                _secondaryColor.colorValue = _colorPatterns[selectedColorIndex].SecondaryColor;
+                _primaryColor.colorValue = colorPatterns[selectedColorIndex].PrimaryColor;
+                _secondaryColor.colorValue = colorPatterns[selectedColorIndex].SecondaryColor;
             }
 
             EditorGUILayout.PropertyField(_primaryColor, Localization.GetLayout("primaryColor"));
