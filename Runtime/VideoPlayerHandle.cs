@@ -15,7 +15,6 @@ namespace Yamadev.YamaStream
         [SerializeField] VideoPlayerType _videoPlayerType;
         [SerializeField] string _textureName = "_MainTex";
         [SerializeField] bool _useMaterial;
-        [SerializeField] bool _isAvPro;
         [SerializeField] bool _fixFlicker;
         [SerializeField] Material _blitMaterial;
         BaseVRCVideoPlayer _baseVideoPlayer;
@@ -39,10 +38,9 @@ namespace Yamadev.YamaStream
 #if UNITY_EDITOR && AVPRO_DEBUG
         private void Update()
         {
-            if (_isAvPro && _stopped && BaseVideoPlayer.IsPlaying)
-            {
+            if (_videoPlayerType == VideoPlayerType.AVProVideoPlayer && 
+                _stopped && BaseVideoPlayer.IsPlaying)
                 OnVideoStart();
-            }
         }
 #endif
 
@@ -183,7 +181,7 @@ namespace Yamadev.YamaStream
                 _texture = _properties.GetTexture(_textureName);
             }
 
-            if (_isAvPro && _fixFlicker && _texture != null)
+            if (_videoPlayerType == VideoPlayerType.AVProVideoPlayer && _fixFlicker && _texture != null)
                 SendCustomEventDelayedFrames(nameof(BlitLastUpdate), 0, EventTiming.LateUpdate);
 
             if (_listener != null) _listener.OnTextureUpdated();

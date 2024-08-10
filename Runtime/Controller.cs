@@ -22,8 +22,8 @@ namespace Yamadev.YamaStream
         [SerializeField] int _maxErrorRetry = 5;
         [SerializeField] string _timeFormat = @"hh\:mm\:ss";
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(VideoPlayerType))] VideoPlayerType _videoPlayerType;
-        [SerializeField, UdonSynced, FieldChangeCallback(nameof(Loop))] bool _loop = false;
-        [UdonSynced, FieldChangeCallback(nameof(Paused))] bool _paused = false;
+        [SerializeField, UdonSynced, FieldChangeCallback(nameof(Loop))] bool _loop;
+        [UdonSynced, FieldChangeCallback(nameof(Paused))] bool _paused;
         [UdonSynced, FieldChangeCallback(nameof(Stopped))] bool _stopped = true;
         [UdonSynced, FieldChangeCallback(nameof(Speed))] float _speed = 1f;
         [UdonSynced, FieldChangeCallback(nameof(Repeat))] Vector3 _repeat = new Vector3(0f, 0f, 999999f);
@@ -55,7 +55,6 @@ namespace Yamadev.YamaStream
             if (_initialized) return;
             Loop = _loop;
             _videoPlayerAnimator.Rebind();
-            initializeTrack();
             initializeScreen();
             UpdateAudio();
             UpdateAudioLink();
