@@ -46224,7 +46224,7 @@ MonoBehaviour:
   _disableUIOnPickUp: 1
   _font: {fileID: 0}
   _primaryColor: {r: 0.9372549, g: 0.38431373, b: 0.5686275, a: 1}
-  _secondaryColor: {r: 0.96862745, g: 0.7294118, b: 0.8117647, a: 0.12109375}
+  _secondaryColor: {r: 0.9686275, g: 0.7294118, b: 0.8117647, a: 0.1215686}
   _ownerColor: {r: 0.39215687, g: 0.70980394, b: 0.9647059, a: 1}
   _adminColor: {r: 0.7294118, g: 0.40784314, b: 0.78431374, a: 1}
   _editorColor: {r: 0.5058824, g: 0.78039217, b: 0.5176471, a: 1}
