@@ -1546,7 +1546,7 @@ GameObject:
   - component: {fileID: 370472319559795585}
   - component: {fileID: 3798310370944337055}
   m_Layer: 0
-  m_Name: YamaPlayer (NoScreen)
+  m_Name: YamaPlayer(NoScreen)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
