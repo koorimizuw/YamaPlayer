@@ -30,7 +30,6 @@ namespace Yamadev.YamaStream
         Listener[] _listeners = { };
         bool _isLocal = false;
         int _errorRetryCount = 0;
-        bool _loading = false;
         bool _isReload = false;
         float _lastSetTime = 0f;
         float _repeatCooling = 0.6f; 
@@ -188,8 +187,8 @@ namespace Yamadev.YamaStream
         public float LastLoaded => VideoPlayerHandle.LastLoaded;
         public bool IsPlaying => VideoPlayerHandle.IsPlaying;
         public float Duration => VideoPlayerHandle.Duration;
-        public float VideoTime => VideoPlayerHandle.Time;
-        public bool IsLoading => _loading;
+        public float VideoTime => VideoPlayerHandle.VideoTime;
+        public bool IsLoading => VideoPlayerHandle.IsLoading;
         public bool IsReload => _isReload;
         public bool IsLive => float.IsInfinity(Duration);
 
@@ -206,7 +205,6 @@ namespace Yamadev.YamaStream
                 SendCustomEventDelayedFrames(nameof(ErrorRetry), 0);
                 return;
             }
-            _loading = true;
             _resolveTrack.Invoke();
             foreach (Listener listener in _listeners) listener.OnVideoRetry();
         }
@@ -214,7 +212,7 @@ namespace Yamadev.YamaStream
         public void SetTime(float time)
         {
             if (IsLive || OutOfRepeat(time)) return;
-            VideoPlayerHandle.Time = time;
+            VideoPlayerHandle.VideoTime = time;
             _lastSetTime = Time.time;
             if (Networking.IsOwner(gameObject) && !_isLocal)
             {
@@ -244,14 +242,12 @@ namespace Yamadev.YamaStream
         #region Video Event
         public override void OnVideoReady()
         {
-            _loading = false;
             foreach (Listener listener in _listeners) listener.OnVideoReady();
         }
 
         public override void OnVideoStart() 
         {
             _errorRetryCount = 0;
-            _loading = false;
             _stopped = false;
             if (_paused) VideoPlayerHandle.Pause();
             else VideoPlayerHandle.Play();
@@ -289,7 +285,6 @@ namespace Yamadev.YamaStream
             if (!_isReload)
             {
                 _paused = false;
-                _loading = false;
                 _stopped = true;
                 _errorRetryCount = 0;
                 _repeat = new Vector3(0f, 0f, 999999f);
@@ -326,7 +321,6 @@ namespace Yamadev.YamaStream
 
         public override void OnVideoError(VideoError videoError)
         {
-            _loading = false;
 #if AUDIOLINK_V1
             if (_audioLink != null && _useAudioLink)
                 _audioLink.SetMediaPlaying(MediaPlaying.Error);

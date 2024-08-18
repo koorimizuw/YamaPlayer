@@ -47,7 +47,6 @@ namespace Yamadev.YamaStream
             VideoPlayerType = track.GetPlayer();
             Track = track;
             ResolveTrack.Invoke();
-            _loading = true;
             if (Networking.IsOwner(gameObject) && !_isLocal && !isReload) RequestSerialization();
             foreach (Listener listener in _listeners) listener.OnUrlChanged();
         }

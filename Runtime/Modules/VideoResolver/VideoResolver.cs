@@ -19,7 +19,7 @@ namespace Yamadev.YamaStream.Modules
 #if WEB_UNIT_INCLUDED
         [SerializeField] Client _client;
 #else
-        [SerializeField] object _client;
+        [SerializeField] UdonSharpBehaviour _client;
 #endif
         [SerializeField] Controller _controller;
         [SerializeField] VRCUrl _callbackYoutubeUrl;
@@ -31,7 +31,12 @@ namespace Yamadev.YamaStream.Modules
         bool _isQuest = false;
 #endif
 
-        void Start() => SendCustomEventDelayedFrames(nameof(SetHooks), 1);
+        void Start()
+        {
+#if WEB_UNIT_INCLUDED
+            SendCustomEventDelayedFrames(nameof(SetHooks), 1);
+#endif
+        }
 
         public void SetHooks()
         {

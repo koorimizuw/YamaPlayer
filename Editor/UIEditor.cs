@@ -27,6 +27,7 @@ namespace Yamadev.YamaStream.Script
         SerializedProperty _idleImage;
         SerializedProperty _defaultOpen;
         SerializedProperty _disableUIOnPickUp;
+        SerializedProperty _disableUIDistance;
         bool _disableUI;
 
         public UIEditor(UIController uiController)
@@ -41,6 +42,7 @@ namespace Yamadev.YamaStream.Script
             _idleImage = _uiControllerSerializedObject.FindProperty("_idleImage");
             _defaultOpen = _uiControllerSerializedObject.FindProperty("_defaultPlaylistOpen");
             _disableUIOnPickUp = _uiControllerSerializedObject.FindProperty("_disableUIOnPickUp");
+            _disableUIDistance = _uiControllerSerializedObject.FindProperty("_disableUIDistance");
         }
 
         public void DrawUISettings()
@@ -117,6 +119,10 @@ namespace Yamadev.YamaStream.Script
 
             EditorGUILayout.PropertyField(_disableUIOnPickUp, Localization.GetLayout("disableUIOnPickUp"));
             EditorGUILayout.LabelField("Å@", Localization.Get("disableUIOnPickUpDesc"));
+
+            EditorGUILayout.PropertyField(_disableUIDistance, Localization.GetLayout("disableUIDistance"));
+            EditorGUILayout.LabelField("Å@", Localization.Get("disableUIDistanceDesc"));
+
 
             ApplyModifiedProperties();
         }

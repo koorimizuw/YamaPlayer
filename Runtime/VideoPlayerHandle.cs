@@ -59,6 +59,24 @@ namespace Yamadev.YamaStream
             set => _listener = value;
         }
 
+        public bool IsPlaying
+        {
+            get
+            {
+                if (BaseVideoPlayer == null) return false;
+                return BaseVideoPlayer.IsPlaying;
+            }
+        }
+
+        public bool IsLoading => _loading;
+
+        public bool IsLive => float.IsInfinity(Duration);
+
+        public float Duration
+        {
+            get => BaseVideoPlayer.GetDuration();
+        }
+
         public float LastLoaded => _lastLoaded;
 
         public bool Loop
@@ -67,7 +85,7 @@ namespace Yamadev.YamaStream
             set => BaseVideoPlayer.Loop = value;
         }
 
-        public float Time
+        public float VideoTime
         {
             get => BaseVideoPlayer.GetTime();
             set => BaseVideoPlayer.SetTime(value);
@@ -194,21 +212,6 @@ namespace Yamadev.YamaStream
             if (_blitTexture == null || _blitTexture.width != _texture.width || _blitTexture.height != _texture.height)
                 createBlitTexture(_texture.width, _texture.height);
             VRCGraphics.Blit(_texture, _blitTexture, _blitMaterial);
-        }
-
-        public bool IsPlaying
-        {
-            get
-            {
-                if (BaseVideoPlayer == null) return false;
-                return BaseVideoPlayer.IsPlaying;
-            }
-        }
-
-        public bool IsLive => float.IsInfinity(Duration);
-        public float Duration
-        {
-            get => BaseVideoPlayer.GetDuration();
         }
     }
 }

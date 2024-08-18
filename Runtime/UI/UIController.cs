@@ -18,6 +18,7 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] TextAsset _translation;
         [SerializeField] TextAsset _updateLogs;
         [SerializeField] bool _disableUIOnPickUp = true;
+        [SerializeField, Range(0f, 10f)] float _disableUIDistance = 0f;
         [SerializeField] Font _font;
 
         // [Header("Color")]
@@ -222,9 +223,14 @@ namespace Yamadev.YamaStream.UI
             if (_volumeHelper != null && _volumeTooltip != null)
                 _volumeTooltip.text = $"{Mathf.Ceil(_volumeHelper.Percent * 100)}%";
             if (!_controller.Stopped) updateProgress();
-            if (_disableUIOnPickUp && _uiBoxCollider != null) 
-                _uiBoxCollider.enabled = !Networking.LocalPlayer.PickUpInHand();
+            if (_disableUIOnPickUp && _uiBoxCollider != null)
+                _uiBoxCollider.enabled =　!outOfDistance && !Networking.LocalPlayer.PickUpInHand();
+            else _uiBoxCollider.enabled = !outOfDistance;
         }
+
+        bool outOfDistance => _disableUIDistance > 0 && 
+            Utilities.IsValid(Networking.LocalPlayer) &&
+            (Networking.LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin).position - transform.position).sqrMagnitude > _disableUIDistance;
 
         Localization I18n
         {
