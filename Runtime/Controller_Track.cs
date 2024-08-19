@@ -49,6 +49,7 @@ namespace Yamadev.YamaStream
             ResolveTrack.Invoke();
             if (Networking.IsOwner(gameObject) && !_isLocal && !isReload) RequestSerialization();
             foreach (Listener listener in _listeners) listener.OnUrlChanged();
+            PrintLog($"Play track: {track.GetUrl()}.");
         }
         public void Resolve() => VideoPlayerHandle.PlayUrl(Track.GetVRCUrl());
 

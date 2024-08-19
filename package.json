@@ -1,7 +1,7 @@
 {
   "name": "net.kwxxw.yama-stream",
   "displayName": "YamaPlayer",
-  "version": "1.4.10-beta1",
+  "version": "1.4.10-beta2",
   "unity": "2022.3",
   "description": "Video player for VRChat.",
   "author": {

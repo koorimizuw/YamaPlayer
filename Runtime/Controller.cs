@@ -80,6 +80,7 @@ namespace Yamadev.YamaStream
                 _videoPlayerType = value;
                 if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
                 foreach (Listener listener in _listeners) listener.OnPlayerChanged();
+                PrintLog($"Video player change to {_videoPlayerType}.");
             }
         }
 
@@ -138,6 +139,7 @@ namespace Yamadev.YamaStream
 #endif
                 if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
                 foreach (Listener listener in _listeners) listener.OnLoopChanged();
+                PrintLog($"Loop changed {_loop}.");
             }
         }
 
@@ -163,6 +165,7 @@ namespace Yamadev.YamaStream
                     RequestSerialization();
                 }
                 foreach (Listener listener in _listeners) listener.OnSpeedChanged();
+                PrintLog($"Speed changed {_speed:F2}x.");
             }
         }
 
@@ -181,6 +184,9 @@ namespace Yamadev.YamaStream
                 _repeat = value;
                 if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
                 foreach (Listener listener in _listeners) listener.OnRepeatChanged();
+                RepeatStatus status = _repeat.ToRepeatStatus();
+                if (status.IsOn()) PrintLog($"Repeat on, start: {status.GetStartTime()}, end: {status.GetEndTime()}.");
+                else PrintLog($"Repeat off.");
             }
         }
 
@@ -220,6 +226,7 @@ namespace Yamadev.YamaStream
                 RequestSerialization();
             }
             foreach (Listener listener in _listeners) listener.OnSetTime(time);
+            PrintLog($"{_videoPlayerType}: Set video time: {time}.");
         }
 
         public void SendCustomVideoEvent(string eventName)
@@ -243,6 +250,7 @@ namespace Yamadev.YamaStream
         public override void OnVideoReady()
         {
             foreach (Listener listener in _listeners) listener.OnVideoReady();
+            PrintLog($"{_videoPlayerType}: Video ready.");
         }
 
         public override void OnVideoStart() 
@@ -264,6 +272,7 @@ namespace Yamadev.YamaStream
             else DoSync();
             if (KaraokeMode != KaraokeMode.None) SendCustomEventDelayedSeconds(nameof(ForceSync), 1f);
             foreach (Listener listener in _listeners) listener.OnVideoStart();
+            PrintLog($"{_videoPlayerType}: Video start.");
             _isReload = false;
         }
 
@@ -272,12 +281,14 @@ namespace Yamadev.YamaStream
             _paused = false;
             if (KaraokeMode != KaraokeMode.None) SendCustomEventDelayedSeconds(nameof(ForceSync), 1f);
             foreach (Listener listener in _listeners) listener.OnVideoPlay();
+            PrintLog($"{_videoPlayerType}: Video play.");
         }
 
         public override void OnVideoPause()
         {
             _paused = true;
             foreach (Listener listener in _listeners) listener.OnVideoPause();
+            PrintLog($"{_videoPlayerType}: Video pause.");
         }
 
         public override void OnVideoStop()
@@ -301,6 +312,7 @@ namespace Yamadev.YamaStream
                 }
             }
             foreach (Listener listener in _listeners) listener.OnVideoStop();
+            PrintLog($"{_videoPlayerType}: Video stop.");
         }
 
         public override void OnVideoLoop()
@@ -311,12 +323,15 @@ namespace Yamadev.YamaStream
                 RequestSerialization();
             }
             foreach (Listener listener in _listeners) listener.OnVideoLoop();
+            PrintLog($"{_videoPlayerType}: Video loop.");
         }
+
         public override void OnVideoEnd()
         {
             if (Networking.IsOwner(gameObject) && !_isLocal && _forwardInterval >= 0)
                 SendCustomEventDelayedSeconds(nameof(RunForward), _forwardInterval);
             foreach (Listener listener in _listeners) listener.OnVideoEnd();
+            PrintLog($"{_videoPlayerType}: Video end.");
         }
 
         public override void OnVideoError(VideoError videoError)
@@ -334,6 +349,7 @@ namespace Yamadev.YamaStream
                 } else _errorRetryCount = 0;
             }
             foreach (Listener listener in _listeners) listener.OnVideoError(videoError);
+            PrintLog($"{_videoPlayerType}: Video error {videoError}.");
         }
         #endregion
     }

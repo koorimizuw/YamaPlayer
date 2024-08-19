@@ -223,16 +223,15 @@ namespace Yamadev.YamaStream.UI
             if (_volumeHelper != null && _volumeTooltip != null)
                 _volumeTooltip.text = $"{Mathf.Ceil(_volumeHelper.Percent * 100)}%";
             if (!_controller.Stopped) updateProgress();
-            if (_disableUIOnPickUp && _uiBoxCollider != null)
-                _uiBoxCollider.enabled =　!outOfDistance && !Networking.LocalPlayer.PickUpInHand();
-            else _uiBoxCollider.enabled = !outOfDistance;
+            if (_uiBoxCollider != null)
+                _uiBoxCollider.enabled = !outOfDistance && (!_disableUIOnPickUp || !Networking.LocalPlayer.PickUpInHand());
         }
 
         bool outOfDistance => _disableUIDistance > 0 && 
             Utilities.IsValid(Networking.LocalPlayer) &&
             (Networking.LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin).position - transform.position).sqrMagnitude > _disableUIDistance;
 
-        Localization I18n
+        Localization i18n
         {
             get
             {
@@ -250,9 +249,9 @@ namespace Yamadev.YamaStream.UI
             if ((int)_controller.PlayerPermission >= (int)PlayerPermission.Editor) return true;
             if (_modal != null)
             {
-                _modal.Title = I18n.GetValue("noPermission");
-                _modal.Message = I18n.GetValue("noPermissionMessage");
-                _modal.CancelText = I18n.GetValue("close");
+                _modal.Title = i18n.GetValue("noPermission");
+                _modal.Message = i18n.GetValue("noPermissionMessage");
+                _modal.CancelText = i18n.GetValue("close");
                 _modal.CloseEvent = UdonEvent.Empty();
                 _modal.Open(0);
             }
@@ -268,10 +267,10 @@ namespace Yamadev.YamaStream.UI
                 SetUnityPlayerEvent();
                 return;
             }
-            _modal.Title = I18n.GetValue("confirmChangePlayer");
-            _modal.Message = I18n.GetValue("confirmChangePlayerMessage");
-            _modal.CancelText = I18n.GetValue("cancel");
-            _modal.ExecuteText = I18n.GetValue("continue");
+            _modal.Title = i18n.GetValue("confirmChangePlayer");
+            _modal.Message = i18n.GetValue("confirmChangePlayerMessage");
+            _modal.CancelText = i18n.GetValue("cancel");
+            _modal.ExecuteText = i18n.GetValue("continue");
             _modal.CloseEvent = UdonEvent.Empty();
             _modal.ExecuteEvent = UdonEvent.New(this, nameof(SetUnityPlayerEvent));
             _modal.Open(1);
@@ -291,10 +290,10 @@ namespace Yamadev.YamaStream.UI
                 SetAVProPlayerEvent();
                 return;
             }
-            _modal.Title = I18n.GetValue("confirmChangePlayer");
-            _modal.Message = I18n.GetValue("confirmChangePlayerMessage");
-            _modal.CancelText = I18n.GetValue("cancel");
-            _modal.ExecuteText = I18n.GetValue("continue");
+            _modal.Title = i18n.GetValue("confirmChangePlayer");
+            _modal.Message = i18n.GetValue("confirmChangePlayerMessage");
+            _modal.CancelText = i18n.GetValue("cancel");
+            _modal.ExecuteText = i18n.GetValue("continue");
             _modal.CloseEvent = UdonEvent.Empty();
             _modal.ExecuteEvent = UdonEvent.New(this, nameof(SetAVProPlayerEvent));
             _modal.Open(1);
@@ -316,18 +315,18 @@ namespace Yamadev.YamaStream.UI
             }
             if (_controller.Stopped && !_controller.IsLoading || _modal == null) 
             {
-                _controller.SetMeOwner();
+                _controller.TakeOwnership();
                 _controller.PlayTrack(Track.New(_controller.VideoPlayerType, "", urlInputField.GetUrl()));
                 urlInputField.SetUrl(VRCUrl.Empty);
                 return; 
             }
             if (_modal != null)
             {
-                _modal.Title = I18n.GetValue("playUrl");
-                _modal.Message = I18n.GetValue("confirmPlayUrlMessage");
-                _modal.CancelText = I18n.GetValue("cancel");
-                _modal.ExecuteText = I18n.GetValue("confirmAddQueue");
-                _modal.Execute2Text = I18n.GetValue("confirmPlayUrl");
+                _modal.Title = i18n.GetValue("playUrl");
+                _modal.Message = i18n.GetValue("confirmPlayUrlMessage");
+                _modal.CancelText = i18n.GetValue("cancel");
+                _modal.ExecuteText = i18n.GetValue("confirmAddQueue");
+                _modal.Execute2Text = i18n.GetValue("confirmPlayUrl");
                 _modal.CloseEvent = UdonEvent.New(this, nameof(HideVideoPlayerSelector));
                 if (urlInputField == _urlInputField) _modal.ExecuteEvent = UdonEvent.New(this, nameof(AddUrlToQueueEvent));
                 else if (urlInputField == _urlInputFieldTop) _modal.ExecuteEvent = UdonEvent.New(this, nameof(AddUrlTopToQueueEvent));
@@ -365,7 +364,7 @@ namespace Yamadev.YamaStream.UI
         public void AddUrlToQueueEventBase(VRCUrlInputField urlInputField)
         {
             if (urlInputField == null) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.Queue.AddTrack(Track.New(GetVideoPlayerSelectorValue(), "", urlInputField.GetUrl()));
             urlInputField.SetUrl(VRCUrl.Empty);
             HideVideoPlayerSelector();
@@ -377,7 +376,7 @@ namespace Yamadev.YamaStream.UI
         public void PlayUrlEventBase(VRCUrlInputField urlInputField)
         {
             if (urlInputField == null) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.PlayTrack(Track.New(GetVideoPlayerSelectorValue(), "", urlInputField.GetUrl()));
             urlInputField.SetUrl(VRCUrl.Empty);
             HideVideoPlayerSelector();
@@ -387,19 +386,19 @@ namespace Yamadev.YamaStream.UI
         public void Play()
         {
             if (!CheckPermission()) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.Paused = false;
         }
         public void Pause()
         {
             if (!CheckPermission()) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.Paused = true;
         }
         public void Stop()
         {
             if (!CheckPermission()) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.Stopped = true;
         }
         public void ProgressDrag() => _progressDrag = true;
@@ -407,25 +406,25 @@ namespace Yamadev.YamaStream.UI
         {
             _progressDrag = false;
             if (_progress == null || !CheckPermission()) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.SetTime(_controller.Duration * _progress.value);
         }
         public void SetTimeByHelper()
         {
             if (_progressHelper == null || !CheckPermission()) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.SetTime(_controller.Duration * _progressHelper.Percent);
         }
         public void Loop()
         {
             if (!CheckPermission()) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.Loop = true;
         }
         public void LoopOff()
         {
             if (!CheckPermission()) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.Loop = false;
         }
 
@@ -441,7 +440,7 @@ namespace Yamadev.YamaStream.UI
             RepeatStatus status = _controller.Repeat.ToRepeatStatus();
             if (on) status.TurnOn(); 
             else status.TurnOff();
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.Repeat = status.ToVector3();
         }
 
@@ -452,7 +451,7 @@ namespace Yamadev.YamaStream.UI
             {
                 RepeatStatus status = _controller.Repeat.ToRepeatStatus();
                 status.SetStartTime(_controller.IsLive ? 0f : Mathf.Clamp(_controller.Duration * _repeatSlider.SliderLeft.value, 0f, _controller.Duration));
-                _controller.SetMeOwner();
+                _controller.TakeOwnership();
                 _controller.Repeat = status.ToVector3();
             }
             else _repeatSlider.SliderLeft.SetValueWithoutNotify(_controller.Repeat.ToRepeatStatus().GetStartTime() / _controller.Duration);
@@ -464,7 +463,7 @@ namespace Yamadev.YamaStream.UI
             {
                 RepeatStatus status = _controller.Repeat.ToRepeatStatus();
                 status.SetEndTime(_controller.IsLive ? 999999f : Mathf.Clamp(_controller.Duration * _repeatSlider.SliderRight.value, 0f, _controller.Duration));
-                _controller.SetMeOwner();
+                _controller.TakeOwnership();
                 _controller.Repeat = status.ToVector3();
             }
             else _repeatSlider.SliderRight.SetValueWithoutNotify(_controller.Repeat.ToRepeatStatus().GetEndTime() / _controller.Duration);
@@ -472,32 +471,33 @@ namespace Yamadev.YamaStream.UI
         public void SetShuffle()
         {
             if (!CheckPermission()) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.ShufflePlay = true;
         }
         public void SetShuffleOff()
         {
             if (!CheckPermission()) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.ShufflePlay = false;
         }
 
         public void Backward()
         {
             if (!CheckPermission()) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.Backward();
         }
         public void Forward()
         {
             if (!CheckPermission()) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.Forward();
         }
+
         public void SetSpeed()
         {
             if (!CheckPermission()) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             if (_speedSlider != null) _controller.Speed = _speedSlider.value / 20f;
         }
 
@@ -511,25 +511,31 @@ namespace Yamadev.YamaStream.UI
             if (_audioLinkOff == null || !_audioLinkOff.isOn) return;
             _controller.UseAudioLink = false;
         }
+
         public void Mute() => _controller.Mute = true;
         public void MuteOff() => _controller.Mute = false;
+
         public void SetVolume() => _controller.Volume = _volume.value;
         public void SetVolumeByHelper()
         {
             if (_volumeHelper != null) _controller.Volume = _volumeHelper.Percent;
         }
+
         public void Subtract50ms() => _controller.LocalDelay -= 0.05f;
         public void Subtract100ms() => _controller.LocalDelay -= 0.1f;
         public void Add50ms() => _controller.LocalDelay += 0.05f;
         public void Add100ms() => _controller.LocalDelay += 0.1f;
+
         public void SetEmission()
         {
             if (_emissionSlider != null) _controller.Emission = _emissionSlider.value;
         }
+
         public void SetPitch()
         {
             // if (_pitchSlider != null) _controller.Pitch = _pitchSlider.value;
         }
+
         public void SetMirrorInverse()
         {
             if (_mirrorInversion == null || !_mirrorInversion.isOn) return;
@@ -540,6 +546,7 @@ namespace Yamadev.YamaStream.UI
             if (_mirrorInversionOff == null || !_mirrorInversionOff.isOn) return;
             _controller.MirrorInverse = false;
         }
+
         public void SetMaxResolution144() => _controller.MaxResolution = 144;
         public void SetMaxResolution240() => _controller.MaxResolution = 240;
         public void SetMaxResolution360() => _controller.MaxResolution = 360;
@@ -548,57 +555,60 @@ namespace Yamadev.YamaStream.UI
         public void SetMaxResolution1080() => _controller.MaxResolution = 1080;
         public void SetMaxResolution2160() => _controller.MaxResolution = 2160;
         public void SetMaxResolution4320() => _controller.MaxResolution = 4320;
-        public void SetLanguageAuto() => SetLanguage(Utils.GetLocalLanguage());
+
+        public void SetLanguageAuto() => SetLanguage(null);
         public void SetLanguageJapanese() => SetLanguage("ja-JP");
         public void SetLanguageChineseChina() => SetLanguage("zh-CN");
         public void SetLanguageChineseTaiwan() => SetLanguage("zh-TW");
         public void SetLanguageKorean() => SetLanguage("ko-KR");
         public void SetLanguageEnglish() =>SetLanguage("en-US");
+
         public void SetLanguage(string language)
         {
-            I18n.SetLanguage(language);
+            i18n.SetLanguage(language);
             UpdateUI();
             UpdateTranslation();
             GeneratePlaylistView();
         }
+
         public void SetKaraokeModeOff()
         {
             if (!CheckPermission()) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.KaraokeMode = KaraokeMode.None;
         }
         public void SetKaraokeModeKaraoke()
         {
             if (!CheckPermission()) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.KaraokeMode = KaraokeMode.Karaoke;
         }
         public void SetKaraokeModeDance()
         {
             if (!CheckPermission()) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.KaraokeMode = KaraokeMode.Dance;
         }
         public void JoinKaraokeMembers()
         {
             if (_controller.IsKaraokeMember) return;
             _controller.KaraokeMembers = _controller.KaraokeMembers.Add(Networking.LocalPlayer.displayName);
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             if (_modal != null && _modal.IsActive) OpenKaraokeMemberModal();
         }
         public void LeaveKaraokeMembers()
         {
             if (!_controller.IsKaraokeMember) return;
             _controller.KaraokeMembers = _controller.KaraokeMembers.Remove(Networking.LocalPlayer.displayName);
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             if (_modal != null && _modal.IsActive) OpenKaraokeMemberModal();
         }
         public void OpenKaraokeMemberModal()
         {
             if (_modal == null || _controller.KaraokeMode == KaraokeMode.None) return;
             UdonEvent callback = _controller.IsKaraokeMember ? UdonEvent.New(this, nameof(LeaveKaraokeMembers)) : UdonEvent.New(this, nameof(JoinKaraokeMembers));
-            string executeText = _controller.IsKaraokeMember ? I18n.GetValue("leaveMember") : I18n.GetValue("joinMember");
-            _modal.Show(I18n.GetValue("karaokeMember"), string.Join("\n", _controller.KaraokeMembers), callback, I18n.GetValue("close"), executeText);
+            string executeText = _controller.IsKaraokeMember ? i18n.GetValue("leaveMember") : i18n.GetValue("joinMember");
+            _modal.Show(i18n.GetValue("karaokeMember"), string.Join("\n", _controller.KaraokeMembers), callback, i18n.GetValue("close"), executeText);
         }
 
         public void SetPermission()
@@ -612,7 +622,7 @@ namespace Yamadev.YamaStream.UI
                 PlayerPermission playerPermission = PlayerPermission.Viewer;
                 if (dropdown.value == 1) playerPermission = PlayerPermission.Editor;
                 if (dropdown.value == 0) playerPermission = PlayerPermission.Admin;
-                _controller.Permission.SetMeOwner();
+                _controller.Permission.TakeOwnership();
                 _controller.Permission.SetPermission(_permissionIndex, playerPermission);
             }
         }
@@ -636,7 +646,7 @@ namespace Yamadev.YamaStream.UI
                 if (cell.TryFind("Text", out var n) && n.TryGetComponentLocal(out Text name))
                     name.text = _controller.Playlists[_playlists.Indexes[i]].PlaylistName;
                 if (cell.TryFind("TrackCount", out var tr) && tr.TryGetComponentLocal(out Text trackCount))
-                    trackCount.text = playlist.Length > 0 ? $"{I18n.GetValue("total")} {playlist.Length} {I18n.GetValue("tracks")}" : string.Empty;
+                    trackCount.text = playlist.Length > 0 ? $"{i18n.GetValue("total")} {playlist.Length} {i18n.GetValue("tracks")}" : string.Empty;
                 if (cell.TryGetComponentLocal<IndexTrigger>(out var trigger)) trigger.SetProgramVariable("_varibaleObject", _playlists.Indexes[i]);
             }
         }
@@ -717,7 +727,7 @@ namespace Yamadev.YamaStream.UI
             if (!CheckPermission()) return;
             if (_playlistTracks == null || _playlistTrackIndex < 0) return;
 
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             if (_playlistTrackIndex < _controller.Queue.Length) _controller.Queue.Remove(_playlistTrackIndex);
         }
 
@@ -728,21 +738,21 @@ namespace Yamadev.YamaStream.UI
 
             Playlist playlist = _isHistoryPage ? _controller.History :
                 _playlistIndex >= 0 && _playlistIndex < _controller.Playlists.Length ? _controller.Playlists[_playlistIndex] : null;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.Queue.AddTrack(playlist.GetTrack(_playlistTrackIndex));
         }
 
         public void MoveUp()
         {
             if (!CheckPermission()) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.Queue.MoveUp(_playlistTrackIndex);
         }
 
         public void MoveDown()
         {
             if (!CheckPermission()) return;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             _controller.Queue.MoveDown(_playlistTrackIndex);
         }
         public void PlayPlaylistTrack()
@@ -752,7 +762,7 @@ namespace Yamadev.YamaStream.UI
 
             Playlist playlist = _isHistoryPage ? _controller.History : 
                 _playlistIndex >= 0 && _playlistIndex < _controller.Playlists.Length ? _controller.Playlists[_playlistIndex] : null;
-            _controller.SetMeOwner();
+            _controller.TakeOwnership();
             if (playlist != null) _controller.PlayTrack(playlist, _playlistTrackIndex);
         }
 
@@ -805,13 +815,13 @@ namespace Yamadev.YamaStream.UI
             if (_repeat != null) _repeat.SetIsOnWithoutNotify(_controller.Repeat.ToRepeatStatus().IsOn());
             if (_repeatSlider != null && _repeatStartTime != null && _repeatEndTime != null)
             {
-                string notSetText = I18n.GetValue("notSet");
+                string notSetText = i18n.GetValue("notSet");
                 string startText = _controller.Repeat.ToRepeatStatus().GetStartTime() == 0 ? notSetText : TimeSpan.FromSeconds(_controller.Repeat.ToRepeatStatus().GetStartTime()).ToString(_timeFormat);
                 string endText = _controller.Repeat.ToRepeatStatus().GetEndTime() >= _controller.Duration || _controller.IsLive ? notSetText : TimeSpan.FromSeconds(_controller.Repeat.ToRepeatStatus().GetEndTime()).ToString(_timeFormat);
                 _repeatSlider.SliderLeft.SetValueWithoutNotify(_controller.IsLive || !_controller.IsPlaying ? 0f : Mathf.Clamp(_controller.Repeat.ToRepeatStatus().GetStartTime() / _controller.Duration, 0f, 1f));
                 _repeatSlider.SliderRight.SetValueWithoutNotify(_controller.IsLive || !_controller.IsPlaying ? 1f : Mathf.Clamp(_controller.Repeat.ToRepeatStatus().GetEndTime() / _controller.Duration, 0f, 1f));
-                _repeatStartTime.text = $"{I18n.GetValue("start")}(A): {startText}";
-                _repeatEndTime.text = $"{I18n.GetValue("end")}(B): {endText}";
+                _repeatStartTime.text = $"{i18n.GetValue("start")}(A): {startText}";
+                _repeatEndTime.text = $"{i18n.GetValue("end")}(B): {endText}";
             }
             if (_localDelayText != null) _localDelayText.text = (Mathf.Round(_controller.LocalDelay * 100) / 100).ToString();
             if (_inorderPlay != null) _inorderPlay.gameObject.SetActive(!_controller.ShufflePlay);
@@ -867,19 +877,19 @@ namespace Yamadev.YamaStream.UI
             switch (videoError)
             {
                 case VideoError.Unknown:
-                    _message.text = I18n.GetValue("unknownErrorMessage");
+                    _message.text = i18n.GetValue("unknownErrorMessage");
                     break;
                 case VideoError.InvalidURL:
-                    _message.text = I18n.GetValue("invalidUrlMessage");
+                    _message.text = i18n.GetValue("invalidUrlMessage");
                     break;
                 case VideoError.AccessDenied:
-                    _message.text = I18n.GetValue("accessDeniedMessage");
+                    _message.text = i18n.GetValue("accessDeniedMessage");
                     break;
                 case VideoError.RateLimited:
-                    _message.text = I18n.GetValue("rateLimitedMessage");
+                    _message.text = i18n.GetValue("rateLimitedMessage");
                     break;
                 case VideoError.PlayerError:
-                    _message.text = I18n.GetValue("playerErrorMessage");
+                    _message.text = i18n.GetValue("playerErrorMessage");
                     break;
                 default:
                     break;
@@ -890,7 +900,7 @@ namespace Yamadev.YamaStream.UI
         {
             if (_loading != null) _loading.SetActive(_controller.IsLoading);
             if (_animator != null) _animator.SetBool("Loading", _controller.IsLoading);
-            if (_message != null) _message.text = I18n.GetValue("videoLoadingMessage");
+            if (_message != null) _message.text = i18n.GetValue("videoLoadingMessage");
         }
 
         public void GeneratePermissionView()
@@ -952,63 +962,63 @@ namespace Yamadev.YamaStream.UI
 
         public void UpdateTranslation()
         {
-            if (_returnToMain != null) _returnToMain.text = I18n.GetValue("returnToMain");
-            if (_inputUrl != null) _inputUrl.text = I18n.GetValue("inputUrl");
-            if (_loopPlayText != null) _loopPlayText.text = I18n.GetValue("loop");
-            if (_loopPlayText2 != null) _loopPlayText2.text = I18n.GetValue("loop");
-            if (_shufflePlayText != null) _shufflePlayText.text = I18n.GetValue("shuffle");
-            if (_shufflePlayText2 != null) _shufflePlayText2.text = I18n.GetValue("shuffle");
-            if (_options != null) _options.text = I18n.GetValue("options");
-            if (_settings != null) _settings.text = I18n.GetValue("settings");
-            if (_karaokeMember != null) _karaokeMember.text = I18n.GetValue("karaokeMember");
-            if (_playlist != null) _playlist.text = I18n.GetValue("playlist");
-            if (_videoSearch != null) _videoSearch.text = I18n.GetValue("videoSearch");
-            if (_version != null) _version.text = I18n.GetValue("version");
-            if (_settingsTitle != null) _settingsTitle.text = I18n.GetValue("settingsTitle");
-            if (_playback != null) _playback.text = I18n.GetValue("playback");
-            if (_videoAndAudio != null) _videoAndAudio.text = I18n.GetValue("videoAndAudio");
-            if (_other != null) _other.text = I18n.GetValue("other");
-            if (_videoPlayer != null) _videoPlayer.text = $"{I18n.GetValue("videoPlayer")}<size=100>(Global)</size>";
-            if (_videoPlayerDesc != null) _videoPlayerDesc.text = I18n.GetValue("videoPlayerDesc");
-            if (_playbackSpeed != null) _playbackSpeed.text = $"{I18n.GetValue("playbackSpeed")}<size=100>(Global)</size>";
-            if (_playbackSpeedDesc != null) _playbackSpeedDesc.text = I18n.GetValue("playbackSpeedDesc");
-            if (_slower != null) _slower.text = I18n.GetValue("slower");
-            if (_faster != null) _faster.text = I18n.GetValue("faster");
-            if (_repeatPlay != null) _repeatPlay.text = $"{I18n.GetValue("repeatPlay")}<size=100>(Global)</size>";
-            if (_repeatPlayDesc != null) _repeatPlayDesc.text = I18n.GetValue("repeatPlayDesc");
-            if (_repeatOnText != null) _repeatOnText.text = I18n.GetValue("repeatOn");
-            if (_repeatOffText != null) _repeatOffText.text = I18n.GetValue("repeatOff");
-            if (_maxResolution != null) _maxResolution.text = I18n.GetValue("maxResolution");
-            if (_maxResolutionDesc != null) _maxResolutionDesc.text = I18n.GetValue("maxResolutionDesc");
-            if (_mirrorInversionTitle != null) _mirrorInversionTitle.text = I18n.GetValue("mirrorInversion");
-            if (_mirrorInversionDesc != null) _mirrorInversionDesc.text = I18n.GetValue("mirrorInversionDesc");
-            if (_mirrorInversionOnText != null) _mirrorInversionOnText.text = I18n.GetValue("mirrorInversionOn");
-            if (_mirrorInversionOffText != null) _mirrorInversionOffText.text = I18n.GetValue("mirrorInversionOff");
-            if (_brightness != null) _brightness.text = I18n.GetValue("brightness");
-            if (_brightnessDesc != null) _brightnessDesc.text = I18n.GetValue("brightnessDesc");
-            if (_audioLinkDesc != null) _audioLinkDesc.text = I18n.GetValue("audioLinkDesc");
-            if (_audioLinkOnText != null) _audioLinkOnText.text = I18n.GetValue("audioLinkOn");
-            if (_audioLinkOffText != null) _audioLinkOffText.text = I18n.GetValue("audioLinkOff");
-            if (_karaokeModeText != null) _karaokeModeText.text = $"{I18n.GetValue("karaokeMode")}<size=100>(Global)</size>";
-            if (_karaokeModeDesc != null) _karaokeModeDesc.text = I18n.GetValue("karaokeModeDesc");
-            if (_karaokeModeOnText != null) _karaokeModeOnText.text = I18n.GetValue("karaokeModeOn");
-            if (_danceModeOnText != null) _danceModeOnText.text = I18n.GetValue("danceModeOn");
-            if (_karaokeModeOffText != null) _karaokeModeOffText.text = I18n.GetValue("karaokeModeOff");
-            if (_localDelay != null) _localDelay.text = I18n.GetValue("localOffset");
-            if (_localDelayDesc != null) _localDelayDesc.text = I18n.GetValue("localOffsetDesc");
-            if (_languageSelect != null) _languageSelect.text = I18n.GetValue("languageSelect");
+            if (_returnToMain != null) _returnToMain.text = i18n.GetValue("returnToMain");
+            if (_inputUrl != null) _inputUrl.text = i18n.GetValue("inputUrl");
+            if (_loopPlayText != null) _loopPlayText.text = i18n.GetValue("loop");
+            if (_loopPlayText2 != null) _loopPlayText2.text = i18n.GetValue("loop");
+            if (_shufflePlayText != null) _shufflePlayText.text = i18n.GetValue("shuffle");
+            if (_shufflePlayText2 != null) _shufflePlayText2.text = i18n.GetValue("shuffle");
+            if (_options != null) _options.text = i18n.GetValue("options");
+            if (_settings != null) _settings.text = i18n.GetValue("settings");
+            if (_karaokeMember != null) _karaokeMember.text = i18n.GetValue("karaokeMember");
+            if (_playlist != null) _playlist.text = i18n.GetValue("playlist");
+            if (_videoSearch != null) _videoSearch.text = i18n.GetValue("videoSearch");
+            if (_version != null) _version.text = i18n.GetValue("version");
+            if (_settingsTitle != null) _settingsTitle.text = i18n.GetValue("settingsTitle");
+            if (_playback != null) _playback.text = i18n.GetValue("playback");
+            if (_videoAndAudio != null) _videoAndAudio.text = i18n.GetValue("videoAndAudio");
+            if (_other != null) _other.text = i18n.GetValue("other");
+            if (_videoPlayer != null) _videoPlayer.text = $"{i18n.GetValue("videoPlayer")}<size=100>(Global)</size>";
+            if (_videoPlayerDesc != null) _videoPlayerDesc.text = i18n.GetValue("videoPlayerDesc");
+            if (_playbackSpeed != null) _playbackSpeed.text = $"{i18n.GetValue("playbackSpeed")}<size=100>(Global)</size>";
+            if (_playbackSpeedDesc != null) _playbackSpeedDesc.text = i18n.GetValue("playbackSpeedDesc");
+            if (_slower != null) _slower.text = i18n.GetValue("slower");
+            if (_faster != null) _faster.text = i18n.GetValue("faster");
+            if (_repeatPlay != null) _repeatPlay.text = $"{i18n.GetValue("repeatPlay")}<size=100>(Global)</size>";
+            if (_repeatPlayDesc != null) _repeatPlayDesc.text = i18n.GetValue("repeatPlayDesc");
+            if (_repeatOnText != null) _repeatOnText.text = i18n.GetValue("repeatOn");
+            if (_repeatOffText != null) _repeatOffText.text = i18n.GetValue("repeatOff");
+            if (_maxResolution != null) _maxResolution.text = i18n.GetValue("maxResolution");
+            if (_maxResolutionDesc != null) _maxResolutionDesc.text = i18n.GetValue("maxResolutionDesc");
+            if (_mirrorInversionTitle != null) _mirrorInversionTitle.text = i18n.GetValue("mirrorInversion");
+            if (_mirrorInversionDesc != null) _mirrorInversionDesc.text = i18n.GetValue("mirrorInversionDesc");
+            if (_mirrorInversionOnText != null) _mirrorInversionOnText.text = i18n.GetValue("mirrorInversionOn");
+            if (_mirrorInversionOffText != null) _mirrorInversionOffText.text = i18n.GetValue("mirrorInversionOff");
+            if (_brightness != null) _brightness.text = i18n.GetValue("brightness");
+            if (_brightnessDesc != null) _brightnessDesc.text = i18n.GetValue("brightnessDesc");
+            if (_audioLinkDesc != null) _audioLinkDesc.text = i18n.GetValue("audioLinkDesc");
+            if (_audioLinkOnText != null) _audioLinkOnText.text = i18n.GetValue("audioLinkOn");
+            if (_audioLinkOffText != null) _audioLinkOffText.text = i18n.GetValue("audioLinkOff");
+            if (_karaokeModeText != null) _karaokeModeText.text = $"{i18n.GetValue("karaokeMode")}<size=100>(Global)</size>";
+            if (_karaokeModeDesc != null) _karaokeModeDesc.text = i18n.GetValue("karaokeModeDesc");
+            if (_karaokeModeOnText != null) _karaokeModeOnText.text = i18n.GetValue("karaokeModeOn");
+            if (_danceModeOnText != null) _danceModeOnText.text = i18n.GetValue("danceModeOn");
+            if (_karaokeModeOffText != null) _karaokeModeOffText.text = i18n.GetValue("karaokeModeOff");
+            if (_localDelay != null) _localDelay.text = i18n.GetValue("localOffset");
+            if (_localDelayDesc != null) _localDelayDesc.text = i18n.GetValue("localOffsetDesc");
+            if (_languageSelect != null) _languageSelect.text = i18n.GetValue("languageSelect");
 
-            if (_videoSearchTitle != null) _videoSearchTitle.text = I18n.GetValue("videoSearchTitle");
-            if (_inputKeyword != null) _inputKeyword.text = I18n.GetValue("inputKeyword");
-            if (_inLoading != null) _inLoading.text = I18n.GetValue("inLoading");
+            if (_videoSearchTitle != null) _videoSearchTitle.text = i18n.GetValue("videoSearchTitle");
+            if (_inputKeyword != null) _inputKeyword.text = i18n.GetValue("inputKeyword");
+            if (_inLoading != null) _inLoading.text = i18n.GetValue("inLoading");
 
-            if (_playlistTitle != null) _playlistTitle.text = I18n.GetValue("playlistTitle");
-            if (_playQueue != null) _playQueue.text = I18n.GetValue("playQueue");
-            if (_playHistory != null) _playHistory.text = I18n.GetValue("playHistory");
-            if (_addVideoLink != null) _addVideoLink.text = I18n.GetValue("addVideoLink");
-            if (_addLiveLink != null) _addLiveLink.text = I18n.GetValue("addLiveLink");
-            if (_permissionTitle != null) _permissionTitle.text = I18n.GetValue("permission");
-            if (_permissionDesc != null) _permissionDesc.text = $"<color=#64B5F6>Owner</color>\t\t\t{I18n.GetValue("ownerPermission")}\r\n<color=#BA68C8>Admin</color>\t\t\t{I18n.GetValue("adminPermission")}\r\n<color=#81C784>Editor</color>\t\t\t{I18n.GetValue("editorPermission")}\r\n<color=#FFB74D>Viewer</color>\t\t\t{I18n.GetValue("viewerPermission")}";
+            if (_playlistTitle != null) _playlistTitle.text = i18n.GetValue("playlistTitle");
+            if (_playQueue != null) _playQueue.text = i18n.GetValue("playQueue");
+            if (_playHistory != null) _playHistory.text = i18n.GetValue("playHistory");
+            if (_addVideoLink != null) _addVideoLink.text = i18n.GetValue("addVideoLink");
+            if (_addLiveLink != null) _addLiveLink.text = i18n.GetValue("addLiveLink");
+            if (_permissionTitle != null) _permissionTitle.text = i18n.GetValue("permission");
+            if (_permissionDesc != null) _permissionDesc.text = $"<color=#64B5F6>Owner</color>\t\t\t{i18n.GetValue("ownerPermission")}\r\n<color=#BA68C8>Admin</color>\t\t\t{i18n.GetValue("adminPermission")}\r\n<color=#81C784>Editor</color>\t\t\t{i18n.GetValue("editorPermission")}\r\n<color=#FFB74D>Viewer</color>\t\t\t{i18n.GetValue("viewerPermission")}";
 
             if (_playlistTracks != null)
             {
@@ -1018,12 +1028,12 @@ namespace Yamadev.YamaStream.UI
                     Transform cell = scrollRectTransform.GetChild(i);
                     if (cell.transform.TryFind("Actions", out var actions))
                     {
-                        if (actions.TryFind("Return/Text", out var back) && back.TryGetComponentLocal<Text>(out var backText)) backText.text = I18n.GetValue("back");
-                        if (actions.TryFind("Up/Text", out var up) && up.TryGetComponentLocal<Text>(out var upText)) upText.text = I18n.GetValue("moveUp");
-                        if (actions.TryFind("Down/Text", out var down) && down.TryGetComponentLocal<Text>(out var downText)) downText.text = I18n.GetValue("moveDown");
-                        if (actions.TryFind("Remove/Text", out var remove) && remove.TryGetComponentLocal<Text>(out var removeText)) removeText.text = I18n.GetValue("remove");
-                        if (actions.TryFind("Add/Text", out var addQueue) && addQueue.TryGetComponentLocal<Text>(out var addQueueText)) addQueueText.text = I18n.GetValue("addQueue");
-                        if (actions.TryFind("Play/Text", out var play) && play.TryGetComponentLocal<Text>(out var playText)) playText.text = I18n.GetValue("playVideo");
+                        if (actions.TryFind("Return/Text", out var back) && back.TryGetComponentLocal<Text>(out var backText)) backText.text = i18n.GetValue("back");
+                        if (actions.TryFind("Up/Text", out var up) && up.TryGetComponentLocal<Text>(out var upText)) upText.text = i18n.GetValue("moveUp");
+                        if (actions.TryFind("Down/Text", out var down) && down.TryGetComponentLocal<Text>(out var downText)) downText.text = i18n.GetValue("moveDown");
+                        if (actions.TryFind("Remove/Text", out var remove) && remove.TryGetComponentLocal<Text>(out var removeText)) removeText.text = i18n.GetValue("remove");
+                        if (actions.TryFind("Add/Text", out var addQueue) && addQueue.TryGetComponentLocal<Text>(out var addQueueText)) addQueueText.text = i18n.GetValue("addQueue");
+                        if (actions.TryFind("Play/Text", out var play) && play.TryGetComponentLocal<Text>(out var playText)) playText.text = i18n.GetValue("playVideo");
                     }
                 }
             }

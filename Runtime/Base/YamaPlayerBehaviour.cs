@@ -1,3 +1,4 @@
+using UnityEngine;
 using UdonSharp;
 using VRC.SDKBase;
 
@@ -5,12 +6,15 @@ namespace Yamadev.YamaStream
 {
     public abstract class YamaPlayerBehaviour : UdonSharpBehaviour
     {
+        const string _debugPrefix = "[<color=#EF6291>YamaStream</color>]";
+
+        protected bool _isLocalPlayerValid => Utilities.IsValid(Networking.LocalPlayer);
+
         protected VRCPlayerApi _localPlayer
         {
             get
             {
-                if (Utilities.IsValid(Networking.LocalPlayer))
-                    return Networking.LocalPlayer;
+                if (_isLocalPlayerValid) return Networking.LocalPlayer;
                 return null;
             }
         }
@@ -21,12 +25,21 @@ namespace Yamadev.YamaStream
 
         protected bool _isMaster => _localPlayer != null && _localPlayer.isMaster;
 
-        protected bool isInVR => _localPlayer != null && _localPlayer.IsUserInVR();
+        protected bool _isInVR => _localPlayer != null && _localPlayer.IsUserInVR();
 
-        public virtual void TakeOwnership()
+        public void TakeOwnership()
         {
-            if (_localPlayer == null) return;
+            if (!_isLocalPlayerValid) return;
             if (!_isObjectOwner) Networking.SetOwner(_localPlayer, gameObject);
         }
+
+        public void SyncVariables()
+        {
+            if (!_isLocalPlayerValid) return;
+            TakeOwnership();
+            RequestSerialization();
+        }
+
+        public void PrintLog(string message) => Debug.Log($"{_debugPrefix} {message}");
     }
 }
