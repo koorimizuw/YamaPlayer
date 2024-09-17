@@ -3,7 +3,7 @@ using UdonSharp;
 
 namespace Yamadev.YamaStream
 {
-    public abstract class Playlist : UdonSharpBehaviour
+    public abstract class Playlist : Listener
     {
         public virtual string PlaylistName { get; }
         public virtual int Length { get; }

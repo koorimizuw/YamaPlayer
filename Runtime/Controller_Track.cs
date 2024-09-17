@@ -13,17 +13,12 @@ namespace Yamadev.YamaStream
         Track _track;
         UdonEvent _resolveTrack;
 
-        void initializeTrack()
-        {
-            _track = Track.New(_videoPlayerType, string.Empty, VRCUrl.Empty);
-            _resolveTrack = UdonEvent.New(this, nameof(Resolve));
-        }
-
         public Track Track
         {
             get
             {
-                if (!_initialized) initialize();
+                if (!Utilities.IsValid(_track))
+                    _track = Track.New(_videoPlayerType, string.Empty, VRCUrl.Empty);
                 return _track;
             }
             set
@@ -37,7 +32,8 @@ namespace Yamadev.YamaStream
         {
             get
             {
-                if (!_initialized) initialize();
+                if (!Utilities.IsValid(_resolveTrack)) 
+                    _resolveTrack = UdonEvent.New(this, nameof(Resolve));
                 return _resolveTrack;
             }
             set => _resolveTrack = value;
@@ -50,10 +46,10 @@ namespace Yamadev.YamaStream
             if (Track.GetUrl() != string.Empty) VideoPlayerHandle.Stop();
             VideoPlayerType = track.GetPlayer();
             Track = track;
-            _resolveTrack.Invoke();
-            _loading = true;
+            ResolveTrack.Invoke();
             if (Networking.IsOwner(gameObject) && !_isLocal && !isReload) RequestSerialization();
             foreach (Listener listener in _listeners) listener.OnUrlChanged();
+            PrintLog($"Play track: {track.GetUrl()}.");
         }
         public void Resolve() => VideoPlayerHandle.PlayUrl(Track.GetVRCUrl());
 

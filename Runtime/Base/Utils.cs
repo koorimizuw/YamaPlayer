@@ -1,26 +1,25 @@
 ﻿
 using System;
-using UdonSharp;
 using UnityEngine;
-using UnityEngine.UI;
 using VRC.SDKBase;
 
 namespace Yamadev.YamaStream
 {
     public static class Utils
     {
-        public static string Protocol(this string url)
+        public static string GetProtocol(this string url)
         {
             int index = url.IndexOf("://");
             if (index == -1) return string.Empty;
             return url.Substring(0, index).ToLower();
         }
-        public static string Protocol(this VRCUrl url) => url.Get().Protocol();
+        public static string Protocol(this VRCUrl url) => url.Get().GetProtocol();
+
         public static bool IsValidUrl(this string url)
         {
             if (string.IsNullOrEmpty(url)) return false;
             string[] vaildProtocols = { "http", "https", "rtsp", "rtmp", "rtspt", "rtspu", "rtmps", "rtsps" };
-            return Array.IndexOf(vaildProtocols, url.Protocol()) >= 0;
+            return Array.IndexOf(vaildProtocols, url.GetProtocol()) >= 0;
         }
         public static bool IsValid(this VRCUrl url) => url.Get().IsValidUrl();
 
@@ -133,17 +132,6 @@ namespace Yamadev.YamaStream
             return arr;
         }
 
-        public static void SetMeOwner(this UdonSharpBehaviour udon)
-        {
-            if (!Networking.IsOwner(udon.gameObject)) Networking.SetOwner(Networking.LocalPlayer, udon.gameObject);
-        }
-
-        public static void SyncVariables(this UdonSharpBehaviour udon)
-        {
-            udon.SetMeOwner();
-            udon.RequestSerialization();
-        }
-
         public static Vector3 GetMousePosition(VRCPlayerApi.TrackingDataType type = VRCPlayerApi.TrackingDataType.Head)
         {
             var tracking = Networking.LocalPlayer.GetTrackingData(type);
@@ -170,26 +158,6 @@ namespace Yamadev.YamaStream
             for (int i = 0; i < arr.Length; i++)
                 arr[i] = value;
             return arr;
-        }
-
-        public static string GetLocalLanguage()
-        {
-            TimeZoneInfo tz = TimeZoneInfo.Local;
-            switch (tz.Id)
-            {
-                case "Tokyo Standard Time":
-                    return "ja-JP";
-                case "Taipei Standard Time":
-                    return "zh-TW";
-                case "China Standard Time":
-                    return "zh-CN";
-                case "Korea Standard Time":
-                    return "ko-KR";
-                case "North Korea Standard Time":
-                    return "ko-KR";
-                default:
-                    return "en-US";
-            }
         }
 
         public static bool PickUpInHand(this VRCPlayerApi player)

@@ -4,7 +4,7 @@ using VRC.SDK3.Components.Video;
 
 namespace Yamadev.YamaStream
 {
-    public abstract class Listener : UdonSharpBehaviour
+    public abstract class Listener : YamaPlayerBehaviour
     {
         #region Video Event
         public override void OnVideoPlay() { }

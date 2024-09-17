@@ -16,7 +16,6 @@ namespace Yamadev.YamaStream.Script
         YamaPlayerController _target;
         UIController _uiController;
         UIEditor _uiEditor;
-        bool _disableUI;
         bool _globalSync;
 
         void OnEnable()
@@ -64,20 +63,6 @@ namespace Yamadev.YamaStream.Script
                 }
                 Styles.DrawDivider();
             }
-
-            VRCUiShape uiSharp = _uiController.GetComponentInChildren<VRCUiShape>(true);
-            if (uiSharp == null) return;
-
-            _disableUI = !uiSharp.gameObject.activeSelf;
-            _disableUI = EditorGUILayout.Toggle(Localization.Get("disableUI"), _disableUI);
-            uiSharp.gameObject.SetActive(!_disableUI);
-            if (_disableUI)
-            {
-                EditorGUILayout.Space(12f);
-                EditorGUILayout.HelpBox(Localization.Get("shouldEnableUIFirst"), MessageType.Info);
-                return;
-            }
-            Styles.DrawDivider();
 
             _uiEditor.DrawUISettings();
 

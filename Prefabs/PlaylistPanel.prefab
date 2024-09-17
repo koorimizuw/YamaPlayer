@@ -5208,8 +5208,9 @@ MonoBehaviour:
   _translation: {fileID: 4900000, guid: 02e2b6ce10f26f94fb504aba7ccd2bfe, type: 3}
   _updateLogs: {fileID: 4900000, guid: 011c1aa791634cf45b66a6811ad47c8a, type: 3}
   _disableUIOnPickUp: 1
+  _font: {fileID: 0}
   _primaryColor: {r: 0.9372549, g: 0.38431373, b: 0.5686275, a: 1}
-  _secondaryColor: {r: 0.96862745, g: 0.7294118, b: 0.8117647, a: 0.12109375}
+  _secondaryColor: {r: 0.9686275, g: 0.7294118, b: 0.8117647, a: 0.1215686}
   _ownerColor: {r: 0.39215687, g: 0.70980394, b: 0.9647059, a: 1}
   _adminColor: {r: 0.7294118, g: 0.40784314, b: 0.78431374, a: 1}
   _editorColor: {r: 0.5058824, g: 0.78039217, b: 0.5176471, a: 1}
@@ -5242,6 +5243,9 @@ MonoBehaviour:
   _volumeTooltip: {fileID: 0}
   _pitchSlider: {fileID: 0}
   _pitchText: {fileID: 0}
+  _audioLinkSettings: {fileID: 0}
+  _audioLinkOn: {fileID: 0}
+  _audioLinkOff: {fileID: 0}
   _playlistSelector: {fileID: 5313014072087675697}
   _playlists: {fileID: 390868765318500462}
   _playlistName: {fileID: 1506682586023338984}
@@ -5321,6 +5325,9 @@ MonoBehaviour:
   _mirrorInversionOffText: {fileID: 0}
   _brightness: {fileID: 0}
   _brightnessDesc: {fileID: 0}
+  _audioLinkDesc: {fileID: 0}
+  _audioLinkOnText: {fileID: 0}
+  _audioLinkOffText: {fileID: 0}
   _karaokeModeText: {fileID: 0}
   _karaokeModeDesc: {fileID: 0}
   _karaokeModeOnText: {fileID: 0}

@@ -37,7 +37,7 @@ namespace Yamadev.YamaStream
         {
             _playlistLink = url;
             LoadPlaylist();
-            this.SyncVariables();
+            SyncVariables();
         }
 
         public void LoadPlaylist()

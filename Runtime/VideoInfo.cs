@@ -44,6 +44,8 @@ namespace Yamadev.YamaStream
             {
                 _info.SetValue(urlStr, Utils.FindSubString(result.Result, new string[] { "\"name\":\"" }, '"'));
             }
+            else _info.SetValue(urlStr, string.Empty);
+
             if (_controller.Track.GetTitle() == string.Empty)
             {
                 Track track = _controller.Track;

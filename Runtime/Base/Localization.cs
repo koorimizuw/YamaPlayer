@@ -2,6 +2,7 @@
 using UdonSharp;
 using VRC.SDK3.Data;
 using UnityEngine;
+using System;
 
 namespace Yamadev.YamaStream
 {
@@ -14,7 +15,7 @@ namespace Yamadev.YamaStream
             object[] result = new object[] { null, null };
             if (VRCJson.TryDeserializeFromJson(translation, out DataToken data) &&
                 data.TokenType == TokenType.DataDictionary) result[0] = data.DataDictionary;
-            result[1] = Utils.GetLocalLanguage();
+            result[1] = LocalizationExtentions.GetLanguageByTimeZone();
             return (Localization)(object)result;
         }
     }
@@ -30,9 +31,27 @@ namespace Yamadev.YamaStream
             return string.Empty;
         }
 
-        public static void SetLanguage(this Localization _i18n, string language)
+        public static void SetLanguage(this Localization _i18n, string language) =>
+            ((object[])(object)_i18n)[1] = string.IsNullOrEmpty(language) ? GetLanguageByTimeZone() : language;
+
+        public static string GetLanguageByTimeZone()
         {
-            ((object[])(object)_i18n)[1] = language;
+            TimeZoneInfo tz = TimeZoneInfo.Local;
+            switch (tz.Id)
+            {
+                case "Tokyo Standard Time":
+                    return "ja-JP";
+                case "Taipei Standard Time":
+                    return "zh-TW";
+                case "China Standard Time":
+                    return "zh-CN";
+                case "Korea Standard Time":
+                    return "ko-KR";
+                case "North Korea Standard Time":
+                    return "ko-KR";
+                default:
+                    return "en-US";
+            }
         }
     }
 }

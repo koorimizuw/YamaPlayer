@@ -8,7 +8,7 @@ using VRC.SDKBase;
 namespace Yamadev.YamaStream
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
-    public class Permission : UdonSharpBehaviour
+    public class Permission : YamaPlayerBehaviour
     {
         [SerializeField] Controller _controller;
         [SerializeField] PlayerPermission _defaultPermission = PlayerPermission.Editor;
@@ -38,7 +38,8 @@ namespace Yamadev.YamaStream
             }
         }
 
-        public PlayerPermission PlayerPermission => GetPermissionByPlayerId(Networking.LocalPlayer.playerId);
+        public PlayerPermission PlayerPermission =>
+            _isLocalPlayerValid ? GetPermissionByPlayerId(_localPlayer.playerId) : PlayerPermission.Viewer;
 
         DataDictionary initlizePlayerPermission(VRCPlayerApi player)
         {
@@ -50,29 +51,29 @@ namespace Yamadev.YamaStream
 
         void Initialize()
         {
-            if (Networking.LocalPlayer == null) return;
-            _permission.Add(Networking.LocalPlayer.playerId.ToString(), initlizePlayerPermission(Networking.LocalPlayer));
+            if (_localPlayer == null) return;
+            _permission.Add(_localPlayer.playerId.ToString(), initlizePlayerPermission(_localPlayer));
             _initialized = true;
             PermissionData = _permission;
-            this.SyncVariables();
+            SyncVariables();
         }
 
         public override void OnPlayerJoined(VRCPlayerApi player)
         {
-            if (!Networking.IsOwner(gameObject)) return;
+            if (!_isObjectOwner) return;
             if (_permission.ContainsKey(player.playerId.ToString())) return;
             _permission.Add(player.playerId.ToString(), initlizePlayerPermission(player));
             PermissionData = _permission;
-            this.SyncVariables();
+            SyncVariables();
         }
 
         public override void OnPlayerLeft(VRCPlayerApi player)
         {
-            if (!Networking.IsOwner(gameObject)) return;
+            if (!_isObjectOwner) return;
             if (!_permission.ContainsKey(player.playerId.ToString())) return;
             _permission.Remove(player.playerId.ToString());
             PermissionData = _permission;
-            this.SyncVariables();
+            SyncVariables();
         }
 
         public override void OnPreSerialization()
@@ -101,7 +102,7 @@ namespace Yamadev.YamaStream
             int value = (int)permission;
             _permission[key].DataDictionary["permission"] = value;
             PermissionData = _permission;
-            this.SyncVariables();
+            SyncVariables();
         }
 
         public PlayerPermission GetPermissionByPlayerId(int playerId)

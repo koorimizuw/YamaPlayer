@@ -106,6 +106,7 @@ namespace Yamadev.YamaStream
                 UpdateAudio();
                 UpdateAudioLink();
                 foreach (Listener listener in _listeners) listener.OnVolumeChanged();
+                PrintLog($"Volume changed {_volume * 100}%.");
             }
         }
 
@@ -118,6 +119,8 @@ namespace Yamadev.YamaStream
                 UpdateAudio();
                 UpdateAudioLink();
                 foreach (Listener listener in _listeners) listener.OnMuteChanged();
+                if (_mute) PrintLog($"Muted.");
+                else PrintLog($"Mute off.");
             }
         }
 

@@ -87,7 +87,7 @@ namespace Yamadev.YamaStream
 
         public void SendEvent()
         {
-            if (Networking.IsOwner(_controller.gameObject) && !_controller.IsLocal) this.SyncVariables();
+            if (_isObjectOwner && !_controller.IsLocal) SyncVariables();
             if (_isQueue) _controller.SendCustomVideoEvent(nameof(Listener.OnQueueUpdated));
             if (_isHistory) _controller.SendCustomVideoEvent(nameof(Listener.OnHistoryUpdated));
         }
