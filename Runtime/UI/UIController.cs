@@ -591,16 +591,16 @@ namespace Yamadev.YamaStream.UI
         }
         public void JoinKaraokeMembers()
         {
-            if (_controller.IsKaraokeMember) return;
-            _controller.KaraokeMembers = _controller.KaraokeMembers.Add(Networking.LocalPlayer.displayName);
+            if (_controller.KaraokeMode == KaraokeMode.None || _controller.IsKaraokeMember) return;
             _controller.TakeOwnership();
+            _controller.KaraokeMembers = _controller.KaraokeMembers.Add(Networking.LocalPlayer.displayName);
             if (_modal != null && _modal.IsActive) OpenKaraokeMemberModal();
         }
         public void LeaveKaraokeMembers()
         {
-            if (!_controller.IsKaraokeMember) return;
-            _controller.KaraokeMembers = _controller.KaraokeMembers.Remove(Networking.LocalPlayer.displayName);
+            if (_controller.KaraokeMode == KaraokeMode.None || !_controller.IsKaraokeMember) return;
             _controller.TakeOwnership();
+            _controller.KaraokeMembers = _controller.KaraokeMembers.Remove(Networking.LocalPlayer.displayName);
             if (_modal != null && _modal.IsActive) OpenKaraokeMemberModal();
         }
         public void OpenKaraokeMemberModal()
@@ -867,6 +867,7 @@ namespace Yamadev.YamaStream.UI
             if (_karaokeModeKaraoke != null) _karaokeModeKaraoke.SetIsOnWithoutNotify(_controller.KaraokeMode == KaraokeMode.Karaoke);
             if (_karaokeModeDance != null) _karaokeModeDance.SetIsOnWithoutNotify(_controller.KaraokeMode == KaraokeMode.Dance);
             if (_karaokeModal != null) _karaokeModal.SetActive(_controller.KaraokeMode != KaraokeMode.None);
+            if (_modal.gameObject.activeSelf) OpenKaraokeMemberModal();
         }
 
         void updateErrorView(VideoError videoError)
@@ -1085,6 +1086,7 @@ namespace Yamadev.YamaStream.UI
         public override void OnMirrorInversionChanged() => updateScreenView();
         public override void OnEmissionChanged() => updateScreenView();
         public override void OnKaraokeModeChanged() => updateKaraokeView();
+        public override void OnKaraokeMemberChanged() => updateKaraokeView();
         public override void OnPermissionChanged() => GeneratePermissionView();
     }
 }
