@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using UnityEngine;
 using UnityEditor;
-using System.Diagnostics;
 using System;
 using System.Net.Http;
 using System.Net;
@@ -20,6 +19,7 @@ namespace Yamadev.YamaStream.Script
 
         static void checkExist()
         {
+            /*
             if (File.Exists(_dlPath))
             {
                 _ytdlpPath = _dlPath;
@@ -27,8 +27,8 @@ namespace Yamadev.YamaStream.Script
                 _exist = true;
                 return;
             }
-            
-            /*
+            */
+
             string[] splitPath = Application.persistentDataPath.Split('/', '\\');
             string path = string.Join("\\", splitPath.Take(splitPath.Length - 2)) + "\\VRChat\\VRChat\\Tools\\yt-dlp.exe";
             if (!File.Exists(path)) path = string.Join("\\", splitPath.Take(splitPath.Length - 2)) + "\\VRChat\\VRChat\\Tools\\youtube-dl.exe";
@@ -37,7 +37,6 @@ namespace Yamadev.YamaStream.Script
                 _ytdlpPath = path;
                 _exist = true;
             }
-            */
         }
 
         public static bool IsOriginal => _isOriginal;
@@ -45,12 +44,13 @@ namespace Yamadev.YamaStream.Script
         {
             get
             {
-                if (_exist) return _ytdlpPath;
+                // if (_exist) return _ytdlpPath;
                 checkExist();
                 return _exist ? _ytdlpPath : string.Empty;
             }
         }
 
+        /*
         [MenuItem("YamaPlayer/Download Yt-dlp")]
         public static async Task DownloadYtdlp()
         {
@@ -103,5 +103,6 @@ namespace Yamadev.YamaStream.Script
             EditorUtility.ClearProgressBar();
             return string.Empty;
         }
+        */
     }
 }

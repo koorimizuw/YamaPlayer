@@ -28,8 +28,6 @@ Shader "Yamadev/YamaStream/Screen"
 	    };
 
         void vert (inout appdata_full v) {
-            if (_AVPro) v.texcoord.y = 1 - v.texcoord.y;
-
             bool inMirror = 0 < dot(cross(UNITY_MATRIX_V[0], UNITY_MATRIX_V[1]), UNITY_MATRIX_V[2]);
             if (inMirror && _InversionInMirror) v.texcoord.xy = float2(1 - v.texcoord.x, v.texcoord.y);
 

@@ -1,5 +1,5 @@
 {
-  "ja": {
+  "ja-JP": {
     "options": "オプション",
     "settings": "設定",
     "general": "全般",
@@ -29,6 +29,9 @@
     "mirrorInversionDesc": "左右反転になる。",
     "mirrorInversionOn": "反転する",
     "mirrorInversionOff": "反転しない",
+    "audioLinkDesc": "AudioLinkに連結する。",
+    "audioLinkOn": "オン",
+    "audioLinkOff": "オフ",
     "brightness": "輝度",
     "brightnessDesc": "画面の明るさを調整する。",
     "karaokeMode": "カラオケモード",
@@ -86,7 +89,7 @@
     "moveDown": "下へ移動",
     "remove": "削除"
   },
-  "en": {
+  "en-US": {
     "options": "Options",
     "settings": "Settings",
     "general": "General",
@@ -116,6 +119,9 @@
     "mirrorInversionDesc": "Left to right inversion.",
     "mirrorInversionOn": "Invert",
     "mirrorInversionOff": "No inversion",
+    "audioLinkDesc": "Connect to AudioLink",
+    "audioLinkOn": "On",
+    "audioLinkOff": "Off",
     "brightness": "Brightness",
     "brightnessDesc": "Adjusts the brightness of the screen.",
     "karaokeMode": "Karaoke Mode",
@@ -173,7 +179,7 @@
     "moveDown": "Move down",
     "remove": "Remove"
   },
-  "zh-cn": {
+  "zh-CN": {
     "options": "选项",
     "settings": "设置",
     "general": "全体",
@@ -203,6 +209,9 @@
     "mirrorInversionDesc": "在镜子里看到的画面将左右反转。",
     "mirrorInversionOn": "反转",
     "mirrorInversionOff": "不反转",
+    "audioLinkDesc": "连接到AudioLink。",
+    "audioLinkOn": "开启",
+    "audioLinkOff": "关闭",
     "brightness": "亮度",
     "brightnessDesc": "调节画面亮度。",
     "karaokeMode": "卡拉OK模式",
@@ -260,7 +269,7 @@
     "moveDown": "向下移动",
     "remove": "移除"
   },
-  "zh-tw": {
+  "zh-TW": {
     "options": "選項",
     "settings": "設定",
     "settingsTitle": "設定",
@@ -290,6 +299,9 @@
     "mirrorInversionDesc": "在鏡子裡看到的畫面將左右反轉。",
     "mirrorInversionOn": "反轉",
     "mirrorInversionOff": "不反轉",
+    "audioLinkDesc": "連結到AudioLink。",
+    "audioLinkOn": "開啓",
+    "audioLinkOff": "關閉",
     "brightness": "亮度",
     "brightnessDesc": "調整畫面亮度。",
     "karaokeMode": "卡拉OK模式",
@@ -347,7 +359,7 @@
     "moveDown": "往下移動",
     "remove": "刪除"
   },
-  "ko": {
+  "ko-KR": {
     "options": "옵션",
     "settings": "설정",
     "settingsTitle": "설정",
@@ -361,7 +373,7 @@
     "videoPlayer": "비디오 플레이어",
     "videoPlayerDesc": "UnityVideoPlayer: 일반 동영상만 재생 가능.\nAVProVideoPlayer: 일반 동영상 외에도 YouTube Live, twitch도 재생 가능.",
     "playbackSpeed": "재생속도",
-    "playbackSpeedDesc": "동영상 재생 속도를 0.05x배 단위로, 0.05x배부터 2.0x배까지 조정할 수 있습니다. \n이 옵션은 동영상 플레이어가 Unity Video Player일 때만 유효합니다.",
+    "playbackSpeedDesc": "동영상 재생 속도를 0.05x배 단위로, 0.05x배부터 2.0x배까지 조정할 수 있습니다. \n동영상 플레이어가 AVPro Video Player인 경우 변경된 후 다시 로드합니다.",
     "slower": "느리게",
     "faster": "빠르게",
     "repeatPlay": "구간 반복 재생",
@@ -377,6 +389,9 @@
     "mirrorInversionDesc": "좌우 화면이 뒤바뀜.",
     "mirrorInversionOn": "반전",
     "mirrorInversionOff": "반전하지 않음",
+    "audioLinkDesc": "AudioLink에 연결.",
+    "audioLinkOn": "켜기",
+    "audioLinkOff": "끄기",
     "brightness": "밝기",
     "brightnessDesc": "화면 밝기 조절.",
     "karaokeMode": "노래방 모드",

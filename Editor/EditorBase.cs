@@ -1,31 +1,53 @@
 ﻿
+using System;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace Yamadev.YamaStream
+namespace Yamadev.YamaStream.Script
 {
     public abstract class EditorBase : Editor
     {
-        protected GUIStyle _uiTitle;
-        protected GUIStyle _bold;
-
-        protected virtual void Initilize()
-        {
-            _uiTitle = new GUIStyle()
-            {
-                alignment = TextAnchor.MiddleCenter,
-                fontSize = 18,
-            };
-            _uiTitle.normal.textColor = Color.white;
-
-            _bold = new GUIStyle(GUI.skin.label);
-            _bold.fontStyle = FontStyle.Bold;
-        }
+        public string Title;
+        static string _logoGuid = "45177375d4933bc469e82e59e57ce065";
+        static float _marginTop = 16f;
 
         public override void OnInspectorGUI()
         {
-            Initilize();
+            DrawLogoAndVersion(_marginTop);
+            EditorGUILayout.Space(16f);
+            DrawLanguageSelector();
+        }
+
+        public void DrawLanguageSelector()
+        {
+            string[] languages = Localization.AvailableLanguages.Select(i => Localization.GetLanguageName(i)).ToArray();
+            int index = Array.IndexOf(Localization.AvailableLanguages, Localization.CurrentLanguage);
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.Space();
+                int selected = EditorGUILayout.Popup(index, languages, GUILayout.Width(200));
+                Localization.CurrentLanguage = Localization.AvailableLanguages[selected];
+                EditorGUILayout.Space();
+            }
+        }
+
+        public void DrawLogoAndVersion(float marginTop)
+        {
+            Texture2D logo = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath(_logoGuid));
+            if (logo == null) return;
+
+            Rect rect = new Rect { height = 60f };
+            rect.width = rect.height * logo.width / logo.height;
+            rect.x = (EditorGUIUtility.currentViewWidth - rect.width) / 2f;
+            rect.y = marginTop;
+            GUI.DrawTexture(rect, logo);
+
+            GUIContent version = new GUIContent($"v{Utils.GetYamaPlayerPackageInfo().version}");
+            Vector2 size = Styles.Bold.CalcSize(version);
+            GUI.Label(new Rect(rect.xMax, rect.yMax - size.y, size.x, size.y), version, Styles.Bold);
+
+            EditorGUILayout.Space(marginTop + rect.height);
         }
     }
 }

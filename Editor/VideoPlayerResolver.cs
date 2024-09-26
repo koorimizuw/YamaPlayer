@@ -26,32 +26,6 @@ namespace Yamadev.YamaStream.Script
     {
         private static HashSet<System.Diagnostics.Process> _runningYtdlProcesses = new HashSet<System.Diagnostics.Process>();
         private static HashSet<MonoBehaviour> _registeredBehaviours = new HashSet<MonoBehaviour>();
-        private static readonly BuildTargetGroup[] _targetGroups =
-        {
-            BuildTargetGroup.Standalone,
-            BuildTargetGroup.Android,
-            BuildTargetGroup.iOS,
-        };
-        private static readonly string _avProDebugSymbol = "AVPRO_DEBUG";
-
-        [MenuItem("YamaPlayer/Enable AVPro Debug")]
-        public static void AVProDebug()
-        {
-            if (Utils.FindType("RenderHeads.Media.AVProVideo.MediaPlayer", true) != null)
-            {
-                foreach (var group in _targetGroups)
-                {
-                    List<string> symbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(group).Split(';').Select(s => s.Trim()).ToList();
-                    if (!symbols.Contains(_avProDebugSymbol))
-                    {
-                        symbols.Insert(0, _avProDebugSymbol);
-                        PlayerSettings.SetScriptingDefineSymbolsForGroup(group, string.Join(";", symbols.ToArray()));
-                    }
-                }
-                EditorUtility.DisplayDialog("Success", "AVPro debug on.", "OK");
-            }
-            else EditorUtility.DisplayDialog("AVPro not imported", "You should import AVPro player first.", "OK");
-        }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void SetupURLResolveCallback()
@@ -77,7 +51,7 @@ namespace Yamadev.YamaStream.Script
             MediaPlayer mediaPlayer = avPro.gameObject.AddComponent<MediaPlayer>();
 #if UNITY_EDITOR_WIN
             OptionsWindows options = (OptionsWindows)mediaPlayer.GetCurrentPlatformOptions();
-            options.audioOutput = Windows.AudioOutput.Unity;
+            options._audioMode = Windows.AudioOutput.Unity;
 #endif
             VRCAVProVideoScreen[] vrcAVProVideoScreens = Utils.FindComponentsInHierarthy<VRCAVProVideoScreen>();
             foreach (VRCAVProVideoScreen screen in vrcAVProVideoScreens)
@@ -152,7 +126,7 @@ namespace Yamadev.YamaStream.Script
             ytdlProcess.StartInfo.UseShellExecute = false;
             ytdlProcess.StartInfo.RedirectStandardOutput = true;
             ytdlProcess.StartInfo.FileName = YtdlpResolver.YtdlpPath;
-            ytdlProcess.StartInfo.Arguments = $"--no-check-certificate --no-cache-dir --rm-cache-dir --no-playlist -f \"mp4[height<=?{resolution}]/best[height<=?{resolution}]\" --get-url \"{url}\"";
+            ytdlProcess.StartInfo.Arguments = $"--no-check-certificate --no-cache-dir --rm-cache-dir -f best --get-url \"{url}\"";
 
             Debug.Log($"[<color=#ff70ab>YamaStream</color>] Attempting to resolve URL '{url}'");
 

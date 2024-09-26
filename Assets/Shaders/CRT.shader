@@ -22,8 +22,6 @@
             int _AVPro;
 
             float4 frag(v2f_customrendertexture i) : SV_Target{
-                if (_AVPro) i.globalTexcoord.y = 1 - i.globalTexcoord.y;
-
                 float aspect = _MainTex_TexelSize.z / 1.77777778;
                 if (_MainTex_TexelSize.w > aspect) i.globalTexcoord.x = ((i.globalTexcoord.x - 0.5) / (aspect / _MainTex_TexelSize.w)) + 0.5;
                 if (_MainTex_TexelSize.w < aspect) i.globalTexcoord.y = ((i.globalTexcoord.y - 0.5) / (_MainTex_TexelSize.w / aspect)) + 0.5;

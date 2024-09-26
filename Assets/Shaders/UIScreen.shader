@@ -2,7 +2,7 @@ Shader "Yamadev/YamaStream/UIScreen"
 {
     Properties
     {
-        [PerRendererData] _MainTex("Main Texture", 2D) = "black" {}
+        _MainTex("Main Texture", 2D) = "black" {}
         [Toggle] _AVPro("AVPro", Int) = 0
     }
 
@@ -58,8 +58,6 @@ Shader "Yamadev/YamaStream/UIScreen"
                     OUT.vertex = UnityObjectToClipPos(v.vertex);
                     OUT.texcoord = v.texcoord;
                     OUT.color = v.color;
-
-                    if (_AVPro) OUT.texcoord.y = 1 - OUT.texcoord.y;
 
                     float aspect = _MainTex_TexelSize.z / 1.77777778;
                     if (_MainTex_TexelSize.w > aspect) OUT.texcoord.x = ((OUT.texcoord.x - 0.5) / (aspect / _MainTex_TexelSize.w)) + 0.5;

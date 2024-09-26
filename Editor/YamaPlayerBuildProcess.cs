@@ -8,12 +8,19 @@ using UnityEngine.SceneManagement;
 using VRC.SDKBase;
 using VRC.Utility;
 using Yamadev.YamaStream.UI;
+using UdonSharpEditor;
+using Yamadev.YamaStream.Modules;
+using VRC.SDK3.Components;
+using UnityEngine.UI;
+#if WEB_UNIT_INCLUDED
+using Yamadev.YamachanWebUnit;
+#endif
 
 namespace Yamadev.YamaStream.Script
 {
     public class YamaPlayerBuildProcess : IProcessSceneWithReport
     {
-        public int callbackOrder => -1;
+        public int callbackOrder => -2;
 
         private void SetAngle(Transform trans)
         {
@@ -25,15 +32,10 @@ namespace Yamadev.YamaStream.Script
             }
         }
 
-        private void BuildPlaylists()
+        private void GeneratePlaylists()
         {
-            PlayListContainer[] ret = Resources.FindObjectsOfTypeAll<PlayListContainer>();
-            if (ret.Length == 0) return;
-
-            foreach (PlayListContainer handle in ret)
+            foreach (PlayListContainer handle in Utils.FindComponentsInHierarthy<PlayListContainer>())
             {
-                if (!AssetDatabase.GetAssetOrScenePath(handle).Contains(".unity")) continue;
-
                 Transform template = handle.TargetContent.transform.GetChild(0);
 
                 int count = handle.TargetContent.childCount;
@@ -46,7 +48,7 @@ namespace Yamadev.YamaStream.Script
                 PlayList[] children = handle.transform.GetComponentsInChildren<PlayList>();
                 foreach (PlayList li in children)
                 {
-                    GameObject newObject = Object.Instantiate(template.gameObject, handle.TargetContent, false);
+                    GameObject newObject = UnityEngine.Object.Instantiate(template.gameObject, handle.TargetContent, false);
                     GameObjectUtility.EnsureUniqueNameForSibling(newObject);
 
                     Playlist udon = newObject.transform.GetComponent<Playlist>();
@@ -70,8 +72,21 @@ namespace Yamadev.YamaStream.Script
             }
         }
 
+        public void CreateWebUnitClient()
+        {
+#if WEB_UNIT_INCLUDED
+            GameObject go = new GameObject("WebUnitClient");
+            Client client = go.AddUdonSharpComponent<Client>();
+            foreach (VideoResolver resolver in Utils.FindComponentsInHierarthy<VideoResolver>())
+                resolver.SetProgramVariable("_client", client);
+#endif
+        }
+
         public void OnProcessScene(Scene scene, BuildReport report)
         {
+            GeneratePlaylists();
+            CreateWebUnitClient();
+
             foreach (YamaPlayer player in Utils.FindComponentsInHierarthy<YamaPlayer>())
             {
                 LatencyManager latencyManager = player.GetComponentInChildren<LatencyManager>();
@@ -87,9 +102,7 @@ namespace Yamadev.YamaStream.Script
                 }
 
                 Controller internalController = player.GetComponentInChildren<Controller>();
-                if (internalController != null) internalController.SetProgramVariable("_version", Utils.GetYamaPlayerVersion());
-
-                BuildPlaylists();
+                if (internalController != null) internalController.SetProgramVariable("_version", Utils.GetYamaPlayerPackageInfo().version);
 
                 Transform internalTransform = player.Internal != null ? player.Internal : player.transform.Find("Internal");
                 if (internalTransform != null)
@@ -122,16 +135,23 @@ namespace Yamadev.YamaStream.Script
                 foreach (UIColor component in uiController.GetComponentsInChildren<UIColor>(true))
                     if (component.GetProgramVariable("_uiController") == null)
                         component.SetProgramVariable("_uiController", uiController);
+
+                Font font = (Font)uiController.GetProgramVariable("_font");
+                if (font != null) foreach (Text text in uiController.GetComponentsInChildren<Text>(true)) text.font = font;
+
+                VRCUrlInputField dynamicUrlInputField = uiController.GetProgramVariable("_dynamicPlaylistUrlInput") as VRCUrlInputField;
+                if (dynamicUrlInputField != null)
+                {
+#if WEB_UNIT_INCLUDED
+                    dynamicUrlInputField.gameObject.SetActive(true);
+#else
+                    dynamicUrlInputField.gameObject.SetActive(false);
+#endif
+                }
             }
 
             foreach (InputController inputController in Utils.FindComponentsInHierarthy<InputController>())
             {
-                foreach (MouseHover component in inputController.GetComponentsInChildren<MouseHover>(true))
-                {
-                    if (component.GetProgramVariable("_inputController") == null)
-                        component.SetProgramVariable("_inputController", inputController);
-                }
-
                 foreach (SliderHelper component in inputController.GetComponentsInChildren<SliderHelper>(true))
                 {
                     if (component.GetProgramVariable("_inputController") == null)
