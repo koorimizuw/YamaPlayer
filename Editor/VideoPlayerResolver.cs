@@ -126,7 +126,7 @@ namespace Yamadev.YamaStream.Script
             ytdlProcess.StartInfo.UseShellExecute = false;
             ytdlProcess.StartInfo.RedirectStandardOutput = true;
             ytdlProcess.StartInfo.FileName = YtdlpResolver.YtdlpPath;
-            ytdlProcess.StartInfo.Arguments = $"--no-check-certificate --no-cache-dir --rm-cache-dir -f best --get-url \"{url}\"";
+            ytdlProcess.StartInfo.Arguments = $"--no-check-certificate --no-cache-dir --rm-cache-dir -f \"(mp4/best)[height<=?{resolution}][height>=?64][protocol^=http]\" --get-url \"{url}\"";
 
             Debug.Log($"[<color=#ff70ab>YamaStream</color>] Attempting to resolve URL '{url}'");
 

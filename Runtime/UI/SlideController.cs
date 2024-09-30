@@ -1,4 +1,5 @@
 ﻿
+using System;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,6 +15,7 @@ namespace Yamadev.YamaStream
         [SerializeField] VRCUrlInputField _urlInputField;
         [SerializeField] RawImage _screen;
         [SerializeField] Text _page;
+        [SerializeField] InputField _jump;
         int _currentPage = -1;
         int _pageCount = -1;
         bool _slideMode;
@@ -58,6 +60,13 @@ namespace Yamadev.YamaStream
             _controller.SetTime(page + 0.5f);
             _currentPage = page;
             UpdateUI();
+        }
+
+        public void Jump()
+        {
+            if (_jump == null) return;
+            if (Int32.TryParse(_jump.text, out int page)) SetPage(page - 1);
+            _jump.text = string.Empty;
         }
 
         public void Up() => SetPage(_currentPage - 1);
