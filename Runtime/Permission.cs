@@ -26,8 +26,8 @@ namespace Yamadev.YamaStream
 
         public bool IsPlayerOwner(VRCPlayerApi player)
         {
-            if (_grantInstanceOwner) return player.isInstanceOwner;
-            if (_grantInstanceMaster) return player.isMaster;
+            if (_grantInstanceOwner && player.isInstanceOwner) return true;
+            if (_grantInstanceMaster && player.isMaster) return true;
             return Array.IndexOf(_ownerList, player.displayName) >= 0;
         }
 
