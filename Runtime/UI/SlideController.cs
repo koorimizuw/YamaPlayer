@@ -16,8 +16,10 @@ namespace Yamadev.YamaStream
         [SerializeField] RawImage _screen;
         [SerializeField] Text _page;
         [SerializeField] InputField _jump;
+        [SerializeField] Dropdown _dropdown;
         int _currentPage = -1;
         int _pageCount = -1;
+        int _seconds = 1;
         bool _slideMode;
 
         private void Start()
@@ -30,6 +32,7 @@ namespace Yamadev.YamaStream
         public void Load()
         {
             if (_urlInputField == null || !Utils.IsValid(_urlInputField.GetUrl())) return;
+            _seconds = _dropdown.value + 1;
             _controller.TakeOwnership();
             _controller.PlayTrack(Track.New(VideoPlayerType.AVProVideoPlayer, string.Empty, _urlInputField.GetUrl()));
             _urlInputField.SetUrl(VRCUrl.Empty);
@@ -49,7 +52,7 @@ namespace Yamadev.YamaStream
             if (!_slideMode) return;
             _controller.TakeOwnership();
             _controller.Paused = true;
-            _pageCount = Mathf.FloorToInt(_controller.Duration);
+            _pageCount = Mathf.FloorToInt(_controller.Duration / _seconds);
             SetPage(0);
         }
 
@@ -57,7 +60,7 @@ namespace Yamadev.YamaStream
         {
             if (!_slideMode || page < 0 || page >= _pageCount) return;
             _controller.TakeOwnership();
-            _controller.SetTime(page + 0.5f);
+            _controller.SetTime(page * _seconds + 0.5f);
             _currentPage = page;
             UpdateUI();
         }
