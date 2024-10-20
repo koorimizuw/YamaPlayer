@@ -24,6 +24,7 @@ namespace Yamadev.YamaStream.Script
         {
             if (Utils.FindType("RenderHeads.Media.AVProVideo.MediaPlayer", true) != null) return;
             UnityEditor.PackageManager.PackageInfo packageInfo = Utils.GetYamaPlayerPackageInfo();
+            Debug.Log(packageInfo);
             if (packageInfo == null) return;
 
             foreach (Sample sample in Sample.FindByPackage(packageInfo.name, packageInfo.version))

@@ -57,6 +57,8 @@ namespace Yamadev.YamaStream.Script
         Permission _permission;
         SerializedObject _permissionSerializedObject;
         SerializedProperty _defaultPermission;
+        SerializedProperty _grantInstanceOwner;
+        SerializedProperty _grantInstanceMaster;
         SerializedProperty _ownerList;
         // UI
         UIController _uiController;
@@ -118,6 +120,8 @@ namespace Yamadev.YamaStream.Script
                 _permissionSerializedObject = new SerializedObject(_permission);
                 _defaultPermission = _permissionSerializedObject.FindProperty("_defaultPermission");
                 _ownerList = _permissionSerializedObject.FindProperty("_ownerList");
+                _grantInstanceOwner = _permissionSerializedObject.FindProperty("_grantInstanceOwner");
+                _grantInstanceMaster = _permissionSerializedObject.FindProperty("_grantInstanceMaster");
             }
             _uiController = _target.GetComponentInChildren<UIController>(true);
             if (_uiController != null)
@@ -539,6 +543,10 @@ namespace Yamadev.YamaStream.Script
             EditorGUILayout.LabelField("Viewer:\t\t" + Localization.Get("viewerPermission"));
             EditorGUILayout.Space(12f);
             EditorGUILayout.PropertyField(_defaultPermission, Localization.GetLayout("defaultPermission"));
+            EditorGUILayout.PropertyField(_grantInstanceOwner, Localization.GetLayout("grantInstanceOwner"));
+            EditorGUILayout.LabelField("　", Localization.Get("grantInstanceOwnerDesc"));
+            EditorGUILayout.PropertyField(_grantInstanceMaster, Localization.GetLayout("grantInstanceMaster"));
+            EditorGUILayout.LabelField("　", Localization.Get("grantInstanceMasterDesc"));
             EditorGUILayout.PropertyField(_ownerList, Localization.GetLayout("ownerList"));
         }
         #endregion

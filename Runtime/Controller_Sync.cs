@@ -6,7 +6,7 @@ using VRC.SDKBase;
 
 namespace Yamadev.YamaStream
 {
-    public partial class Controller : Listener
+    public partial class Controller
     {
         [SerializeField] LatencyManager _latencyManager;
         [SerializeField, Range(1f, 10f)] float _syncFrequency = 5.0f;
@@ -31,7 +31,7 @@ namespace Yamadev.YamaStream
             }
         }
 
-        public bool IsKaraokeMember => Networking.LocalPlayer != null ? Array.IndexOf(_karaokeMembers, Networking.LocalPlayer.displayName) >= 0 : false;
+        public bool IsKaraokeMember => Utilities.IsValid(Networking.LocalPlayer) ? Array.IndexOf(_karaokeMembers, Networking.LocalPlayer.displayName) >= 0 : false;
 
         public KaraokeMode KaraokeMode
         {
