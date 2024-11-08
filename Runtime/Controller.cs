@@ -23,6 +23,8 @@ namespace Yamadev.YamaStream
         [SerializeField] string _timeFormat = @"hh\:mm\:ss";
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(VideoPlayerType))] VideoPlayerType _videoPlayerType;
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(Loop))] bool _loop;
+        [SerializeField, UdonSynced, FieldChangeCallback(nameof(SlideMode))] bool _slideMode;
+        [SerializeField, UdonSynced, FieldChangeCallback(nameof(SlideSeconds))] int _slideSeconds = 1;
         [UdonSynced, FieldChangeCallback(nameof(Paused))] bool _paused;
         [UdonSynced, FieldChangeCallback(nameof(Stopped))] bool _stopped = true;
         [UdonSynced, FieldChangeCallback(nameof(Speed))] float _speed = 1f;
@@ -47,6 +49,7 @@ namespace Yamadev.YamaStream
         public string Version => _version;
 
         public Permission Permission => _permission;
+
         public PlayerPermission PlayerPermission => _permission == null ? PlayerPermission.Editor : _permission.PlayerPermission;
 
         void initialize()
@@ -126,6 +129,35 @@ namespace Yamadev.YamaStream
             }
         }
 
+        public bool SlideMode
+        {
+            get => _slideMode;
+            set
+            {
+                _slideMode = value;
+                if (!_paused) Paused = true;
+                if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
+                foreach (Listener listener in _listeners) listener.OnSlideModeChanged();
+                PrintLog($"Slide mode changed {_slideMode}.");
+            }
+        }
+
+        public int SlideSeconds
+        {
+            get => _slideSeconds;
+            set
+            {
+                _slideSeconds = value;
+                if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
+                foreach (Listener listener in _listeners) listener.OnSlideModeChanged();
+                PrintLog($"Slide seconds changed to {_slideSeconds}.");
+            }
+        }
+
+        public int SlidePage => _slideMode && !_stopped ? Mathf.FloorToInt(VideoTime) / _slideSeconds + 1 : 0;
+
+        public int SlidePageCount => _slideMode ? Mathf.FloorToInt(Duration) / _slideSeconds : 0;
+        
         public bool Loop
         {
             get => _loop;
@@ -215,6 +247,12 @@ namespace Yamadev.YamaStream
             foreach (Listener listener in _listeners) listener.OnVideoRetry();
         }
 
+        public void SetPage(int page)
+        {
+            if (!_slideMode || page < 1 || page > SlidePageCount) return;
+            SetTime(page * _slideSeconds - 0.5f);
+        }
+
         public void SetTime(float time)
         {
             if (IsLive || OutOfRepeat(time)) return;
@@ -231,7 +269,8 @@ namespace Yamadev.YamaStream
 
         public void SendCustomVideoEvent(string eventName)
         {
-            foreach (Listener listener in _listeners) listener.SendCustomEvent(eventName);
+            foreach (Listener listener in _listeners)
+                if (Utilities.IsValid(listener)) listener.SendCustomEvent(eventName);
         }
 
         public override void OnDeserialization()
@@ -257,7 +296,7 @@ namespace Yamadev.YamaStream
         {
             _errorRetryCount = 0;
             _stopped = false;
-            if (_paused) VideoPlayerHandle.Pause();
+            if (_paused || _slideMode) VideoPlayerHandle.Pause();
             else VideoPlayerHandle.Play();
             UpdateAudio();
 #if AUDIOLINK_V1

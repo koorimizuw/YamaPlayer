@@ -44,6 +44,7 @@ namespace Yamadev.YamaStream
         public virtual void OnPlaylistsUpdated() { }
         public virtual void OnTrackSynced(string url) { }
         public virtual void OnUrlChanged() { }
+        public virtual void OnSlideModeChanged() { }
         public virtual void OnLoopChanged() { }
         public virtual void OnShufflePlayChanged() { }
         public virtual void OnOwnerChanged() { }

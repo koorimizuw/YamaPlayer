@@ -83,6 +83,8 @@ namespace Yamadev.YamaStream.Script
             Title = $"YamaPlayer v{Utils.GetYamaPlayerPackageInfo().version}";
 
             _target = target as YamaPlayer;
+            if (EditorApplication.isPlaying) return;
+
             _controller = _target.GetComponentInChildren<Controller>();
             if (_controller != null )
             {

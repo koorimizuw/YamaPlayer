@@ -389,38 +389,71 @@ namespace Yamadev.YamaStream.UI
             _controller.TakeOwnership();
             _controller.Paused = false;
         }
+
         public void Pause()
         {
             if (!CheckPermission()) return;
             _controller.TakeOwnership();
             _controller.Paused = true;
         }
+
         public void Stop()
         {
             if (!CheckPermission()) return;
             _controller.TakeOwnership();
             _controller.Stopped = true;
         }
+
         public void ProgressDrag() => _progressDrag = true;
+
         public void SetTime()
         {
             _progressDrag = false;
-            if (_progress == null || !CheckPermission()) return;
+            if (_progress == null || !CheckPermission() || _controller.Stopped) return;
             _controller.TakeOwnership();
-            _controller.SetTime(_controller.Duration * _progress.value);
+            if (_controller.SlideMode) _controller.SetPage((int)_progress.value);
+            else _controller.SetTime(_controller.Duration * _progress.value);
         }
+
         public void SetTimeByHelper()
         {
             if (_progressHelper == null || !CheckPermission()) return;
             _controller.TakeOwnership();
             _controller.SetTime(_controller.Duration * _progressHelper.Percent);
         }
+
+        public void SlideOff()
+        {
+            if (!CheckPermission()) return;
+            _controller.TakeOwnership();
+            _controller.SlideMode = false;
+        }
+
+        public void SlideOn()
+        {
+            if (!CheckPermission()) return;
+            _controller.TakeOwnership();
+            _controller.SlideMode = true;
+        }
+
+        public void SetSlideSeconds(int seconds)
+        {
+            if (!CheckPermission()) return;
+            _controller.TakeOwnership();
+            _controller.SlideSeconds = seconds;
+        }
+
+        public void SetSlide1s() => SetSlideSeconds(1);
+        public void SetSlide2s() => SetSlideSeconds(2);
+        public void SetSlide3s() => SetSlideSeconds(3);
+
         public void Loop()
         {
             if (!CheckPermission()) return;
             _controller.TakeOwnership();
             _controller.Loop = true;
         }
+
         public void LoopOff()
         {
             if (!CheckPermission()) return;
@@ -456,6 +489,7 @@ namespace Yamadev.YamaStream.UI
             }
             else _repeatSlider.SliderLeft.SetValueWithoutNotify(_controller.Repeat.ToRepeatStatus().GetStartTime() / _controller.Duration);
         }
+
         public void SetRepeatEnd()
         {
             if (_repeatSlider == null || _controller.Stopped) return;
@@ -468,12 +502,14 @@ namespace Yamadev.YamaStream.UI
             }
             else _repeatSlider.SliderRight.SetValueWithoutNotify(_controller.Repeat.ToRepeatStatus().GetEndTime() / _controller.Duration);
         }
+
         public void SetShuffle()
         {
             if (!CheckPermission()) return;
             _controller.TakeOwnership();
             _controller.ShufflePlay = true;
         }
+
         public void SetShuffleOff()
         {
             if (!CheckPermission()) return;
@@ -485,13 +521,16 @@ namespace Yamadev.YamaStream.UI
         {
             if (!CheckPermission()) return;
             _controller.TakeOwnership();
-            _controller.Backward();
+            if (_controller.SlideMode) _controller.SetPage(_controller.SlidePage - 1);
+            else _controller.Backward();
         }
+
         public void Forward()
         {
             if (!CheckPermission()) return;
             _controller.TakeOwnership();
-            _controller.Forward();
+            if (_controller.SlideMode) _controller.SetPage(_controller.SlidePage + 1);
+            else _controller.Forward();
         }
 
         public void SetSpeed()
@@ -781,17 +820,30 @@ namespace Yamadev.YamaStream.UI
             updateTrackView();
             updateLoadingView();
             updateAudioView();
+            updateSlideView();
             if (_idle != null && _idleImage != null) _idle.gameObject.SetActive(_controller.Stopped);
+        }
+
+        void updateSlideView()
+        {
+            if (_videoTime != null) _videoTime.alignment = _controller.SlideMode ? TextAnchor.MiddleCenter : TextAnchor.MiddleLeft;
+            if (_duration != null) _duration.alignment = _controller.SlideMode ? TextAnchor.MiddleCenter : TextAnchor.MiddleRight;
+            if (_progress != null)
+            {
+                _progress.wholeNumbers = _controller.SlideMode;
+                _progress.minValue = _controller.SlideMode && !_controller.Stopped ? 1 : 0;
+                _progress.maxValue = _controller.SlideMode ? _controller.SlidePageCount : 1;
+            }
         }
 
         void updateProgress()
         {
-            if (_videoTime != null) _videoTime.text = TimeSpan.FromSeconds(_controller.VideoTime).ToString(_timeFormat);
-            if (_duration != null) _duration.text = _controller.IsLive ? "Live" : TimeSpan.FromSeconds(_controller.Duration).ToString(_timeFormat);
-            if (_progress != null && !_progressDrag) _progress.SetValueWithoutNotify(_controller.IsLive ? 1f : Mathf.Clamp(_controller.Duration == 0f ? 0f : _controller.VideoTime / _controller.Duration, 0f, 1f));
+            if (_videoTime != null) _videoTime.text = _controller.SlideMode ? _controller.SlidePage.ToString() : TimeSpan.FromSeconds(_controller.VideoTime).ToString(_timeFormat);
+            if (_duration != null) _duration.text = _controller.SlideMode ? _controller.SlidePageCount.ToString() : _controller.IsLive ? "Live" : TimeSpan.FromSeconds(_controller.Duration).ToString(_timeFormat);
+            if (_progress != null && !_progressDrag) _progress.SetValueWithoutNotify(_controller.SlideMode ? _controller.SlidePage : _controller.IsLive ? 1f : Mathf.Clamp(_controller.Duration == 0f ? 0f : _controller.VideoTime / _controller.Duration, 0f, 1f));
             if (_progressHelper != null && _progressTooltip != null)
             {
-                _progressHelper.gameObject.SetActive(!_controller.Stopped && !_controller.IsLive);
+                _progressHelper.gameObject.SetActive(!_controller.Stopped && !_controller.IsLive && !_controller.SlideMode);
                 if (_controller.IsLive) _progressTooltip.text = "Live";
                 else _progressTooltip.text = TimeSpan.FromSeconds(_controller.Duration * _progressHelper.Percent).ToString(_timeFormat);
             }
@@ -1054,6 +1106,7 @@ namespace Yamadev.YamaStream.UI
         }
         public override void OnVideoError(VideoError videoError) => updateErrorView(videoError);
         public override void OnPlayerChanged() => UpdateUI();
+        public override void OnSlideModeChanged() => UpdateUI();
         public override void OnLoopChanged() => updatePlaybackView();
         public override void OnRepeatChanged() => updatePlaybackView();
         public override void OnSpeedChanged() => updatePlaybackView();
