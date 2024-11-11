@@ -49186,11 +49186,11 @@ MonoBehaviour:
   _mirrorInversionOff: {fileID: 7231507018657276784}
   _versionText: {fileID: 8649688595410016675}
   _updateLog: {fileID: 3976063029469917070}
-  _trackTitle: {fileID: 0}
-  _trackUrl: {fileID: 0}
-  _trackDisplayUrl: {fileID: 0}
-  _networkDelay: {fileID: 0}
-  _videoOffset: {fileID: 0}
+  _slideOn: {fileID: 4183615753187909254}
+  _slideOff: {fileID: 3248428868607804705}
+  _slide1s: {fileID: 7527856312249257699}
+  _slide2s: {fileID: 6195523554014687211}
+  _slide3s: {fileID: 7281033784880931201}
   _options: {fileID: 0}
   _settings: {fileID: 7058807524098630099}
   _playlist: {fileID: 0}
@@ -49236,11 +49236,17 @@ MonoBehaviour:
   _localDelay: {fileID: 1201600525576498476}
   _localDelayDesc: {fileID: 5638405468283772384}
   _languageSelect: {fileID: 9169493214379875450}
+  _slideMode: {fileID: 7793194185491035405}
+  _slideModeDesc: {fileID: 3021095543745275295}
+  _slideOnText: {fileID: 7520075471720511880}
+  _slideOffText: {fileID: 3854020775738279957}
+  _slideSeconds: {fileID: 6959852192881387844}
+  _slideSecondsDesc: {fileID: 1112899681476442927}
+  _slide1sText: {fileID: 3935817289499112791}
+  _slide2sText: {fileID: 5673905233711752287}
+  _slide3sText: {fileID: 4335353022215831572}
   _permissionTitle: {fileID: 981546961574094740}
   _permissionDesc: {fileID: 5822919488559568259}
-  _videoSearchTitle: {fileID: 0}
-  _inputKeyword: {fileID: 0}
-  _inLoading: {fileID: 0}
   _playlistTitle: {fileID: 3348657229140404574}
   _playQueue: {fileID: 5951389011498858251}
   _playHistory: {fileID: 6675846035505862293}

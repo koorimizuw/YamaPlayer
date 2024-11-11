@@ -126,12 +126,12 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] Text _versionText;
         [SerializeField] Text _updateLog;
 
-        [Header("Debug")]
-        [SerializeField, HideInInspector] Text _trackTitle;
-        [SerializeField, HideInInspector] Text _trackUrl;
-        [SerializeField, HideInInspector] Text _trackDisplayUrl;
-        [SerializeField, HideInInspector] Text _networkDelay;
-        [SerializeField, HideInInspector] Text _videoOffset;
+        [Header("Slide")]
+        [SerializeField] Toggle _slideOn;
+        [SerializeField] Toggle _slideOff;
+        [SerializeField] Toggle _slide1s;
+        [SerializeField] Toggle _slide2s;
+        [SerializeField] Toggle _slide3s;
 
         [Header("Translation - SideBar")]
         [SerializeField] Text _options;
@@ -181,13 +181,17 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] Text _localDelay;
         [SerializeField] Text _localDelayDesc;
         [SerializeField] Text _languageSelect;
+        [SerializeField] Text _slideMode;
+        [SerializeField] Text _slideModeDesc;
+        [SerializeField] Text _slideOnText;
+        [SerializeField] Text _slideOffText;
+        [SerializeField] Text _slideSeconds;
+        [SerializeField] Text _slideSecondsDesc;
+        [SerializeField] Text _slide1sText;
+        [SerializeField] Text _slide2sText;
+        [SerializeField] Text _slide3sText;
         [SerializeField] Text _permissionTitle;
         [SerializeField] Text _permissionDesc;
-
-        [Header("Translation - Video Search")]
-        [SerializeField] Text _videoSearchTitle;
-        [SerializeField] Text _inputKeyword;
-        [SerializeField] Text _inLoading;
 
         [Header("Translation - Playlist")]
         [SerializeField] Text _playlistTitle;
@@ -364,7 +368,7 @@ namespace Yamadev.YamaStream.UI
         public void AddUrlToQueueEventBase(VRCUrlInputField urlInputField)
         {
             if (urlInputField == null) return;
-            _controller.TakeOwnership();
+            _controller.Queue.TakeOwnership();
             _controller.Queue.AddTrack(Track.New(GetVideoPlayerSelectorValue(), "", urlInputField.GetUrl()));
             urlInputField.SetUrl(VRCUrl.Empty);
             HideVideoPlayerSelector();
@@ -834,6 +838,11 @@ namespace Yamadev.YamaStream.UI
                 _progress.minValue = _controller.SlideMode && !_controller.Stopped ? 1 : 0;
                 _progress.maxValue = _controller.SlideMode ? _controller.SlidePageCount : 1;
             }
+            if (_slideOn) _slideOn.SetIsOnWithoutNotify(_controller.SlideMode);
+            if (_slideOff) _slideOff.SetIsOnWithoutNotify(!_controller.SlideMode);
+            if (_slide1s) _slide1s.SetIsOnWithoutNotify(_controller.SlideSeconds == 1);
+            if (_slide2s) _slide2s.SetIsOnWithoutNotify(_controller.SlideSeconds == 2);
+            if (_slide3s) _slide3s.SetIsOnWithoutNotify(_controller.SlideSeconds == 3);
         }
 
         void updateProgress()
@@ -1060,10 +1069,15 @@ namespace Yamadev.YamaStream.UI
             if (_localDelay != null) _localDelay.text = i18n.GetValue("localOffset");
             if (_localDelayDesc != null) _localDelayDesc.text = i18n.GetValue("localOffsetDesc");
             if (_languageSelect != null) _languageSelect.text = i18n.GetValue("languageSelect");
-
-            if (_videoSearchTitle != null) _videoSearchTitle.text = i18n.GetValue("videoSearchTitle");
-            if (_inputKeyword != null) _inputKeyword.text = i18n.GetValue("inputKeyword");
-            if (_inLoading != null) _inLoading.text = i18n.GetValue("inLoading");
+            if (_slideMode != null) _slideMode.text = $"{i18n.GetValue("slideMode")}<size=100>(Global)</size>";
+            if (_slideModeDesc != null) _slideModeDesc.text = i18n.GetValue("slideModeDesc");
+            if (_slideOnText != null) _slideOnText.text = i18n.GetValue("slideOn");
+            if (_slideOffText != null) _slideOffText.text = i18n.GetValue("slideOff");
+            if (_slideSeconds != null) _slideSeconds.text = $"{i18n.GetValue("slideSeconds")}<size=100>(Global)</size>";
+            if (_slideSecondsDesc != null) _slideSecondsDesc.text = i18n.GetValue("slideSecondsDesc");
+            if (_slide1sText != null) _slide1sText.text = i18n.GetValue("slide1s");
+            if (_slide2sText != null) _slide2sText.text = i18n.GetValue("slide2s");
+            if (_slide3sText != null) _slide3sText.text = i18n.GetValue("slide3s");
 
             if (_playlistTitle != null) _playlistTitle.text = i18n.GetValue("playlistTitle");
             if (_playQueue != null) _playQueue.text = i18n.GetValue("playQueue");
