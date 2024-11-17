@@ -13,8 +13,8 @@ namespace Yamadev.YamaStream
 
         public static UdonEvent New(UdonSharpBehaviour udon, string callback)
         {
-            // 0. UdonSharpBehaviour udon
-            // 1. string callback event name
+            // 0. UdonSharpBehaviour: udon
+            // 1. string: callback event name
             object[] result = new object[] { udon, callback };
             return (UdonEvent)(object)result;
         }

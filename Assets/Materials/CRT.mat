@@ -63,7 +63,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AVPro: 0
+    - _AVPro: 1
+    - _AspectRatio: 1.7777778
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1

@@ -69,12 +69,12 @@ namespace Yamadev.YamaStream
         {
             if (start > str.Length) return string.Empty;
             int end = start;
-            int count = 1;
+            int count = 0;
             while (end < str.Length)
             {
                 if (str[end] == '{') count++;
                 else if (str[end] == '}') count--;
-                if (count == 0) return str.Substring(start, end - start);
+                if (count == 0) return str.Substring(start, end - start + 1);
                 end++;
             }
             return string.Empty;

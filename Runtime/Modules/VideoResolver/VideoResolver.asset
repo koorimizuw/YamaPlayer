@@ -62,7 +62,7 @@ MonoBehaviour:
       Data: 3|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: UdonSharp.UdonSharpBehaviour, UdonSharp.Runtime
+      Data: Yamadev.YamachanWebUnit.Client, Yamadev.YamachanWebUnit.Runtime
     - Name: 
       Entry: 8
       Data: 

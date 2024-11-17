@@ -102,7 +102,6 @@ namespace Yamadev.YamaStream.Script
                 _screenTypes = _controllerSerializedObject.FindProperty("_screenTypes");
                 _screens = _controllerSerializedObject.FindProperty("_screens");
                 _textureProperties = _controllerSerializedObject.FindProperty("_textureProperties");
-                _avProProperties = _controllerSerializedObject.FindProperty("_avProProperties");
             }
             _autoPlay = _target.GetComponentInChildren<AutoPlay>();
             if (_autoPlay != null)
@@ -160,25 +159,21 @@ namespace Yamadev.YamaStream.Script
                     _screenTypes.arraySize += 1;
                     _screens.arraySize += 1;
                     _textureProperties.arraySize += 1;
-                    _avProProperties.arraySize += 1;
                     _screenTypes.GetArrayElementAtIndex(_screenTypes.arraySize - 1).intValue = (int)ScreenType.Renderer;
                     _screens.GetArrayElementAtIndex(_screens.arraySize - 1).objectReferenceValue = null;
                     _textureProperties.GetArrayElementAtIndex(_textureProperties.arraySize - 1).stringValue = "_MainTex";
-                    _avProProperties.GetArrayElementAtIndex(_avProProperties.arraySize - 1).stringValue = "_AVPro";
                 },
                 onRemoveCallback = (list) =>
                 {
                     _screenTypes.DeleteArrayElementAtIndex(list.index);
                     _screens.DeleteArrayElementAtIndex(list.index);
                     _textureProperties.DeleteArrayElementAtIndex(list.index);
-                    _avProProperties.DeleteArrayElementAtIndex(list.index);
                 },
                 drawElementCallback = (rect, index, isActive, isFocused) =>
                 {
                     SerializedProperty screenType = _screenTypes.GetArrayElementAtIndex(index);
                     SerializedProperty screen = _screens.GetArrayElementAtIndex(index);
                     SerializedProperty textureProperty = _textureProperties.GetArrayElementAtIndex(index);
-                    SerializedProperty avProProperty = _avProProperties.GetArrayElementAtIndex(index);
                     rect.height = EditorGUIUtility.singleLineHeight;
                     using (var check = new EditorGUI.ChangeCheckScope())
                     {
@@ -235,10 +230,8 @@ namespace Yamadev.YamaStream.Script
                     }
                     rect.y += EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
                     EditorGUI.PropertyField(rect, textureProperty, Localization.GetLayout("mainTextureProperty"));
-                    rect.y += EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
-                    EditorGUI.PropertyField(rect, avProProperty, Localization.GetLayout("avProProperty"));
                 },
-                elementHeight = (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 3,
+                elementHeight = (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 2,
             };
         }
 

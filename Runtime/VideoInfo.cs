@@ -32,26 +32,14 @@ namespace Yamadev.YamaStream
         public override void OnStringLoadSuccess(IVRCStringDownload result)
         {
             string urlStr = result.Url.Get();
-            if (urlStr.StartsWith("https://www.youtube.com") || urlStr.StartsWith("https://youtube.com"))
-            {
-                _info.SetValue(urlStr, Utils.FindSubString(result.Result, new string[] { "\"videoDetails\":", "title\":\"" }, '"'));
-            }
+            if (urlStr.StartsWith("https://www.youtube.com") || urlStr.StartsWith("https://youtube.com") || urlStr.StartsWith("https://youtu.be"))
+                _info.SetValue(urlStr, GetYouTubeTitleFromHtml(result.Result));
             else if (urlStr.StartsWith("https://www.twitch.tv") || urlStr.StartsWith("https://twitch.tv"))
-            {
-                _info.SetValue(urlStr, Utils.FindSubString(result.Result, new string[] { "\"name\":\"" }, '"'));
-            }
-            else if (urlStr.StartsWith("https://www.nicovideo.jp") || urlStr.StartsWith("https://nicovideo.jp"))
-            {
-                _info.SetValue(urlStr, Utils.FindSubString(result.Result, new string[] { "\"name\":\"" }, '"'));
-            }
+                _info.SetValue(urlStr, GetTwitchTitleFromTwitch(result.Result));
             else _info.SetValue(urlStr, string.Empty);
 
-            if (_controller.Track.GetTitle() == string.Empty)
-            {
-                Track track = _controller.Track;
-                _controller.Track = Track.New(track.GetPlayer(), GetVideoInfo(result.Url), track.GetVRCUrl(), track.GetOriginalUrl(), track.GetDetails());
-            }
-            _controller.SendCustomVideoEvent(nameof(Listener.OnVideoInfoLoaded));
+            _controller.Track.SetTitle(GetVideoInfo(result.Url));
+            _controller.SendCustomVideoEvent(nameof(OnVideoInfoLoaded));
         }
 
         public override void OnStringLoadError(IVRCStringDownload result)
@@ -62,7 +50,39 @@ namespace Yamadev.YamaStream
 
         public override void OnUrlChanged()
         {
-            if (_controller.Track.GetTitle() == string.Empty) DownloadVideoInfo(_controller.Track.GetVRCUrl());
+            if (_controller.Track.GetTitle() == string.Empty) 
+                DownloadVideoInfo(_controller.Track.GetVRCUrl());
         }
+
+        #region HTML parser
+        public string GetYouTubeTitleFromHtml(string html)
+        {
+            string keyword = "\"videoDetails\":";
+            int start = html.IndexOf(keyword) + keyword.Length;
+            if (start < 0) return string.Empty;
+
+            string jsonString = Utils.FindPairBrackets(html, start);
+            if (!string.IsNullOrEmpty(jsonString) &&
+                VRCJson.TryDeserializeFromJson(jsonString, out var json) &&
+                json.DataDictionary.TryGetValue("title", out var title))
+                return title.String;
+            return string.Empty;
+        }
+
+        public string GetTwitchTitleFromTwitch(string html)
+        {
+            int start = html.IndexOf("{\"@context\":");
+            if (start < 0) return string.Empty;
+
+            string jsonString = Utils.FindPairBrackets(html, start);
+            if (!string.IsNullOrEmpty(jsonString) &&
+                VRCJson.TryDeserializeFromJson(jsonString, out var json) &&
+                json.DataDictionary.TryGetValue("@graph", out var graph) &&
+                graph.DataList.Count > 0 &&
+                graph.DataList[0].DataDictionary.TryGetValue("name", out var name))
+                return name.String;
+            return string.Empty;
+        }
+        #endregion
     }
 }

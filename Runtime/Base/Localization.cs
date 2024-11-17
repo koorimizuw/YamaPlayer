@@ -1,7 +1,6 @@
 
 using UdonSharp;
 using VRC.SDK3.Data;
-using UnityEngine;
 using System;
 
 namespace Yamadev.YamaStream
@@ -10,8 +9,8 @@ namespace Yamadev.YamaStream
     {
         public static Localization Initialize(string translation)
         {
-            // 0. DataDictionary translation data
-            // 1. string current language
+            // 0. DataDictionary: translation data
+            // 1. string: current language
             object[] result = new object[] { null, null };
             if (VRCJson.TryDeserializeFromJson(translation, out DataToken data) &&
                 data.TokenType == TokenType.DataDictionary) result[0] = data.DataDictionary;

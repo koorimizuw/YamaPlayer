@@ -1136,6 +1136,7 @@ namespace Yamadev.YamaStream.UI
         public override void OnVideoInfoLoaded()
         {
             if (_isQueuePage) GeneratePlaylistTracks();
+            updateTrackView();
         }
         public override void OnQueueUpdated()
         {
