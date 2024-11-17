@@ -19,8 +19,9 @@ float4 GetFixedAVProTexture(sampler2D tex, float2 uv)
     return color;
 }
 
-float4 GetTexture(sampler2D tex, float2 uv, float4 texelSize, float aspectRatio)
+float4 GetTexture(sampler2D tex, float2 uv, float4 texelSize, float aspectRatio, bool flip = false)
 {
+    if (flip) uv.x = 1 - uv.x;
     uv = AdjustAspect(uv, texelSize, aspectRatio);
     if (any(uv < 0 || uv > 1)) return 0;
     return tex2D(tex, uv);
