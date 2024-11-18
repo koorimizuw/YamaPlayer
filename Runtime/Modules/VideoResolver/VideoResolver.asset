@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: VideoResolver
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 5d7fb8fef6271ff4dbfce8c327705abd,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 11988de9d18948e4aaced5b1c187ce2e,
     type: 2}
   udonAssembly: 
   assemblyError: 
@@ -62,7 +62,7 @@ MonoBehaviour:
       Data: 3|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: UdonSharp.UdonSharpBehaviour, UdonSharp.Runtime
+      Data: Yamadev.YamachanWebUnit.Client, Yamadev.YamachanWebUnit.Runtime
     - Name: 
       Entry: 8
       Data: 

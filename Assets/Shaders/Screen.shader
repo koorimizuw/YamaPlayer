@@ -1,51 +1,45 @@
 Shader "Yamadev/YamaStream/Screen"
 {
-	Properties{
-    _MainTex ("Main Texture", 2D) = "black" {}
-    _BaseColor ("Base Color", Color) = (0, 0, 0, 0)
-    [Toggle] _InversionInMirror("Inversion in mirron", Int) = 1
-    [Toggle] _AVPro("AVPro", Int) = 0
-    _Emission ("Emission Scale", Float) = 1
+	Properties
+    {
+        _MainTex ("Main Texture", 2D) = "black" {}
+        _BaseColor ("Base Color", Color) = (0, 0, 0, 0)
+        [Toggle] _MirrorFlip ("Mirror Flip", Int) = 1
+        // [Toggle] _AVPro ("AVPro Flag", Int) = 0
+        _Emission ("Emission Scale", Float) = 1
+        _AspectRatio ("Aspect Ratio", Float) = 1.77777778
 	}
 
-	SubShader {
-		Tags { "RenderType"="Opaque" }
+	SubShader 
+    {
+		Tags { "RenderType" = "Opaque" }
 		LOD 200
 		
 		CGPROGRAM
-		#pragma surface surf Standard fullforwardshadows vertex:vert
+		#pragma surface surf Standard fullforwardshadows
 		#pragma target 3.0
+        #include "./YamaPlayerShader.cginc"
 
         sampler2D _MainTex;
         float4 _MainTex_TexelSize;
         float4 _BaseColor;
-        int _InversionInMirror;
+        int _MirrorFlip;
+        int _VRChatMirrorMode;
         int _AVPro;
-        fixed _Emission;
+        float _Emission;
+        float _AspectRatio;
 
 	    struct Input {
 		    float2 uv_MainTex;
 	    };
-
-        void vert (inout appdata_full v) {
-            bool inMirror = 0 < dot(cross(UNITY_MATRIX_V[0], UNITY_MATRIX_V[1]), UNITY_MATRIX_V[2]);
-            if (inMirror && _InversionInMirror) v.texcoord.xy = float2(1 - v.texcoord.x, v.texcoord.y);
-
-            float aspect = _MainTex_TexelSize.z / 1.77777778;
-            if (_MainTex_TexelSize.w > aspect) v.texcoord.x = ((v.texcoord.x - 0.5) / (aspect / _MainTex_TexelSize.w)) + 0.5;
-            if (_MainTex_TexelSize.w < aspect) v.texcoord.y = ((v.texcoord.y - 0.5) / (_MainTex_TexelSize.w / aspect)) + 0.5;
-        }
     
 	    void surf (Input IN, inout SurfaceOutputStandard o) {
-			fixed4 e = tex2D (_MainTex, IN.uv_MainTex);
-            e *= !any(IN.uv_MainTex < 0 || 1 < IN.uv_MainTex);
-            if (_AVPro) e.rgb = pow(e.rgb, 2.2);
-
-            o.Albedo = _BaseColor.rgb + e;
-            o.Alpha = e.a;
-            o.Emission = e * _Emission;
+			float4 color = GetTexture(_MainTex, IN.uv_MainTex, _MainTex_TexelSize, _AspectRatio, _MirrorFlip && _VRChatMirrorMode);
+            o.Albedo = _BaseColor + color;
+            o.Alpha = color;
+            o.Emission = color * _Emission;
 		}
-		    ENDCG
+		ENDCG
 	}
 	FallBack "Diffuse"
 }

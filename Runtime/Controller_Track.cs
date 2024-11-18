@@ -4,7 +4,7 @@ using VRC.SDKBase;
 
 namespace Yamadev.YamaStream
 {
-    public partial class Controller : Listener
+    public partial class Controller
     {
         [UdonSynced] VideoPlayerType _targetPlayer;
         [UdonSynced] string _title = string.Empty;

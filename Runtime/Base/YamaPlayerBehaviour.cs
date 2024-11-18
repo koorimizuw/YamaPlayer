@@ -40,6 +40,8 @@ namespace Yamadev.YamaStream
             RequestSerialization();
         }
 
-        public void PrintLog(string message) => Debug.Log($"{_debugPrefix} {message}");
+        public void PrintLog(object message) => Debug.Log($"{_debugPrefix} {message}");
+
+        public void PrintError(object message) => Debug.LogError($"{_debugPrefix} {message}");
     }
 }

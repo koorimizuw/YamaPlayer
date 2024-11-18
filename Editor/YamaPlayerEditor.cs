@@ -57,6 +57,8 @@ namespace Yamadev.YamaStream.Script
         Permission _permission;
         SerializedObject _permissionSerializedObject;
         SerializedProperty _defaultPermission;
+        SerializedProperty _grantInstanceOwner;
+        SerializedProperty _grantInstanceMaster;
         SerializedProperty _ownerList;
         // UI
         UIController _uiController;
@@ -81,6 +83,8 @@ namespace Yamadev.YamaStream.Script
             Title = $"YamaPlayer v{Utils.GetYamaPlayerPackageInfo().version}";
 
             _target = target as YamaPlayer;
+            if (EditorApplication.isPlaying) return;
+
             _controller = _target.GetComponentInChildren<Controller>();
             if (_controller != null )
             {
@@ -98,7 +102,6 @@ namespace Yamadev.YamaStream.Script
                 _screenTypes = _controllerSerializedObject.FindProperty("_screenTypes");
                 _screens = _controllerSerializedObject.FindProperty("_screens");
                 _textureProperties = _controllerSerializedObject.FindProperty("_textureProperties");
-                _avProProperties = _controllerSerializedObject.FindProperty("_avProProperties");
             }
             _autoPlay = _target.GetComponentInChildren<AutoPlay>();
             if (_autoPlay != null)
@@ -118,6 +121,8 @@ namespace Yamadev.YamaStream.Script
                 _permissionSerializedObject = new SerializedObject(_permission);
                 _defaultPermission = _permissionSerializedObject.FindProperty("_defaultPermission");
                 _ownerList = _permissionSerializedObject.FindProperty("_ownerList");
+                _grantInstanceOwner = _permissionSerializedObject.FindProperty("_grantInstanceOwner");
+                _grantInstanceMaster = _permissionSerializedObject.FindProperty("_grantInstanceMaster");
             }
             _uiController = _target.GetComponentInChildren<UIController>(true);
             if (_uiController != null)
@@ -154,25 +159,21 @@ namespace Yamadev.YamaStream.Script
                     _screenTypes.arraySize += 1;
                     _screens.arraySize += 1;
                     _textureProperties.arraySize += 1;
-                    _avProProperties.arraySize += 1;
                     _screenTypes.GetArrayElementAtIndex(_screenTypes.arraySize - 1).intValue = (int)ScreenType.Renderer;
                     _screens.GetArrayElementAtIndex(_screens.arraySize - 1).objectReferenceValue = null;
                     _textureProperties.GetArrayElementAtIndex(_textureProperties.arraySize - 1).stringValue = "_MainTex";
-                    _avProProperties.GetArrayElementAtIndex(_avProProperties.arraySize - 1).stringValue = "_AVPro";
                 },
                 onRemoveCallback = (list) =>
                 {
                     _screenTypes.DeleteArrayElementAtIndex(list.index);
                     _screens.DeleteArrayElementAtIndex(list.index);
                     _textureProperties.DeleteArrayElementAtIndex(list.index);
-                    _avProProperties.DeleteArrayElementAtIndex(list.index);
                 },
                 drawElementCallback = (rect, index, isActive, isFocused) =>
                 {
                     SerializedProperty screenType = _screenTypes.GetArrayElementAtIndex(index);
                     SerializedProperty screen = _screens.GetArrayElementAtIndex(index);
                     SerializedProperty textureProperty = _textureProperties.GetArrayElementAtIndex(index);
-                    SerializedProperty avProProperty = _avProProperties.GetArrayElementAtIndex(index);
                     rect.height = EditorGUIUtility.singleLineHeight;
                     using (var check = new EditorGUI.ChangeCheckScope())
                     {
@@ -229,10 +230,8 @@ namespace Yamadev.YamaStream.Script
                     }
                     rect.y += EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
                     EditorGUI.PropertyField(rect, textureProperty, Localization.GetLayout("mainTextureProperty"));
-                    rect.y += EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
-                    EditorGUI.PropertyField(rect, avProProperty, Localization.GetLayout("avProProperty"));
                 },
-                elementHeight = (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 3,
+                elementHeight = (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 2,
             };
         }
 
@@ -539,6 +538,10 @@ namespace Yamadev.YamaStream.Script
             EditorGUILayout.LabelField("Viewer:\t\t" + Localization.Get("viewerPermission"));
             EditorGUILayout.Space(12f);
             EditorGUILayout.PropertyField(_defaultPermission, Localization.GetLayout("defaultPermission"));
+            EditorGUILayout.PropertyField(_grantInstanceOwner, Localization.GetLayout("grantInstanceOwner"));
+            EditorGUILayout.LabelField("　", Localization.Get("grantInstanceOwnerDesc"));
+            EditorGUILayout.PropertyField(_grantInstanceMaster, Localization.GetLayout("grantInstanceMaster"));
+            EditorGUILayout.LabelField("　", Localization.Get("grantInstanceMasterDesc"));
             EditorGUILayout.PropertyField(_ownerList, Localization.GetLayout("ownerList"));
         }
         #endregion

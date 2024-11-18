@@ -13,7 +13,6 @@ namespace Yamadev.YamaStream
         [SerializeField] ScreenType[] _screenTypes;
         [SerializeField] Object[] _screens;
         [SerializeField] string[] _textureProperties;
-        [SerializeField] string[] _avProProperties;
         MaterialPropertyBlock _properties;
 
         void initializeScreen()
@@ -56,7 +55,7 @@ namespace Yamadev.YamaStream
             set
             {
                 _mirrorInverse = value;
-                MaterialProperty.SetInt("_InversionInMirror", value ? 1 : 0);
+                MaterialProperty.SetInt("_MirrorFlip", value ? 1 : 0);
                 foreach (Listener listener in _listeners) listener.OnMirrorInversionChanged();
             }
         }
@@ -83,46 +82,23 @@ namespace Yamadev.YamaStream
                 if (screen == null) continue;
 
                 string textureProperty = _textureProperties[i];
-                string avProProperty = _avProProperties[i];
                 switch (_screenTypes[i])
                 {
                     case ScreenType.Renderer:
                         MaterialProperty.SetTexture(textureProperty, Texture);
-                        MaterialProperty.SetInt(avProProperty, isAVPro);
                         ((Renderer)screen).SetPropertyBlock(MaterialProperty, 0);
-                        SetST(((Renderer)screen).sharedMaterial, textureProperty);
                         break;
                     case ScreenType.RawImage:
                         ((RawImage)screen).texture = Texture;
-                        ((RawImage)screen).material.SetInt(avProProperty, isAVPro);
-#if UNITY_STANDALONE_WIN
-                        ((RawImage)screen).uvRect = isAVPro == 1 ? new Rect(0, 1, 1, -1) : new Rect(0, 0, 1, 1);
-#else
-                        ((RawImage)screen).uvRect = new Rect(0, 0, 1, 1);
-#endif
                         break;
                     case ScreenType.Material:
                         ((Material)screen).SetTexture(textureProperty, Texture);
-                        ((Material)screen).SetInt(avProProperty, isAVPro);
-                        SetST((Material)screen, textureProperty);
                         break;
                 }
             }
         }
 
-        public void SetST(Material material, string textureProperty)
-        {
-#if UNITY_STANDALONE_WIN
-            bool isAVPro = VideoPlayerType == VideoPlayerType.AVProVideoPlayer;
-            material.SetTextureScale(textureProperty, isAVPro ?  new Vector2(1, -1) : new Vector2(1, 1));
-            material.SetTextureOffset(textureProperty, isAVPro ? new Vector2(0, 1) : new Vector2(0, 0));
-#else
-            material.SetTextureScale(textureProperty, new Vector2(1, 1));
-            material.SetTextureOffset(textureProperty, new Vector2(0, 0));
-#endif
-        }
-
-        public void AddScreen(ScreenType screenType, Object screen, string textureProperty = "_MainTex", string avProProperty = "_AVPro")
+        public void AddScreen(ScreenType screenType, Object screen, string textureProperty = "_MainTex")
         {
             foreach (Object obj in _screens)
             {
@@ -131,7 +107,6 @@ namespace Yamadev.YamaStream
             _screenTypes = _screenTypes.Add(screenType);
             _screens = _screens.Add(screen);
             _textureProperties = _textureProperties.Add(textureProperty);
-            _avProProperties = _avProProperties.Add(avProProperty);
         }
     }
 }

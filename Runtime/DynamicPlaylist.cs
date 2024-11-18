@@ -83,10 +83,10 @@ namespace Yamadev.YamaStream
                 int playlistIndex = result.IndexOf("{\"playlistVideoListRenderer\":");
                 if (playlistIndex >= 0)
                 {
-                    int headerIndex = result.IndexOf("{\"playlistHeaderRenderer\":");
+                    int headerIndex = result.IndexOf("{\"pageHeaderRenderer\":");
                     string headerString = Utils.FindPairBrackets(result, headerIndex);
                     if (headerString != string.Empty && VRCJson.TryDeserializeFromJson(headerString, out var headerJson))
-                        _playlistName = headerJson.DataDictionary["playlistHeaderRenderer"].DataDictionary["title"].DataDictionary["simpleText"].String;
+                        _playlistName = headerJson.DataDictionary["pageHeaderRenderer"].DataDictionary["pageTitle"].String;
                     string playlistString = Utils.FindPairBrackets(result, playlistIndex);
                     if (playlistString != string.Empty && VRCJson.TryDeserializeFromJson(playlistString, out var playlistJson))
                     {

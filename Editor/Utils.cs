@@ -37,14 +37,13 @@ namespace Yamadev.YamaStream.Script
             return null;
         }
 
-        public static void AddScreenProperty(this Controller controller, ScreenType screenType, UnityEngine.Object screen, string textureProperty = "_MainTex", string avProProperty = "_AVPro")
+        public static void AddScreenProperty(this Controller controller, ScreenType screenType, UnityEngine.Object screen, string textureProperty = "_MainTex")
         {
             if (controller == null) return;
             SerializedObject serializedObject = new SerializedObject(controller);
             SerializedProperty screenTypes = serializedObject.FindProperty("_screenTypes");
             SerializedProperty screens = serializedObject.FindProperty("_screens");
             SerializedProperty textureProperties = serializedObject.FindProperty("_textureProperties");
-            SerializedProperty avProProperties = serializedObject.FindProperty("_avProProperties");
             for (int i = 0; i < screens.arraySize; i++)
             {
                 if (screens.GetArrayElementAtIndex(i).objectReferenceValue == screen) return;
@@ -52,11 +51,9 @@ namespace Yamadev.YamaStream.Script
             screenTypes.arraySize += 1;
             screens.arraySize += 1;
             textureProperties.arraySize += 1;
-            avProProperties.arraySize += 1;
             screenTypes.GetArrayElementAtIndex(screenTypes.arraySize - 1).intValue = (int)screenType;
             screens.GetArrayElementAtIndex(screenTypes.arraySize - 1).objectReferenceValue = screen;
             textureProperties.GetArrayElementAtIndex(screenTypes.arraySize - 1).stringValue = textureProperty;
-            avProProperties.GetArrayElementAtIndex(screenTypes.arraySize - 1).stringValue = avProProperty;
             serializedObject.ApplyModifiedProperties();
         }
 
@@ -67,14 +64,12 @@ namespace Yamadev.YamaStream.Script
             SerializedProperty screenTypes = serializedObject.FindProperty("_screenTypes");
             SerializedProperty screens = serializedObject.FindProperty("_screens");
             SerializedProperty textureProperties = serializedObject.FindProperty("_textureProperties");
-            SerializedProperty avProProperties = serializedObject.FindProperty("_avProProperties");
             for (int i = 0; i < screens.arraySize; i++)
             {
                 if (screens.GetArrayElementAtIndex(i).objectReferenceValue != screen) continue;
                 screenTypes.DeleteArrayElementAtIndex(i);
                 screens.DeleteArrayElementAtIndex(i);
                 textureProperties.DeleteArrayElementAtIndex(i);
-                avProProperties.DeleteArrayElementAtIndex(i);
                 serializedObject.ApplyModifiedProperties();
                 break;
             }

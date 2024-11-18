@@ -126,12 +126,12 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] Text _versionText;
         [SerializeField] Text _updateLog;
 
-        [Header("Debug")]
-        [SerializeField, HideInInspector] Text _trackTitle;
-        [SerializeField, HideInInspector] Text _trackUrl;
-        [SerializeField, HideInInspector] Text _trackDisplayUrl;
-        [SerializeField, HideInInspector] Text _networkDelay;
-        [SerializeField, HideInInspector] Text _videoOffset;
+        [Header("Slide")]
+        [SerializeField] Toggle _slideOn;
+        [SerializeField] Toggle _slideOff;
+        [SerializeField] Toggle _slide1s;
+        [SerializeField] Toggle _slide2s;
+        [SerializeField] Toggle _slide3s;
 
         [Header("Translation - SideBar")]
         [SerializeField] Text _options;
@@ -181,13 +181,17 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] Text _localDelay;
         [SerializeField] Text _localDelayDesc;
         [SerializeField] Text _languageSelect;
+        [SerializeField] Text _slideMode;
+        [SerializeField] Text _slideModeDesc;
+        [SerializeField] Text _slideOnText;
+        [SerializeField] Text _slideOffText;
+        [SerializeField] Text _slideSeconds;
+        [SerializeField] Text _slideSecondsDesc;
+        [SerializeField] Text _slide1sText;
+        [SerializeField] Text _slide2sText;
+        [SerializeField] Text _slide3sText;
         [SerializeField] Text _permissionTitle;
         [SerializeField] Text _permissionDesc;
-
-        [Header("Translation - Video Search")]
-        [SerializeField] Text _videoSearchTitle;
-        [SerializeField] Text _inputKeyword;
-        [SerializeField] Text _inLoading;
 
         [Header("Translation - Playlist")]
         [SerializeField] Text _playlistTitle;
@@ -364,7 +368,7 @@ namespace Yamadev.YamaStream.UI
         public void AddUrlToQueueEventBase(VRCUrlInputField urlInputField)
         {
             if (urlInputField == null) return;
-            _controller.TakeOwnership();
+            _controller.Queue.TakeOwnership();
             _controller.Queue.AddTrack(Track.New(GetVideoPlayerSelectorValue(), "", urlInputField.GetUrl()));
             urlInputField.SetUrl(VRCUrl.Empty);
             HideVideoPlayerSelector();
@@ -389,38 +393,71 @@ namespace Yamadev.YamaStream.UI
             _controller.TakeOwnership();
             _controller.Paused = false;
         }
+
         public void Pause()
         {
             if (!CheckPermission()) return;
             _controller.TakeOwnership();
             _controller.Paused = true;
         }
+
         public void Stop()
         {
             if (!CheckPermission()) return;
             _controller.TakeOwnership();
             _controller.Stopped = true;
         }
+
         public void ProgressDrag() => _progressDrag = true;
+
         public void SetTime()
         {
             _progressDrag = false;
-            if (_progress == null || !CheckPermission()) return;
+            if (_progress == null || !CheckPermission() || _controller.Stopped) return;
             _controller.TakeOwnership();
-            _controller.SetTime(_controller.Duration * _progress.value);
+            if (_controller.SlideMode) _controller.SetPage((int)_progress.value);
+            else _controller.SetTime(_controller.Duration * _progress.value);
         }
+
         public void SetTimeByHelper()
         {
             if (_progressHelper == null || !CheckPermission()) return;
             _controller.TakeOwnership();
             _controller.SetTime(_controller.Duration * _progressHelper.Percent);
         }
+
+        public void SlideOff()
+        {
+            if (!CheckPermission()) return;
+            _controller.TakeOwnership();
+            _controller.SlideMode = false;
+        }
+
+        public void SlideOn()
+        {
+            if (!CheckPermission()) return;
+            _controller.TakeOwnership();
+            _controller.SlideMode = true;
+        }
+
+        public void SetSlideSeconds(int seconds)
+        {
+            if (!CheckPermission()) return;
+            _controller.TakeOwnership();
+            _controller.SlideSeconds = seconds;
+        }
+
+        public void SetSlide1s() => SetSlideSeconds(1);
+        public void SetSlide2s() => SetSlideSeconds(2);
+        public void SetSlide3s() => SetSlideSeconds(3);
+
         public void Loop()
         {
             if (!CheckPermission()) return;
             _controller.TakeOwnership();
             _controller.Loop = true;
         }
+
         public void LoopOff()
         {
             if (!CheckPermission()) return;
@@ -456,6 +493,7 @@ namespace Yamadev.YamaStream.UI
             }
             else _repeatSlider.SliderLeft.SetValueWithoutNotify(_controller.Repeat.ToRepeatStatus().GetStartTime() / _controller.Duration);
         }
+
         public void SetRepeatEnd()
         {
             if (_repeatSlider == null || _controller.Stopped) return;
@@ -468,12 +506,14 @@ namespace Yamadev.YamaStream.UI
             }
             else _repeatSlider.SliderRight.SetValueWithoutNotify(_controller.Repeat.ToRepeatStatus().GetEndTime() / _controller.Duration);
         }
+
         public void SetShuffle()
         {
             if (!CheckPermission()) return;
             _controller.TakeOwnership();
             _controller.ShufflePlay = true;
         }
+
         public void SetShuffleOff()
         {
             if (!CheckPermission()) return;
@@ -485,13 +525,16 @@ namespace Yamadev.YamaStream.UI
         {
             if (!CheckPermission()) return;
             _controller.TakeOwnership();
-            _controller.Backward();
+            if (_controller.SlideMode) _controller.SetPage(_controller.SlidePage - 1);
+            else _controller.Backward();
         }
+
         public void Forward()
         {
             if (!CheckPermission()) return;
             _controller.TakeOwnership();
-            _controller.Forward();
+            if (_controller.SlideMode) _controller.SetPage(_controller.SlidePage + 1);
+            else _controller.Forward();
         }
 
         public void SetSpeed()
@@ -591,16 +634,16 @@ namespace Yamadev.YamaStream.UI
         }
         public void JoinKaraokeMembers()
         {
-            if (_controller.IsKaraokeMember) return;
-            _controller.KaraokeMembers = _controller.KaraokeMembers.Add(Networking.LocalPlayer.displayName);
+            if (_controller.KaraokeMode == KaraokeMode.None || _controller.IsKaraokeMember) return;
             _controller.TakeOwnership();
+            _controller.KaraokeMembers = _controller.KaraokeMembers.Add(Networking.LocalPlayer.displayName);
             if (_modal != null && _modal.IsActive) OpenKaraokeMemberModal();
         }
         public void LeaveKaraokeMembers()
         {
-            if (!_controller.IsKaraokeMember) return;
-            _controller.KaraokeMembers = _controller.KaraokeMembers.Remove(Networking.LocalPlayer.displayName);
+            if (_controller.KaraokeMode == KaraokeMode.None || !_controller.IsKaraokeMember) return;
             _controller.TakeOwnership();
+            _controller.KaraokeMembers = _controller.KaraokeMembers.Remove(Networking.LocalPlayer.displayName);
             if (_modal != null && _modal.IsActive) OpenKaraokeMemberModal();
         }
         public void OpenKaraokeMemberModal()
@@ -781,17 +824,35 @@ namespace Yamadev.YamaStream.UI
             updateTrackView();
             updateLoadingView();
             updateAudioView();
+            updateSlideView();
             if (_idle != null && _idleImage != null) _idle.gameObject.SetActive(_controller.Stopped);
+        }
+
+        void updateSlideView()
+        {
+            if (_videoTime != null) _videoTime.alignment = _controller.SlideMode ? TextAnchor.MiddleCenter : TextAnchor.MiddleLeft;
+            if (_duration != null) _duration.alignment = _controller.SlideMode ? TextAnchor.MiddleCenter : TextAnchor.MiddleRight;
+            if (_progress != null)
+            {
+                _progress.wholeNumbers = _controller.SlideMode;
+                _progress.minValue = _controller.SlideMode && !_controller.Stopped ? 1 : 0;
+                _progress.maxValue = _controller.SlideMode ? _controller.SlidePageCount : 1;
+            }
+            if (_slideOn) _slideOn.SetIsOnWithoutNotify(_controller.SlideMode);
+            if (_slideOff) _slideOff.SetIsOnWithoutNotify(!_controller.SlideMode);
+            if (_slide1s) _slide1s.SetIsOnWithoutNotify(_controller.SlideSeconds == 1);
+            if (_slide2s) _slide2s.SetIsOnWithoutNotify(_controller.SlideSeconds == 2);
+            if (_slide3s) _slide3s.SetIsOnWithoutNotify(_controller.SlideSeconds == 3);
         }
 
         void updateProgress()
         {
-            if (_videoTime != null) _videoTime.text = TimeSpan.FromSeconds(_controller.VideoTime).ToString(_timeFormat);
-            if (_duration != null) _duration.text = _controller.IsLive ? "Live" : TimeSpan.FromSeconds(_controller.Duration).ToString(_timeFormat);
-            if (_progress != null && !_progressDrag) _progress.SetValueWithoutNotify(_controller.IsLive ? 1f : Mathf.Clamp(_controller.Duration == 0f ? 0f : _controller.VideoTime / _controller.Duration, 0f, 1f));
+            if (_videoTime != null) _videoTime.text = _controller.SlideMode ? _controller.SlidePage.ToString() : TimeSpan.FromSeconds(_controller.VideoTime).ToString(_timeFormat);
+            if (_duration != null) _duration.text = _controller.SlideMode ? _controller.SlidePageCount.ToString() : _controller.IsLive ? "Live" : TimeSpan.FromSeconds(_controller.Duration).ToString(_timeFormat);
+            if (_progress != null && !_progressDrag) _progress.SetValueWithoutNotify(_controller.SlideMode ? _controller.SlidePage : _controller.IsLive ? 1f : Mathf.Clamp(_controller.Duration == 0f ? 0f : _controller.VideoTime / _controller.Duration, 0f, 1f));
             if (_progressHelper != null && _progressTooltip != null)
             {
-                _progressHelper.gameObject.SetActive(!_controller.Stopped && !_controller.IsLive);
+                _progressHelper.gameObject.SetActive(!_controller.Stopped && !_controller.IsLive && !_controller.SlideMode);
                 if (_controller.IsLive) _progressTooltip.text = "Live";
                 else _progressTooltip.text = TimeSpan.FromSeconds(_controller.Duration * _progressHelper.Percent).ToString(_timeFormat);
             }
@@ -867,6 +928,7 @@ namespace Yamadev.YamaStream.UI
             if (_karaokeModeKaraoke != null) _karaokeModeKaraoke.SetIsOnWithoutNotify(_controller.KaraokeMode == KaraokeMode.Karaoke);
             if (_karaokeModeDance != null) _karaokeModeDance.SetIsOnWithoutNotify(_controller.KaraokeMode == KaraokeMode.Dance);
             if (_karaokeModal != null) _karaokeModal.SetActive(_controller.KaraokeMode != KaraokeMode.None);
+            if (_modal.gameObject.activeSelf) OpenKaraokeMemberModal();
         }
 
         void updateErrorView(VideoError videoError)
@@ -1007,10 +1069,15 @@ namespace Yamadev.YamaStream.UI
             if (_localDelay != null) _localDelay.text = i18n.GetValue("localOffset");
             if (_localDelayDesc != null) _localDelayDesc.text = i18n.GetValue("localOffsetDesc");
             if (_languageSelect != null) _languageSelect.text = i18n.GetValue("languageSelect");
-
-            if (_videoSearchTitle != null) _videoSearchTitle.text = i18n.GetValue("videoSearchTitle");
-            if (_inputKeyword != null) _inputKeyword.text = i18n.GetValue("inputKeyword");
-            if (_inLoading != null) _inLoading.text = i18n.GetValue("inLoading");
+            if (_slideMode != null) _slideMode.text = $"{i18n.GetValue("slideMode")}<size=100>(Global)</size>";
+            if (_slideModeDesc != null) _slideModeDesc.text = i18n.GetValue("slideModeDesc");
+            if (_slideOnText != null) _slideOnText.text = i18n.GetValue("slideOn");
+            if (_slideOffText != null) _slideOffText.text = i18n.GetValue("slideOff");
+            if (_slideSeconds != null) _slideSeconds.text = $"{i18n.GetValue("slideSeconds")}<size=100>(Global)</size>";
+            if (_slideSecondsDesc != null) _slideSecondsDesc.text = i18n.GetValue("slideSecondsDesc");
+            if (_slide1sText != null) _slide1sText.text = i18n.GetValue("slide1s");
+            if (_slide2sText != null) _slide2sText.text = i18n.GetValue("slide2s");
+            if (_slide3sText != null) _slide3sText.text = i18n.GetValue("slide3s");
 
             if (_playlistTitle != null) _playlistTitle.text = i18n.GetValue("playlistTitle");
             if (_playQueue != null) _playQueue.text = i18n.GetValue("playQueue");
@@ -1053,6 +1120,7 @@ namespace Yamadev.YamaStream.UI
         }
         public override void OnVideoError(VideoError videoError) => updateErrorView(videoError);
         public override void OnPlayerChanged() => UpdateUI();
+        public override void OnSlideModeChanged() => UpdateUI();
         public override void OnLoopChanged() => updatePlaybackView();
         public override void OnRepeatChanged() => updatePlaybackView();
         public override void OnSpeedChanged() => updatePlaybackView();
@@ -1068,6 +1136,7 @@ namespace Yamadev.YamaStream.UI
         public override void OnVideoInfoLoaded()
         {
             if (_isQueuePage) GeneratePlaylistTracks();
+            updateTrackView();
         }
         public override void OnQueueUpdated()
         {
@@ -1085,6 +1154,7 @@ namespace Yamadev.YamaStream.UI
         public override void OnMirrorInversionChanged() => updateScreenView();
         public override void OnEmissionChanged() => updateScreenView();
         public override void OnKaraokeModeChanged() => updateKaraokeView();
+        public override void OnKaraokeMemberChanged() => updateKaraokeView();
         public override void OnPermissionChanged() => GeneratePermissionView();
     }
 }
