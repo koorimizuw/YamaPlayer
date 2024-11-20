@@ -38,7 +38,7 @@ namespace Yamadev.YamaStream
                 _info.SetValue(urlStr, GetTwitchTitleFromTwitch(result.Result));
             else _info.SetValue(urlStr, string.Empty);
 
-            _controller.Track.SetTitle(GetVideoInfo(result.Url));
+            if (!_controller.Track.HasTitle()) _controller.Track.SetTitle(GetVideoInfo(_controller.Track.GetVRCUrl()));
             _controller.SendCustomVideoEvent(nameof(OnVideoInfoLoaded));
         }
 
