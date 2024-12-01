@@ -132,15 +132,6 @@ namespace Yamadev.YamaStream
             return arr;
         }
 
-        public static Vector3 GetMousePosition(VRCPlayerApi.TrackingDataType type = VRCPlayerApi.TrackingDataType.Head)
-        {
-            var tracking = Networking.LocalPlayer.GetTrackingData(type);
-            Quaternion rot = tracking.rotation;
-            if (type == VRCPlayerApi.TrackingDataType.LeftHand || type == VRCPlayerApi.TrackingDataType.RightHand) rot *= Quaternion.Euler(0, 40f, 0);
-            Physics.Raycast(tracking.position, rot * Vector3.forward, out RaycastHit hit, Mathf.Infinity);
-            return hit.point;
-        }
-
         public static bool TryFind(this Transform t, string n, out Transform result)
         {
             result = t.Find(n);

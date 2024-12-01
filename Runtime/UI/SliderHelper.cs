@@ -1,15 +1,16 @@
 ﻿
 using UdonSharp;
 using UnityEngine;
+using VRC.SDKBase;
 
 namespace Yamadev.YamaStream
 {
+    [RequireComponent(typeof(RectTransform))]
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class SliderHelper : UdonSharpBehaviour
     {
         [SerializeField] InputController _inputController;
-        [SerializeField] RectTransform _detectArea;
-        [SerializeField] GameObject _tooltip;
+        [SerializeField] RectTransform _tooltip;
         RectTransform _trans;
         float _percent = 0f;
         void Start()
@@ -19,30 +20,22 @@ namespace Yamadev.YamaStream
 
         public float Percent => _percent;
 
-        private void Update()
+        public override void PostLateUpdate()
         {
-            Vector3[] corners = new Vector3[4];
-            _detectArea.GetWorldCorners(corners);
-            Rect detect = corners[2].x - corners[0].x > 0 ? new Rect(corners[0], corners[2] - corners[0]) : new Rect(corners[3], corners[1] - corners[3]);
+            Vector3 localPosition = _trans.InverseTransformPoint(_inputController.MousePosition);
+            float localX = localPosition.x + (_trans.rect.width * (1 - _trans.pivot.x));
+            _percent = localX / _trans.rect.width;
 
-            if (detect.Contains(_inputController.MousePosition)) _tooltip.SetActive(true);
+            if (_trans.rect.Contains(localPosition)) _tooltip.gameObject.SetActive(true);
             else
             {
-                _tooltip.SetActive(false);
+                _tooltip.gameObject.SetActive(false);
                 return;
             }
 
-            _trans.GetWorldCorners(corners);
-            bool normal = corners[2].x - corners[0].x > 0;
-            Rect rect = normal ? new Rect(corners[0], corners[2] - corners[0]) : new Rect(corners[3], corners[1] - corners[3]);
-
-            if (!rect.Contains(_inputController.MousePosition)) return;
-            RectTransform trans = _tooltip.GetComponent<RectTransform>();
-            Vector2 pos = trans.anchoredPosition;
-            _percent = (_inputController.MousePosition.x - rect.x) / rect.width;
-            _percent = normal ? _percent : 1 - _percent;
+            Vector2 pos = _tooltip.anchoredPosition;
             pos.x = _percent * _trans.sizeDelta.x;
-            trans.anchoredPosition = pos;
+            _tooltip.anchoredPosition = pos;
         }
     }
 }

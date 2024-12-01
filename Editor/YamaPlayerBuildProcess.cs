@@ -22,16 +22,6 @@ namespace Yamadev.YamaStream.Script
     {
         public int callbackOrder => -2;
 
-        private void SetAngle(Transform trans)
-        {
-            Vector3 angle = trans.eulerAngles;
-            if (angle.y % 180 != 0 && angle.y % 90 == 0)
-            {
-                angle.y += 0.01f;
-                trans.eulerAngles = angle;
-            }
-        }
-
         private void GeneratePlaylists()
         {
             foreach (PlayListContainer handle in Utils.FindComponentsInHierarthy<PlayListContainer>())
@@ -122,12 +112,6 @@ namespace Yamadev.YamaStream.Script
                         newRecord.SetActive(true);
                     }
                 }
-                SetAngle(player.transform);
-            }
-
-            foreach (YamaPlayerController controller in Utils.FindComponentsInHierarthy<YamaPlayerController>())
-            {
-                SetAngle(controller.transform.transform);
             }
 
             foreach (UIController uiController in Utils.FindComponentsInHierarthy<UIController>())
