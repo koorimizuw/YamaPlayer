@@ -22,11 +22,19 @@ namespace Yamadev.YamaStream
 
         public static Vector3 GetMousePosition(TrackingDataType type = TrackingDataType.Head)
         {
+            if (!Utilities.IsValid(Networking.LocalPlayer)) return Vector3.zero;
             var tracking = Networking.LocalPlayer.GetTrackingData(type);
             Quaternion rot = tracking.rotation;
             if (type == TrackingDataType.LeftHand || type == TrackingDataType.RightHand) rot *= Quaternion.Euler(0, 40f, 0);
-            Physics.Raycast(tracking.position, rot * Vector3.forward, out RaycastHit hit, Mathf.Infinity);
-            return hit.point;
+            RaycastHit[] hits = Physics.RaycastAll(tracking.position, rot * Vector3.forward, Mathf.Infinity);
+            foreach (RaycastHit hit in hits)
+            {
+                if (hit.transform == null) continue;
+                if (hit.collider != null && !hit.collider.isTrigger) return Vector3.zero;
+                if (hit.collider.gameObject.GetComponent<RectTransform>() == null) continue;
+                return hit.point;
+            }
+            return Vector3.zero;
         }
 
         public override void InputUse(bool value, UdonInputEventArgs args)
