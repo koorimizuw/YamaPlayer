@@ -3,7 +3,7 @@ using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace Yamadev.YamaStream
+namespace Yamadev.YamaStream.UI
 {
     [RequireComponent(typeof(RectTransform))]
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
