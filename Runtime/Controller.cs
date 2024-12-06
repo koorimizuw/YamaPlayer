@@ -14,7 +14,7 @@ namespace Yamadev.YamaStream
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public partial class Controller : Listener
     {
-        [SerializeField] string _version;
+        [SerializeField] YamaPlayerManager _manager;
         [SerializeField] Animator _videoPlayerAnimator;
         [SerializeField] VideoPlayerHandle[] _videoPlayerHandles;
         [SerializeField] Permission _permission;
@@ -45,8 +45,6 @@ namespace Yamadev.YamaStream
                 SetTime(Repeat.ToRepeatStatus().GetStartTime());
             if (IsPlaying && Time.time - _syncFrequency > _lastSync) DoSync();
         }
-
-        public string Version => _version;
 
         public Permission Permission => _permission;
 

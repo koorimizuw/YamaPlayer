@@ -14,9 +14,8 @@ namespace Yamadev.YamaStream.UI
     public class UIController : Listener
     {
         // [Header("Settings")]
+        [SerializeField] YamaPlayerManager _manager;
         [SerializeField] Controller _controller;
-        [SerializeField] TextAsset _translation;
-        [SerializeField] TextAsset _updateLogs;
         [SerializeField] bool _disableUIOnPickUp = true;
         [SerializeField, Range(0f, 10f)] float _disableUIDistance = 0f;
         [SerializeField] Font _font;
@@ -215,8 +214,8 @@ namespace Yamadev.YamaStream.UI
             SendCustomEventDelayedFrames(nameof(UpdateUI), 3);
             SendCustomEventDelayedFrames(nameof(GeneratePlaylistView), 3);
             SendCustomEventDelayedFrames(nameof(UpdateTranslation), 3);
-            if (_versionText != null) _versionText.text = $"YamaPlayer v{_controller.Version}";
-            if (_updateLog != null && _updateLogs != null) _updateLog.text = _updateLogs.text;
+            if (_versionText != null) _versionText.text = $"YamaPlayer v{_manager.Version}";
+            if (_updateLog != null && _manager.UpdateLogs != null) _updateLog.text = _manager.UpdateLogs.text;
             if (_idle != null && _idleImage != null) _idle.sprite = _idleImage;
             if (_animator != null && _defaultPlaylistOpen) _animator.SetTrigger("TogglePlaylist");
             _uiBoxCollider = GetComponentInChildren<BoxCollider>();
@@ -240,7 +239,7 @@ namespace Yamadev.YamaStream.UI
             get
             {
                 if (Utilities.IsValid(_i18n)) return _i18n;
-                _i18n = Localization.Initialize(_translation.text);
+                _i18n = Localization.Initialize(_manager.Translation.text);
                 return _i18n;
             }
         }
