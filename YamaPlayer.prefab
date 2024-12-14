@@ -361,6 +361,7 @@ MonoBehaviour:
   _retryAfterSeconds: 5.1
   _maxErrorRetry: 5
   _timeFormat: hh\:mm\:ss
+  _isLocal: 0
   _videoPlayerType: 1
   _loop: 0
   _slideMode: 0
@@ -1331,7 +1332,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19c8d62b03eab1b4c902579725a5d163, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetContent: {fileID: 0}
+  targetContent: {fileID: 7876130940339505696}
 --- !u!1 &8503568631861745688
 GameObject:
   m_ObjectHideFlags: 0
