@@ -6,9 +6,9 @@ using UnityEngine.UI;
 using VRC.SDK3.Components;
 using Yamadev.YamaStream.UI;
 
-namespace Yamadev.YamaStream.Script
+namespace Yamadev.YamaStream.Editor
 {
-    public class ColorPattern
+    public record ColorPattern
     {
         public string Name;
         public Color PrimaryColor;

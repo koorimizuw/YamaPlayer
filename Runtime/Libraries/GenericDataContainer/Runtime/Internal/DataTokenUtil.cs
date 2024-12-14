@@ -1,6 +1,6 @@
 using VRC.SDK3.Data;
 
-namespace Koyashiro.GenericDataContainer.Internal
+namespace Yamadev.YamaStream.Libraries.Internal
 {
     public static class DataTokenUtil
     {

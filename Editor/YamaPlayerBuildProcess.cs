@@ -12,12 +12,13 @@ using UdonSharpEditor;
 using Yamadev.YamaStream.Modules;
 using VRC.SDK3.Components;
 using UnityEngine.UI;
+using Yamadev.YamaStream.Script;
 
 #if WEB_UNIT_INCLUDED
 using Yamadev.YamachanWebUnit;
 #endif
 
-namespace Yamadev.YamaStream.Script
+namespace Yamadev.YamaStream.Editor
 {
     public class YamaPlayerBuildProcess : IProcessSceneWithReport
     {
@@ -30,6 +31,7 @@ namespace Yamadev.YamaStream.Script
             foreach (PlayListContainer handle in Utils.FindComponentsInHierarthy<PlayListContainer>())
             {
                 Transform template = handle.TargetContent.transform.GetChild(0);
+                template.gameObject.SetActive(false);
 
                 int count = handle.TargetContent.childCount;
                 for (int i = 1; i < count; i++)
@@ -44,7 +46,7 @@ namespace Yamadev.YamaStream.Script
                     GameObject newObject = UnityEngine.Object.Instantiate(template.gameObject, handle.TargetContent, false);
                     GameObjectUtility.EnsureUniqueNameForSibling(newObject);
 
-                    Playlist udon = newObject.transform.GetComponent<Playlist>();
+                    YamaStream.Playlist udon = newObject.transform.GetComponent<YamaStream.Playlist>();
 
                     VideoPlayerType[] players = li.Tracks.Select(tr => ((VideoPlayerType)(int)tr.Mode)).ToArray();
                     string[] titles = li.Tracks.Select(tr => tr.Title).ToArray();
@@ -59,9 +61,8 @@ namespace Yamadev.YamaStream.Script
                     newObject.SetActive(true);
                 }
 
-                GameObject.DestroyImmediate(template.gameObject);
                 Controller playlistUdon = yamaPlayer.GetComponentInChildren<Controller>();
-                playlistUdon.SetProgramVariable("_playlists", handle.TargetContent.GetComponentsInChildren<Playlist>());
+                playlistUdon.SetProgramVariable("_playlists", handle.TargetContent.GetComponentsInChildren<YamaStream.Playlist>());
             }
         }
 
@@ -91,7 +92,7 @@ namespace Yamadev.YamaStream.Script
             string path = AssetDatabase.GUIDToAssetPath(_managerPrefabGuid);
             GameObject obj = PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(path), null) as GameObject;
             YamaPlayerManager manager = obj.GetComponent<YamaPlayerManager>();
-            manager.SetProgramVariable("Version", Utils.GetYamaPlayerPackageInfo().version);
+            manager.SetProgramVariable("Version", VersionManager.Version);
             LatencyManager latencyManager = obj.GetComponentInChildren<LatencyManager>();
             if (latencyManager != null)
             {

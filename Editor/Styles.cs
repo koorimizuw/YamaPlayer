@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace Yamadev.YamaStream.Script
+namespace Yamadev.YamaStream.Editor
 {
     internal static class Styles
     {

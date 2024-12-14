@@ -1,9 +1,9 @@
 using UnityEngine;
 using VRC.SDK3.Data;
 using UdonSharp;
-using Koyashiro.GenericDataContainer.Internal;
+using Yamadev.YamaStream.Libraries.Internal;
 
-namespace Koyashiro.GenericDataContainer
+namespace Yamadev.YamaStream.Libraries.GenericDataContainer
 {
     [AddComponentMenu("")]
     public class DataList<T> : UdonSharpBehaviour

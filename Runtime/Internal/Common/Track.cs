@@ -1,4 +1,5 @@
 ﻿
+using System.Security.Policy;
 using UdonSharp;
 using VRC.SDKBase;
 
@@ -21,6 +22,12 @@ namespace Yamadev.YamaStream
             object[] track = new object[] { player, title, url, originalUrl };
             return (Track)(object)track;
         }
+
+        public static Track Empty()
+        {
+            object[] track = new object[] { VideoPlayerType.AVProVideoPlayer, string.Empty, VRCUrl.Empty, string.Empty };
+            return (Track)(object)track;
+        }
     }
 
     public static class TrackExtentions
@@ -30,7 +37,7 @@ namespace Yamadev.YamaStream
             return ((object[])(object)obj).Length > 0;
         }
 
-        public static VideoPlayerType GetPlayer(this Track obj)
+        public static VideoPlayerType GetPlayerType(this Track obj)
         {
             return (VideoPlayerType)((object[])(object)obj)[0];
         }

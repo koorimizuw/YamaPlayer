@@ -7,12 +7,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDK3.Video.Components.AVPro;
 using Yamadev.YamaStream.UI;
+using Yamadev.YamaStream.Script;
 
 #if LTCGI_INCLUDED
 using pi.LTCGI;
 #endif
 
-namespace Yamadev.YamaStream.Script
+namespace Yamadev.YamaStream.Editor
 {
     [CustomEditor(typeof(YamaPlayer))]
     internal class YamaPlayerEditor : EditorBase
@@ -29,6 +30,7 @@ namespace Yamadev.YamaStream.Script
         // controller
         Controller _controller;
         SerializedObject _controllerSerializedObject;
+        SerializedProperty _localMode;
         SerializedProperty _useAudioLink;
         SerializedProperty _audioLink;
         SerializedProperty _volume;
@@ -80,7 +82,7 @@ namespace Yamadev.YamaStream.Script
 
         private void OnEnable()
         {
-            Title = $"YamaPlayer v{Utils.GetYamaPlayerPackageInfo().version}";
+            Title = $"YamaPlayer v{VersionManager.Version}";
 
             _target = target as YamaPlayer;
             if (EditorApplication.isPlaying) return;
@@ -89,6 +91,7 @@ namespace Yamadev.YamaStream.Script
             if (_controller != null )
             {
                 _controllerSerializedObject = new SerializedObject(_controller);
+                _localMode = _controllerSerializedObject.FindProperty("_isLocal");
                 _useAudioLink = _controllerSerializedObject.FindProperty("_useAudioLink");
                 _audioLink = _controllerSerializedObject.FindProperty("_audioLink");
                 _volume = _controllerSerializedObject.FindProperty("_volume");
@@ -459,6 +462,10 @@ namespace Yamadev.YamaStream.Script
             }
             Styles.DrawDivider();
 
+            EditorGUILayout.LabelField(Localization.Get("syncSettings"), Styles.Bold);
+            EditorGUILayout.PropertyField(_localMode, Localization.GetLayout("localMode"));
+            Styles.DrawDivider();
+
             EditorGUILayout.LabelField(Localization.Get("audioSettings"), Styles.Bold);
             EditorGUILayout.PropertyField(_mute, Localization.GetLayout("mute"));
             EditorGUILayout.PropertyField(_volume, Localization.GetLayout("volume"));
@@ -555,7 +562,7 @@ namespace Yamadev.YamaStream.Script
             Styles.DrawDivider();
 
             VersionManager.CheckBetaVersion = EditorGUILayout.Toggle(Localization.Get("checkBetaVersion"), VersionManager.CheckBetaVersion);
-            EditorGUILayout.LabelField(Localization.Get("currentVersion"), Utils.GetYamaPlayerPackageInfo().version);
+            EditorGUILayout.LabelField(Localization.Get("currentVersion"), VersionManager.Version);
             EditorGUILayout.LabelField(Localization.Get("newestVersion"), VersionManager.Newest);
             using (new EditorGUILayout.HorizontalScope())
             {

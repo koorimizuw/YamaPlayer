@@ -2,7 +2,7 @@ using UnityEngine;
 using VRC.SDK3.Data;
 using UdonSharp;
 
-namespace Koyashiro.GenericDataContainer
+namespace Yamadev.YamaStream.Libraries.GenericDataContainer
 {
     [AddComponentMenu("")]
     public class DataDictionary<TKey, TValue> : UdonSharpBehaviour

@@ -18,6 +18,7 @@ namespace Yamadev.YamaStream
             return (Localization)(object)result;
         }
     }
+
     public static class LocalizationExtentions
     {
         public static string GetValue(this Localization _i18n, string key)

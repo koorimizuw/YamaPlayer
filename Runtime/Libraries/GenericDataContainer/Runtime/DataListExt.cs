@@ -1,7 +1,7 @@
 using VRC.SDK3.Data;
-using Koyashiro.GenericDataContainer.Internal;
+using Yamadev.YamaStream.Libraries.Internal;
 
-namespace Koyashiro.GenericDataContainer
+namespace Yamadev.YamaStream.Libraries.GenericDataContainer
 {
     public static class DataListExt
     {
