@@ -1,12 +1,8 @@
-﻿
-using System.Linq;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using VRC.SDKBase;
-using VRC.Utility;
 using Yamadev.YamaStream.UI;
 using UdonSharpEditor;
 using Yamadev.YamaStream.Modules;
@@ -24,47 +20,7 @@ namespace Yamadev.YamaStream.Editor
     {
         readonly static string _managerPrefabGuid = "3488ed8aceb89a146969441cdf1645f0";
 
-        public int callbackOrder => -2;
-
-        private void GeneratePlaylists()
-        {
-            foreach (PlayListContainer handle in Utils.FindComponentsInHierarthy<PlayListContainer>())
-            {
-                Transform template = handle.TargetContent.transform.GetChild(0);
-                template.gameObject.SetActive(false);
-
-                int count = handle.TargetContent.childCount;
-                for (int i = 1; i < count; i++)
-                {
-                    GameObject.DestroyImmediate(handle.TargetContent.GetChild(1).gameObject);
-                }
-
-                YamaPlayer yamaPlayer = handle.FindComponentInParent<YamaPlayer>();
-                PlayList[] children = handle.transform.GetComponentsInChildren<PlayList>();
-                foreach (PlayList li in children)
-                {
-                    GameObject newObject = UnityEngine.Object.Instantiate(template.gameObject, handle.TargetContent, false);
-                    GameObjectUtility.EnsureUniqueNameForSibling(newObject);
-
-                    YamaStream.Playlist udon = newObject.transform.GetComponent<YamaStream.Playlist>();
-
-                    VideoPlayerType[] players = li.Tracks.Select(tr => ((VideoPlayerType)(int)tr.Mode)).ToArray();
-                    string[] titles = li.Tracks.Select(tr => tr.Title).ToArray();
-                    VRCUrl[] urls = li.Tracks.Select(tr => new VRCUrl(tr.Url)).ToArray();
-                    string[] displayUrls = li.Tracks.Select(tr => "").ToArray();
-
-                    udon.SetProgramVariable("_playlistName", li.PlayListName);
-                    udon.SetProgramVariable("_videoPlayerTypes", players);
-                    udon.SetProgramVariable("_titles", titles);
-                    udon.SetProgramVariable("_urls", urls);
-                    udon.SetProgramVariable("_originalUrls", displayUrls);
-                    newObject.SetActive(true);
-                }
-
-                Controller playlistUdon = yamaPlayer.GetComponentInChildren<Controller>();
-                playlistUdon.SetProgramVariable("_playlists", handle.TargetContent.GetComponentsInChildren<YamaStream.Playlist>());
-            }
-        }
+        public int callbackOrder => -10;
 
         public void CreateWebUnitClient()
         {
@@ -109,7 +65,6 @@ namespace Yamadev.YamaStream.Editor
 
         public void OnProcessScene(Scene scene, BuildReport report)
         {
-            GeneratePlaylists();
             CreateWebUnitClient();
             CreateInputController();
             YamaPlayerManager manager = CreateManager();

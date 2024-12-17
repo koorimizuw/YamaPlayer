@@ -62,21 +62,9 @@ namespace Yamadev.YamaStream.Editor
 
         public void ReadInternalPlaylists()
         {
-            List<Playlist> results = new();
             PlayListContainer container = _player?.GetComponentInChildren<PlayListContainer>();
             if (container == null) return;
-            for (int i = 1; i < container.transform.childCount; i++)
-            {
-                PlayList li = container.transform.GetChild(i).GetComponent<PlayList>();
-                results.Add(new Playlist()
-                {
-                    Active = li.gameObject.activeSelf,
-                    Name = li.PlayListName,
-                    Tracks = li.Tracks.ToList(),
-                    YoutubeListId = li.YouTubePlayListID,
-                });
-            }
-            _playlists = results;
+            _playlists = container.ReadPlaylists();
             GeneratePlaylistsView();
         }
 
@@ -284,7 +272,8 @@ namespace Yamadev.YamaStream.Editor
 
         void ConfirmSave()
         {
-            if (_isDirty && EditorUtility.DisplayDialog(Localization.Get("notSaved"), Localization.Get("confirmSave"), Localization.Get("save"), Localization.Get("notSave")))
+            if (_isDirty && 
+                EditorUtility.DisplayDialog(Localization.Get("notSaved"), Localization.Get("confirmSave"), Localization.Get("save"), Localization.Get("notSave")))
                 Save();
         }
 
@@ -315,6 +304,7 @@ namespace Yamadev.YamaStream.Editor
             }
             _isDirty = false;
         }
+
         #region Exporter
         [Serializable] class Playlists 
         { 

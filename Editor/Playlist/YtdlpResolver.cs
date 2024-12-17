@@ -6,6 +6,7 @@ using UnityEngine.Networking;
 using System.Diagnostics;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Debug = UnityEngine.Debug;
 
@@ -21,7 +22,7 @@ namespace Yamadev.YamaStream.Editor
         public static async UniTask DownloadYtdlp()
         {
             if (Exist) return;
-            if (!EditorUtility.DisplayDialog("Download Yt-dlp", "Download newest Yt-dlp?", "Yes", "No")) return;
+            if (!EditorUtility.DisplayDialog("Download Yt-dlp", "Download Yt-dlp?", "Yes", "No")) return;
             try
             {
                 using (var request = UnityWebRequest.Get(_url))
@@ -48,8 +49,7 @@ namespace Yamadev.YamaStream.Editor
         public static async UniTask<List<string>> GetPlaylist(string url)
         {
             if (!Exist) await DownloadYtdlp();
-            List<string> results = new();
-            if (!Exist) return results;
+            if (!Exist) return new();
             try
             {
                 EditorUtility.DisplayProgressBar("Getting Playlist", $"Getting Playlist from ${url}", 0);
@@ -66,17 +66,12 @@ namespace Yamadev.YamaStream.Editor
                     throw new ArgumentException("Process cannot start.");
                 }
                 string output = await process.StandardError.ReadToEndAsync();
-                foreach (string line in output.Split("\n"))
-                {
-                    if (!line.StartsWith("{")) continue;
-                    results.Add(line);
-                }
+                return output.Split("\n").Where(line => line.StartsWith("{")).ToList();
             }
             finally
             {
                 EditorUtility.ClearProgressBar();
             }
-            return results;
         }
     }
 }

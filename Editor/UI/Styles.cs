@@ -38,5 +38,10 @@ namespace Yamadev.YamaStream.Editor
             rect.height = height;
             EditorGUI.DrawRect(rect, color);
         }
+
+        public static bool DisplayConfirmDialog(string title, string message)
+        {
+            return EditorUtility.DisplayDialog(title, message, Localization.Get("yes"), Localization.Get("no"));
+        }
     }
 }

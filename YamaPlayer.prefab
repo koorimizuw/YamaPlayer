@@ -946,7 +946,7 @@ MonoBehaviour:
   _url:
     url: 
   _playlistIndex: 0
-  _playlistTrackIndex: 0
+  _playlistTrackIndex: -1
 --- !u!114 &7267583295862522451
 MonoBehaviour:
   m_ObjectHideFlags: 0
