@@ -18,7 +18,7 @@ namespace Yamadev.YamaStream
             get
             {
                 if (!Utilities.IsValid(_track))
-                    _track = Track.New(_videoPlayerType, string.Empty, VRCUrl.Empty);
+                    _track = Track.Empty();
                 return _track;
             }
             set

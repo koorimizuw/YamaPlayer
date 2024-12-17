@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Reflection;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -104,10 +105,10 @@ namespace Yamadev.YamaStream
             int max = hasExclude ? playlist.Length : playlist.Length - 1;
             if (hasExclude)
             {
-                PlayTrack(ActivePlaylist, next < exclude ? next : next + 1);
+                PlayTrack(playlist, next < exclude ? next : next + 1);
                 return;
             }
-            PlayTrack(ActivePlaylist, next);
+            PlayTrack(playlist, next);
         }
 
         public void RunForward()
