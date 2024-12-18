@@ -1,6 +1,4 @@
-﻿
-using System.Security.Policy;
-using UdonSharp;
+﻿using UdonSharp;
 using VRC.SDKBase;
 
 namespace Yamadev.YamaStream

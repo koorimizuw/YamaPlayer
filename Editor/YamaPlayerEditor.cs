@@ -365,41 +365,41 @@ namespace Yamadev.YamaStream.Editor
                 if (_useLowLatency != null) EditorGUILayout.PropertyField(_useLowLatency, Localization.GetLayout("useLowLatency"));
             }
 
-            EditorGUILayout.LabelField(Localization.Get("externalSettings"), Styles.Bold);
-#if AUDIOLINK_V1
-            EditorGUILayout.PropertyField(_useAudioLink, Localization.GetLayout("useAudioLink"));
-            if (_useAudioLink.boolValue)
+            using (new SectionScope(Localization.Get("externalSettings")))
             {
-                EditorGUILayout.PropertyField(_audioLink);
-                if (_audioLink.objectReferenceValue == null)
+#if AUDIOLINK_V1
+                EditorGUILayout.PropertyField(_useAudioLink, Localization.GetLayout("useAudioLink"));
+                if (_useAudioLink.boolValue)
                 {
-                    using (new EditorGUILayout.HorizontalScope())
+                    EditorGUILayout.PropertyField(_audioLink);
+                    if (_audioLink.objectReferenceValue == null)
                     {
-                        GUILayout.FlexibleSpace();
-                        if (GUILayout.Button(Localization.Get("setUpAudioLink")) &&
-                            Styles.DisplayConfirmDialog(Localization.Get("setUpAudioLink"), Localization.Get("setUpAudioLinkConfirm"))) 
-                            _audioLink.objectReferenceValue = AudioLinkUtils.GetOrAddAudioLink();
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            GUILayout.FlexibleSpace();
+                            if (GUILayout.Button(Localization.Get("setUpAudioLink")) &&
+                                Styles.DisplayConfirmDialog(Localization.Get("setUpAudioLink"), Localization.Get("setUpAudioLinkConfirm"))) 
+                                _audioLink.objectReferenceValue = AudioLinkUtils.GetOrAddAudioLink();
+                        }
                     }
                 }
-            }
 #else
-            EditorGUILayout.LabelField("Audio Link", Localization.Get("audioLinkNotImported"));
+                EditorGUILayout.LabelField("Audio Link", Localization.Get("audioLinkNotImported"));
 #endif
 #if LTCGI_INCLUDED
-            if (EditorGUILayout.Toggle(Localization.Get("useLTCGI"), _useLTCGI))
-            {
-                if (!_useLTCGI) SetUpLTCGI();
-            }
-            else
-            {
-                if (_useLTCGI) RemoveLTCGI();
-            }
-            // EditorGUILayout.LabelField("　", Localization.Get("useLTCGIDesc"));
-#else
-            EditorGUILayout.LabelField("LTCGI", Localization.Get("ltcgiNotImported"));
+                if (EditorGUILayout.Toggle(Localization.Get("useLTCGI"), _useLTCGI))
+                {
+                    if (!_useLTCGI) SetUpLTCGI();
+                }
+                else
+                {
+                    if (_useLTCGI) RemoveLTCGI();
+                }
+                // EditorGUILayout.LabelField("　", Localization.Get("useLTCGIDesc"));
+    #else
+                EditorGUILayout.LabelField("LTCGI", Localization.Get("ltcgiNotImported"));
 #endif
-            Styles.DrawDivider();
-
+            }
             _screenList?.DoLayoutList();
 
         }
