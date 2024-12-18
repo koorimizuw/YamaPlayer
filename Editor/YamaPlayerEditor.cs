@@ -122,11 +122,15 @@ namespace Yamadev.YamaStream.Editor
                 _useLowLatency = _avProSerializedObject.FindProperty("useLowLatency");
             }
 
+#if LTCGI_INCLUDED
             for (int i = 0; i < _screens.arraySize; i++)
             {
                 if (_screens.GetArrayElementAtIndex(i).objectReferenceValue == LTCGIUtils.YamaPlayerCRT.material)
                     _useLTCGI = true;
             }
+#else
+            _useLTCGI = false;
+#endif
 
             GenerateScreenList();
 
@@ -396,7 +400,7 @@ namespace Yamadev.YamaStream.Editor
                     if (_useLTCGI) RemoveLTCGI();
                 }
                 // EditorGUILayout.LabelField("　", Localization.Get("useLTCGIDesc"));
-    #else
+#else
                 EditorGUILayout.LabelField("LTCGI", Localization.Get("ltcgiNotImported"));
 #endif
             }
