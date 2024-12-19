@@ -123,6 +123,7 @@ namespace Yamadev.YamaStream
 
         public override void OnVideoError(VideoError videoError)
         {
+            _stopped = true;
             if (_listener != null) _listener.OnVideoError(videoError);
         }
 

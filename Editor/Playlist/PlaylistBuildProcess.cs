@@ -27,6 +27,7 @@ namespace Yamadev.YamaStream.Editor
                     GameObject go = new GameObject(playlist.Name);
                     if (container.TargetContent != null) go.transform.SetParent(container.TargetContent);
                     YamaStream.Playlist udon = go.AddUdonSharpComponent<YamaStream.Playlist>();
+                    UdonSharpEditorUtility.GetBackingUdonBehaviour(udon).SyncMethod = Networking.SyncType.Manual;
                     udon.SetProgramVariable("_playlistName", playlist.Name);
                     udon.SetProgramVariable("_videoPlayerTypes", playlist.Tracks.Select(tr => ((VideoPlayerType)(int)tr.Mode)).ToArray());
                     udon.SetProgramVariable("_titles", playlist.Tracks.Select(tr => tr.Title).ToArray());
