@@ -14,7 +14,6 @@ namespace Yamadev.YamaStream
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public partial class Controller : Listener
     {
-        [SerializeField] YamaPlayerManager _manager;
         [SerializeField] Animator _videoPlayerAnimator;
         [SerializeField] VideoPlayerHandle[] _videoPlayerHandles;
         [SerializeField] Permission _permission;
@@ -22,6 +21,7 @@ namespace Yamadev.YamaStream
         [SerializeField] int _maxErrorRetry = 5;
         [SerializeField] string _timeFormat = @"hh\:mm\:ss";
         [SerializeField] bool _isLocal;
+        [SerializeField] string _version;
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(VideoPlayerType))] VideoPlayerType _videoPlayerType;
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(Loop))] bool _loop;
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(SlideMode))] bool _slideMode;
@@ -47,6 +47,8 @@ namespace Yamadev.YamaStream
         }
 
         public Permission Permission => _permission;
+
+        public string Version => _version;
 
         public PlayerPermission PlayerPermission => _permission == null ? PlayerPermission.Editor : _permission.PlayerPermission;
 

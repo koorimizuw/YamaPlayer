@@ -8,6 +8,7 @@ namespace Yamadev.YamaStream
 {
     public partial class Controller
     {
+        [SerializeField] LatencyManager _latencyManager;
         [SerializeField, Range(1f, 10f)] float _syncFrequency = 5.0f;
         [SerializeField, Range(0f, 1f)] float _syncMargin = 0.3f;
         [UdonSynced] float _syncTime = 0f;
@@ -39,7 +40,7 @@ namespace Yamadev.YamaStream
             {
                 _karaokeMode = value;
                 if (value == KaraokeMode.None) KaraokeMembers = new string[0];
-                if (_karaokeMode != KaraokeMode.None && _manager.LatencyManager != null) _manager.LatencyManager.RequestRecord();
+                if (_karaokeMode != KaraokeMode.None && _latencyManager != null) _latencyManager.RequestRecord();
                 if (!_isLocal) DoSync(true);
                 if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
                 foreach (Listener listener in _listeners) listener.OnKaraokeModeChanged();
@@ -61,7 +62,7 @@ namespace Yamadev.YamaStream
             }
         }
 
-        public float NetworkDelay => _manager.LatencyManager != null ? _networkDelay : 0.1f;
+        public float NetworkDelay => _latencyManager != null ? _networkDelay : 0.1f;
         public float KaraokeDelay => _karaokeMode == KaraokeMode.None ? 0f :
                 !IsKaraokeMember ? -NetworkDelay :
                 NetworkDelay == 0f ? _defaultKaraokeDelay :
@@ -99,8 +100,8 @@ namespace Yamadev.YamaStream
 
         public void UpdateNetworkDelay()
         {
-            if (_manager.LatencyManager == null) return;
-            _networkDelay = Mathf.Clamp(_manager.LatencyManager.GetServerDelayseconds(), 0, 1);
+            if (_latencyManager == null) return;
+            _networkDelay = Mathf.Clamp(_latencyManager.GetServerDelayseconds(), 0, 1);
         }
     }
 }

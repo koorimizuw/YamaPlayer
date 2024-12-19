@@ -265,6 +265,7 @@ namespace Yamadev.YamaStream.Editor
             public string title;
             public string url;
             public string playlist;
+            public int duration;
         }
 
         public static async UniTask<Playlist> GetYouTubePlaylist(string playlistId, bool publicVideoOnly = true)
@@ -273,26 +274,18 @@ namespace Yamadev.YamaStream.Editor
             try
             {
                 List<string> jsonList = await YtdlpResolver.GetPlaylist(playlistId);
-                if (jsonList.Count > 0)
+                List<YouTubePlaylistTrack> tracks = jsonList.Select(x => JsonUtility.FromJson<YouTubePlaylistTrack>(x)).ToList();
+                if (tracks.Count > 0) result.Name = tracks[0].playlist;
+                result.Tracks = tracks.Where(track =>
                 {
-                    YouTubePlaylistTrack li = JsonUtility.FromJson<YouTubePlaylistTrack>(jsonList[0]);
-                    result.Name = li.playlist;
-                }
-                List<PlaylistTrack> tracks = jsonList.Select(track =>
-                {
-                    YouTubePlaylistTrack pl = JsonUtility.FromJson<YouTubePlaylistTrack>(track);
-                    return new PlaylistTrack
-                    {
-                        Mode = VideoPlayerType.AVProVideoPlayer,
-                        Title = pl.title,
-                        Url = pl.url,
-                    };
-                }).Where(track =>
-                {
-                    if (publicVideoOnly) return track.Title != "[Private video]";
+                    if (publicVideoOnly) return track.duration != 0;
                     return true;
+                }).Select(track => new PlaylistTrack
+                {
+                    Mode = VideoPlayerType.AVProVideoPlayer,
+                    Title = track.title,
+                    Url = track.url,
                 }).ToList();
-                result.Tracks = tracks;
 
             } catch (Exception ex)
             {

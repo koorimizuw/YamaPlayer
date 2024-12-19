@@ -9,7 +9,7 @@ using AudioLink;
 
 namespace Yamadev.YamaStream
 {
-    public partial class Controller : Listener
+    public partial class Controller
     {
 #if AUDIOLINK_V1
         [SerializeField] AudioLink.AudioLink _audioLink;

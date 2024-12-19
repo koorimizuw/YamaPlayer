@@ -9,6 +9,10 @@ using Yamadev.YamaStream.Modules;
 using VRC.SDK3.Components;
 using UnityEngine.UI;
 using Yamadev.YamaStream.Script;
+using VRC.SDKBase;
+using VRC.PackageManagement.Core;
+
+
 
 #if WEB_UNIT_INCLUDED
 using Yamadev.YamachanWebUnit;
@@ -18,15 +22,13 @@ namespace Yamadev.YamaStream.Editor
 {
     public class YamaPlayerBuildProcess : IProcessSceneWithReport
     {
-        readonly static string _managerPrefabGuid = "3488ed8aceb89a146969441cdf1645f0";
-
         public int callbackOrder => -10;
 
         public void CreateWebUnitClient()
         {
 #if WEB_UNIT_INCLUDED
-            GameObject go = new GameObject("WebUnitClient");
-            Client client = go.AddUdonSharpComponent<Client>();
+            Client client = new GameObject("WebUnitClient").AddUdonSharpComponent<Client>();
+            UdonSharpEditorUtility.GetBackingUdonBehaviour(client).SyncMethod = Networking.SyncType.None;
             foreach (VideoResolver resolver in Utils.FindComponentsInHierarthy<VideoResolver>())
                 resolver.SetProgramVariable("_client", client);
 #endif
@@ -34,8 +36,8 @@ namespace Yamadev.YamaStream.Editor
 
         public void CreateInputController()
         {
-            GameObject go = new GameObject("InputController");
-            InputController inputController = go.AddUdonSharpComponent<InputController>();
+            InputController inputController = new GameObject("InputController").AddUdonSharpComponent<InputController>();
+            UdonSharpEditorUtility.GetBackingUdonBehaviour(inputController).SyncMethod = Networking.SyncType.None;
             foreach (SliderHelper component in Utils.FindComponentsInHierarthy<SliderHelper>())
             {
                 if (component.GetProgramVariable("_inputController") == null)
@@ -43,54 +45,36 @@ namespace Yamadev.YamaStream.Editor
             }
         }
 
-        public YamaPlayerManager CreateManager()
+        public LatencyManager CreateLatencyManager()
         {
-            string path = AssetDatabase.GUIDToAssetPath(_managerPrefabGuid);
-            GameObject obj = PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(path), null) as GameObject;
-            YamaPlayerManager manager = obj.GetComponent<YamaPlayerManager>();
-            manager.SetProgramVariable("Version", VersionManager.Version);
-            LatencyManager latencyManager = obj.GetComponentInChildren<LatencyManager>();
-            if (latencyManager != null)
+            LatencyManager latencyManager = new GameObject("LatencyManager").AddUdonSharpComponent<LatencyManager>();
+            UdonSharpEditorUtility.GetBackingUdonBehaviour(latencyManager).SyncMethod = Networking.SyncType.None;
+            for (int i = 0; i < 300; i++)
             {
-                Transform template = latencyManager.transform.GetChild(0);
-                for (int i = 0; i < 300; i++)
-                {
-                    GameObject newRecord = GameObject.Instantiate(template.gameObject, latencyManager.transform, false);
-                    GameObjectUtility.EnsureUniqueNameForSibling(newRecord);
-                    newRecord.SetActive(true);
-                }
+                LatencyRecord record = new GameObject($"LatencyRecord({i})").AddUdonSharpComponent<LatencyRecord>();
+                UdonSharpEditorUtility.GetBackingUdonBehaviour(record).SyncMethod = Networking.SyncType.Manual;
+                record.transform.SetParent(latencyManager.transform);
             }
-            return manager;
+            return latencyManager;
         }
 
         public void OnProcessScene(Scene scene, BuildReport report)
         {
             CreateWebUnitClient();
             CreateInputController();
-            YamaPlayerManager manager = CreateManager();
+            LatencyManager latencyManager = CreateLatencyManager();
 
             foreach (YamaPlayer player in Utils.FindComponentsInHierarthy<YamaPlayer>())
             {
                 Controller internalController = player.GetComponentInChildren<Controller>();
-                if (internalController != null) internalController.SetProgramVariable("_manager", manager);
+                if (internalController != null) internalController.SetProgramVariable("_version", VersionManager.Version);
+                if (internalController != null) internalController.SetProgramVariable("_latencyManager", latencyManager);
 
                 Transform internalTransform = player.Internal != null ? player.Internal : player.transform.Find("Internal");
                 if (internalTransform != null)
                 {
                     internalTransform.SetParent(null, true);
                     GameObjectUtility.EnsureUniqueNameForSibling(internalTransform.gameObject);
-                }
-
-                Transform dynamicPlaylistContainer = player.DynamicPlaylistContainer;
-                if (dynamicPlaylistContainer != null)
-                {
-                    Transform template = dynamicPlaylistContainer.GetChild(0);
-                    for (int i = 0; i < 200; i++)
-                    {
-                        GameObject newRecord = GameObject.Instantiate(template.gameObject, dynamicPlaylistContainer, false);
-                        GameObjectUtility.EnsureUniqueNameForSibling(newRecord);
-                        newRecord.SetActive(true);
-                    }
                 }
             }
 
@@ -102,8 +86,6 @@ namespace Yamadev.YamaStream.Editor
 
                 Font font = (Font)uiController.GetProgramVariable("_font");
                 if (font != null) foreach (Text text in uiController.GetComponentsInChildren<Text>(true)) text.font = font;
-
-                uiController.SetProgramVariable("_manager", manager);
 
                 VRCUrlInputField dynamicUrlInputField = uiController.GetProgramVariable("_dynamicPlaylistUrlInput") as VRCUrlInputField;
                 if (dynamicUrlInputField != null)

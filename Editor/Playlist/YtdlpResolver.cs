@@ -53,7 +53,7 @@ namespace Yamadev.YamaStream.Editor
             try
             {
                 EditorUtility.DisplayProgressBar("Getting Playlist", $"Getting Playlist from ${url}", 0);
-                ProcessStartInfo startInfo = new ProcessStartInfo(_path, $"--flat-playlist --no-write-playlist-metafiles --no-exec -sijo - {url}")
+                ProcessStartInfo startInfo = new ProcessStartInfo(_path, $"--extractor-args \"youtube:lang=ja\" --flat-playlist --no-write-playlist-metafiles --no-exec -sijo - {url}")
                 {
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
