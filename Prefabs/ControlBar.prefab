@@ -2021,10 +2021,12 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 6759507520823274848}
   _controller: {fileID: 0}
-  _translation: {fileID: 0}
-  _updateLogs: {fileID: 4900000, guid: 011c1aa791634cf45b66a6811ad47c8a, type: 3}
   _disableUIOnPickUp: 1
+  _disableUIDistance: 0
   _font: {fileID: 0}
+  _updateLogFile: {fileID: 4900000, guid: 011c1aa791634cf45b66a6811ad47c8a, type: 3}
+  _translationTextFile: {fileID: 4900000, guid: 02e2b6ce10f26f94fb504aba7ccd2bfe,
+    type: 3}
   _primaryColor: {r: 0.9372549, g: 0.3843137, b: 0.5686275, a: 1}
   _secondaryColor: {r: 0.9686275, g: 0.7294118, b: 0.8117647, a: 0.1215686}
   _ownerColor: {r: 0, g: 0, b: 0, a: 0}
@@ -2102,11 +2104,11 @@ MonoBehaviour:
   _mirrorInversionOff: {fileID: 0}
   _versionText: {fileID: 0}
   _updateLog: {fileID: 0}
-  _trackTitle: {fileID: 0}
-  _trackUrl: {fileID: 0}
-  _trackDisplayUrl: {fileID: 0}
-  _networkDelay: {fileID: 0}
-  _videoOffset: {fileID: 0}
+  _slideOn: {fileID: 0}
+  _slideOff: {fileID: 0}
+  _slide1s: {fileID: 0}
+  _slide2s: {fileID: 0}
+  _slide3s: {fileID: 0}
   _options: {fileID: 0}
   _settings: {fileID: 0}
   _playlist: {fileID: 0}
@@ -2152,11 +2154,17 @@ MonoBehaviour:
   _localDelay: {fileID: 0}
   _localDelayDesc: {fileID: 0}
   _languageSelect: {fileID: 0}
+  _slideMode: {fileID: 0}
+  _slideModeDesc: {fileID: 0}
+  _slideOnText: {fileID: 0}
+  _slideOffText: {fileID: 0}
+  _slideSeconds: {fileID: 0}
+  _slideSecondsDesc: {fileID: 0}
+  _slide1sText: {fileID: 0}
+  _slide2sText: {fileID: 0}
+  _slide3sText: {fileID: 0}
   _permissionTitle: {fileID: 0}
   _permissionDesc: {fileID: 0}
-  _videoSearchTitle: {fileID: 0}
-  _inputKeyword: {fileID: 0}
-  _inLoading: {fileID: 0}
   _playlistTitle: {fileID: 0}
   _playQueue: {fileID: 0}
   _playHistory: {fileID: 0}

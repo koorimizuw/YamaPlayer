@@ -3,8 +3,9 @@ using UnityEditor;
 using UnityEngine;
 using VRC.SDK3.Components;
 using Yamadev.YamaStream.UI;
+using Yamadev.YamaStream.Script;
 
-namespace Yamadev.YamaStream.Script
+namespace Yamadev.YamaStream.Editor
 {
     [CustomEditor(typeof(YamaPlayerController))]
     public class YamaPlayerControllerEditor : EditorBase

@@ -6,9 +6,9 @@ using UnityEngine.UI;
 using VRC.SDK3.Components;
 using Yamadev.YamaStream.UI;
 
-namespace Yamadev.YamaStream.Script
+namespace Yamadev.YamaStream.Editor
 {
-    public class ColorPattern
+    public record ColorPattern
     {
         public string Name;
         public Color PrimaryColor;
@@ -53,16 +53,18 @@ namespace Yamadev.YamaStream.Script
             VRCUiShape uiSharp = _uiController.GetComponentInChildren<VRCUiShape>(true);
             if (uiSharp == null) return;
 
-            _disableUI = !uiSharp.gameObject.activeSelf;
-            _disableUI = EditorGUILayout.Toggle(Localization.Get("disableUI"), _disableUI);
-            uiSharp.gameObject.SetActive(!_disableUI);
-            if (_disableUI)
+            using (new SectionScope())
             {
-                EditorGUILayout.Space(12f);
-                EditorGUILayout.HelpBox(Localization.Get("shouldEnableUIFirst"), MessageType.Info);
-                return;
+                _disableUI = !uiSharp.gameObject.activeSelf;
+                _disableUI = EditorGUILayout.Toggle(Localization.Get("disableUI"), _disableUI);
+                uiSharp.gameObject.SetActive(!_disableUI);
+                if (_disableUI)
+                {
+                    EditorGUILayout.Space(12f);
+                    EditorGUILayout.HelpBox(Localization.Get("shouldEnableUIFirst"), MessageType.Info);
+                    return;
+                }
             }
-            Styles.DrawDivider();
 
             List<ColorPattern> colorPatterns = new List<ColorPattern>()
             {
@@ -96,32 +98,40 @@ namespace Yamadev.YamaStream.Script
                 _secondaryColor.colorValue = colorPatterns[selectedColorIndex].SecondaryColor;
             }
 
-            EditorGUILayout.PropertyField(_primaryColor, Localization.GetLayout("primaryColor"));
-            EditorGUILayout.PropertyField(_secondaryColor, Localization.GetLayout("secondaryColor"));
-            EditorGUILayout.PropertyField(_font, Localization.GetLayout("font"));
-            using (new EditorGUILayout.HorizontalScope())
+            using (new SectionScope())
             {
-                GUILayout.FlexibleSpace();
-                if (GUILayout.Button(Localization.Get("preview"))) Preview();
+                EditorGUILayout.PropertyField(_primaryColor, Localization.GetLayout("primaryColor"));
+                EditorGUILayout.PropertyField(_secondaryColor, Localization.GetLayout("secondaryColor"));
+                EditorGUILayout.PropertyField(_font, Localization.GetLayout("font"));
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    GUILayout.FlexibleSpace();
+                    if (GUILayout.Button(Localization.Get("preview"))) Preview();
+                }
             }
-            Styles.DrawDivider();
 
-            EditorGUILayout.PropertyField(_defaultOpen, Localization.GetLayout("defaultPlaylistOpen"));
-            EditorGUILayout.LabelField("　", Localization.Get("showPlaylistUIAafterStart"));
-            Styles.DrawDivider();
+            using (new SectionScope())
+            {
+                EditorGUILayout.PropertyField(_defaultOpen, Localization.GetLayout("defaultPlaylistOpen"));
+                EditorGUILayout.LabelField("　", Localization.Get("showPlaylistUIAafterStart"));
+            }
 
             if (_idle.objectReferenceValue != null)
             {
-                EditorGUILayout.PropertyField(_idleImage, Localization.GetLayout("idleImage"));
-                EditorGUILayout.LabelField("　", Localization.Get("showIdleImage"));
-                Styles.DrawDivider();
+                using (new SectionScope())
+                {
+                    EditorGUILayout.PropertyField(_idleImage, Localization.GetLayout("idleImage"));
+                    EditorGUILayout.LabelField("　", Localization.Get("showIdleImage"));
+                }
             }
 
-            EditorGUILayout.PropertyField(_disableUIOnPickUp, Localization.GetLayout("disableUIOnPickUp"));
-            EditorGUILayout.LabelField("　", Localization.Get("disableUIOnPickUpDesc"));
-
-            EditorGUILayout.PropertyField(_disableUIDistance, Localization.GetLayout("disableUIDistance"));
-            EditorGUILayout.LabelField("　", Localization.Get("disableUIDistanceDesc"));
+            using (new SectionScope())
+            {
+                EditorGUILayout.PropertyField(_disableUIOnPickUp, Localization.GetLayout("disableUIOnPickUp"));
+                EditorGUILayout.LabelField("　", Localization.Get("disableUIOnPickUpDesc"));
+                EditorGUILayout.PropertyField(_disableUIDistance, Localization.GetLayout("disableUIDistance"));
+                EditorGUILayout.LabelField("　", Localization.Get("disableUIDistanceDesc"));
+            }
 
 
             ApplyModifiedProperties();
