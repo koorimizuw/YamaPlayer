@@ -4,9 +4,9 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace Yamadev.YamaStream.Script
+namespace Yamadev.YamaStream.Editor
 {
-    public abstract class EditorBase : Editor
+    public abstract class EditorBase : UnityEditor.Editor
     {
         public string Title;
         static string _logoGuid = "45177375d4933bc469e82e59e57ce065";
@@ -43,7 +43,7 @@ namespace Yamadev.YamaStream.Script
             rect.y = marginTop;
             GUI.DrawTexture(rect, logo);
 
-            GUIContent version = new GUIContent($"v{Utils.GetYamaPlayerPackageInfo().version}");
+            GUIContent version = new GUIContent($"v{VersionManager.Version}");
             Vector2 size = Styles.Bold.CalcSize(version);
             GUI.Label(new Rect(rect.xMax, rect.yMax - size.y, size.x, size.y), version, Styles.Bold);
 
