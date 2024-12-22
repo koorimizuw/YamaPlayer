@@ -10,9 +10,6 @@ using VRC.SDK3.Components;
 using UnityEngine.UI;
 using Yamadev.YamaStream.Script;
 using VRC.SDKBase;
-using VRC.PackageManagement.Core;
-
-
 
 #if WEB_UNIT_INCLUDED
 using Yamadev.YamachanWebUnit;
