@@ -86,7 +86,7 @@ namespace Yamadev.YamaStream.Editor
         public static async void UpdatePackage()
         {
 #if USE_VPM_RESOLVER
-            if (!HasNewVersion) return;
+            if (!HasNewVersion || EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling) return;
             IVRCPackage package = Repos.GetPackageWithVersionMatch(PackageName, Newest);
             Dictionary<string, string> dependencies = new Dictionary<string, string>();
             StringBuilder dialogMsg = new StringBuilder();
