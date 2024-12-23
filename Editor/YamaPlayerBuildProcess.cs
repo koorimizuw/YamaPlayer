@@ -1,116 +1,77 @@
-﻿
-using System.Linq;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using VRC.SDKBase;
-using VRC.Utility;
 using Yamadev.YamaStream.UI;
 using UdonSharpEditor;
 using Yamadev.YamaStream.Modules;
 using VRC.SDK3.Components;
 using UnityEngine.UI;
+using Yamadev.YamaStream.Script;
+using VRC.SDKBase;
+
 #if WEB_UNIT_INCLUDED
 using Yamadev.YamachanWebUnit;
 #endif
 
-namespace Yamadev.YamaStream.Script
+namespace Yamadev.YamaStream.Editor
 {
     public class YamaPlayerBuildProcess : IProcessSceneWithReport
     {
-        public int callbackOrder => -2;
-
-        private void GeneratePlaylists()
-        {
-            foreach (PlayListContainer handle in Utils.FindComponentsInHierarthy<PlayListContainer>())
-            {
-                Transform template = handle.TargetContent.transform.GetChild(0);
-
-                int count = handle.TargetContent.childCount;
-                for (int i = 1; i < count; i++)
-                {
-                    GameObject.DestroyImmediate(handle.TargetContent.GetChild(1).gameObject);
-                }
-
-                YamaPlayer yamaPlayer = handle.FindComponentInParent<YamaPlayer>();
-                PlayList[] children = handle.transform.GetComponentsInChildren<PlayList>();
-                foreach (PlayList li in children)
-                {
-                    GameObject newObject = UnityEngine.Object.Instantiate(template.gameObject, handle.TargetContent, false);
-                    GameObjectUtility.EnsureUniqueNameForSibling(newObject);
-
-                    Playlist udon = newObject.transform.GetComponent<Playlist>();
-
-                    VideoPlayerType[] players = li.Tracks.Select(tr => ((VideoPlayerType)(int)tr.Mode)).ToArray();
-                    string[] titles = li.Tracks.Select(tr => tr.Title).ToArray();
-                    VRCUrl[] urls = li.Tracks.Select(tr => new VRCUrl(tr.Url)).ToArray();
-                    string[] displayUrls = li.Tracks.Select(tr => "").ToArray();
-
-                    udon.SetProgramVariable("_playlistName", li.PlayListName);
-                    udon.SetProgramVariable("_videoPlayerTypes", players);
-                    udon.SetProgramVariable("_titles", titles);
-                    udon.SetProgramVariable("_urls", urls);
-                    udon.SetProgramVariable("_originalUrls", displayUrls);
-                    newObject.SetActive(true);
-                }
-
-                GameObject.DestroyImmediate(template.gameObject);
-                Controller playlistUdon = yamaPlayer.GetComponentInChildren<Controller>();
-                playlistUdon.SetProgramVariable("_playlists", handle.TargetContent.GetComponentsInChildren<Playlist>());
-            }
-        }
+        public int callbackOrder => -10;
 
         public void CreateWebUnitClient()
         {
 #if WEB_UNIT_INCLUDED
-            GameObject go = new GameObject("WebUnitClient");
-            Client client = go.AddUdonSharpComponent<Client>();
+            Client client = new GameObject("WebUnitClient").AddUdonSharpComponent<Client>();
+            UdonSharpEditorUtility.GetBackingUdonBehaviour(client).SyncMethod = Networking.SyncType.None;
             foreach (VideoResolver resolver in Utils.FindComponentsInHierarthy<VideoResolver>())
                 resolver.SetProgramVariable("_client", client);
 #endif
         }
 
+        public void CreateInputController()
+        {
+            InputController inputController = new GameObject("InputController").AddUdonSharpComponent<InputController>();
+            UdonSharpEditorUtility.GetBackingUdonBehaviour(inputController).SyncMethod = Networking.SyncType.None;
+            foreach (SliderHelper component in Utils.FindComponentsInHierarthy<SliderHelper>())
+            {
+                if (component.GetProgramVariable("_inputController") == null)
+                    component.SetProgramVariable("_inputController", inputController);
+            }
+        }
+
+        public LatencyManager CreateLatencyManager()
+        {
+            LatencyManager latencyManager = new GameObject("LatencyManager").AddUdonSharpComponent<LatencyManager>();
+            UdonSharpEditorUtility.GetBackingUdonBehaviour(latencyManager).SyncMethod = Networking.SyncType.None;
+            for (int i = 0; i < 300; i++)
+            {
+                LatencyRecord record = new GameObject($"LatencyRecord({i})").AddUdonSharpComponent<LatencyRecord>();
+                UdonSharpEditorUtility.GetBackingUdonBehaviour(record).SyncMethod = Networking.SyncType.Manual;
+                record.transform.SetParent(latencyManager.transform);
+            }
+            return latencyManager;
+        }
+
         public void OnProcessScene(Scene scene, BuildReport report)
         {
-            GeneratePlaylists();
             CreateWebUnitClient();
+            CreateInputController();
+            LatencyManager latencyManager = CreateLatencyManager();
 
             foreach (YamaPlayer player in Utils.FindComponentsInHierarthy<YamaPlayer>())
             {
-                LatencyManager latencyManager = player.GetComponentInChildren<LatencyManager>();
-                if (latencyManager != null)
-                {
-                    Transform template = latencyManager.transform.GetChild(0);
-                    for (int i = 0; i < 300; i++)
-                    {
-                        GameObject newRecord = GameObject.Instantiate(template.gameObject, latencyManager.transform, false);
-                        GameObjectUtility.EnsureUniqueNameForSibling(newRecord);
-                        newRecord.SetActive(true);
-                    }
-                }
-
                 Controller internalController = player.GetComponentInChildren<Controller>();
-                if (internalController != null) internalController.SetProgramVariable("_version", Utils.GetYamaPlayerPackageInfo().version);
+                if (internalController != null) internalController.SetProgramVariable("_version", VersionManager.Version);
+                if (internalController != null) internalController.SetProgramVariable("_latencyManager", latencyManager);
 
                 Transform internalTransform = player.Internal != null ? player.Internal : player.transform.Find("Internal");
                 if (internalTransform != null)
                 {
                     internalTransform.SetParent(null, true);
                     GameObjectUtility.EnsureUniqueNameForSibling(internalTransform.gameObject);
-                }
-
-                Transform dynamicPlaylistContainer = player.DynamicPlaylistContainer;
-                if (dynamicPlaylistContainer != null)
-                {
-                    Transform template = dynamicPlaylistContainer.GetChild(0);
-                    for (int i = 0; i < 200; i++)
-                    {
-                        GameObject newRecord = GameObject.Instantiate(template.gameObject, dynamicPlaylistContainer, false);
-                        GameObjectUtility.EnsureUniqueNameForSibling(newRecord);
-                        newRecord.SetActive(true);
-                    }
                 }
             }
 
@@ -131,15 +92,6 @@ namespace Yamadev.YamaStream.Script
 #else
                     dynamicUrlInputField.gameObject.SetActive(false);
 #endif
-                }
-            }
-
-            foreach (InputController inputController in Utils.FindComponentsInHierarthy<InputController>())
-            {
-                foreach (SliderHelper component in inputController.GetComponentsInChildren<SliderHelper>(true))
-                {
-                    if (component.GetProgramVariable("_inputController") == null)
-                        component.SetProgramVariable("_inputController", inputController);
                 }
             }
         }
