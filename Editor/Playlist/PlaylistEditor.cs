@@ -1,5 +1,6 @@
 ﻿
 using Cysharp.Threading.Tasks;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -69,12 +70,16 @@ namespace Yamadev.YamaStream.Editor
 
         public void GeneratePlaylistsView()
         {
-            _playlistsTable = new ReorderableList(_playlists, typeof(Playlist))
+            _playlistsTable = new ReorderableList(_playlists, typeof(Playlist), true, false, true, true)
             {
-                drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, Localization.Get("playlists"), EditorStyles.boldLabel),
                 onAddCallback = (list) =>
                 {
-                    _playlists.Add(new Playlist { Active = true, Name = Localization.Get("newPlaylist"), Tracks = new List<PlaylistTrack>() });
+                    _playlists.Add(new Playlist 
+                    {  
+                        Active = true, 
+                        Name = Localization.Get("newPlaylist"), 
+                        Tracks = new List<PlaylistTrack>() 
+                    });
                     _isDirty = true;
                 },
                 onRemoveCallback = (list) =>
@@ -125,6 +130,7 @@ namespace Yamadev.YamaStream.Editor
                 onSelectCallback = GeneratePlaylistTracksView,
                 onReorderCallback = (ReorderableList list) => _isDirty = true,
                 elementHeight = (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 2,
+                showDefaultBackground = false,
             };
         }
 
@@ -137,9 +143,8 @@ namespace Yamadev.YamaStream.Editor
                 return;
             }
             _selectedPlaylist = _playlists[selected.index];
-            _playlistTracksTable = new ReorderableList(_selectedPlaylist.Tracks, typeof(PlaylistTrack))
+            _playlistTracksTable = new ReorderableList(_selectedPlaylist.Tracks, typeof(PlaylistTrack), true, false, true, true)
             {
-                drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, Localization.Get("playlistTracks"), EditorStyles.boldLabel),
                 onAddCallback = (list) =>
                 {
                     ReorderableList.defaultBehaviours.DoAddButton(list);
@@ -178,6 +183,7 @@ namespace Yamadev.YamaStream.Editor
                 },
                 onReorderCallback = (ReorderableList list) => _isDirty = true,
                 elementHeight = (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 3,
+                showDefaultBackground = false,
             };
         }
 
@@ -196,19 +202,21 @@ namespace Yamadev.YamaStream.Editor
                 using (var vert = new EditorGUILayout.VerticalScope(GUILayout.MaxWidth(380)))
                 {
                     HandleDragEvent(vert.rect);
+                    EditorGUILayout.LabelField(Localization.Get("playlists"), Styles.Bold);
                     _leftScrollPos = EditorGUILayout.BeginScrollView(_leftScrollPos, GUI.skin.box);
                     if (_player != null) _playlistsTable?.DoLayoutList();
                     GUILayout.FlexibleSpace();
-                    EditorGUILayout.EndScrollView();
                     EditorGUILayout.HelpBox(Localization.Get("importFromPlayer"), MessageType.Info);
+                    EditorGUILayout.EndScrollView();
+                    DrawPlaylistSettings();
                 }
                 using (new EditorGUILayout.VerticalScope())
                 {
+                    EditorGUILayout.LabelField(Localization.Get("playlistTracks"), Styles.Bold);
                     _rightScrollPos = EditorGUILayout.BeginScrollView(_rightScrollPos, GUI.skin.box);
                     if (_player != null) _playlistTracksTable?.DoLayoutList();
                     GUILayout.FlexibleSpace();
                     EditorGUILayout.EndScrollView();
-                    if (_selectedPlaylist?.Tracks != null) DrawPlaylistSettings();
                 }
             }
         }
@@ -233,7 +241,8 @@ namespace Yamadev.YamaStream.Editor
 
         void DrawPlaylistSettings()
         {
-            if (_selectedPlaylist.Tracks == null) return;
+            if (_selectedPlaylist == null) return;
+            EditorGUILayout.LabelField("プレイリスト設定", Styles.Bold);
             using (new GUILayout.VerticalScope(GUI.skin.box))
             {
                 using (new EditorGUILayout.HorizontalScope())
