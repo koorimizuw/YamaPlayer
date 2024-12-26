@@ -1,5 +1,4 @@
-﻿
-using UdonSharp;
+﻿using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
 using VRC.SDK3.StringLoading;
@@ -34,7 +33,9 @@ namespace Yamadev.YamaStream
         {
             string urlStr = result.Url.Get();
             if (urlStr.StartsWith("https://www.youtube.com") || urlStr.StartsWith("https://youtube.com") || urlStr.StartsWith("https://youtu.be"))
-                _info.SetValue(urlStr, GetYouTubeTitleFromHtml(result.Result));
+            {
+                _info.SetValue(urlStr, YouTube.GetTitleFromHtml(result.Result));
+            }
             else if (urlStr.StartsWith("https://www.twitch.tv") || urlStr.StartsWith("https://twitch.tv"))
                 _info.SetValue(urlStr, GetTwitchTitleFromTwitch(result.Result));
             else _info.SetValue(urlStr, string.Empty);
@@ -56,19 +57,7 @@ namespace Yamadev.YamaStream
         }
 
         #region HTML parser
-        public string GetYouTubeTitleFromHtml(string html)
-        {
-            string keyword = "\"videoDetails\":";
-            int start = html.IndexOf(keyword) + keyword.Length;
-            if (start < 0) return string.Empty;
 
-            string jsonString = Utils.FindPairBrackets(html, start);
-            if (!string.IsNullOrEmpty(jsonString) &&
-                VRCJson.TryDeserializeFromJson(jsonString, out var json) &&
-                json.DataDictionary.TryGetValue("title", out var title))
-                return title.String;
-            return string.Empty;
-        }
 
         public string GetTwitchTitleFromTwitch(string html)
         {
