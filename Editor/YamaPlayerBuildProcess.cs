@@ -21,6 +21,9 @@ namespace Yamadev.YamaStream.Editor
     {
         public int callbackOrder => -10;
 
+        const string _translationFileGuid = "02e2b6ce10f26f94fb504aba7ccd2bfe";
+        const string _updateLogFileGuid = "011c1aa791634cf45b66a6811ad47c8a";
+
         public void CreateWebUnitClient()
         {
 #if WEB_UNIT_INCLUDED
@@ -77,6 +80,11 @@ namespace Yamadev.YamaStream.Editor
 
             foreach (UIController uiController in Utils.FindComponentsInHierarthy<UIController>())
             {
+                TextAsset updateLogFile = AssetDatabase.LoadAssetAtPath<TextAsset>(AssetDatabase.GUIDToAssetPath(_updateLogFileGuid));
+                if (updateLogFile != null) uiController.SetProgramVariable("_updateLogFile", updateLogFile);
+                TextAsset translationFile = AssetDatabase.LoadAssetAtPath<TextAsset>(AssetDatabase.GUIDToAssetPath(_translationFileGuid));
+                if (translationFile != null) uiController.SetProgramVariable("_translationTextFile", translationFile);
+
                 foreach (UIColor component in uiController.GetComponentsInChildren<UIColor>(true))
                     if (component.GetProgramVariable("_uiController") == null)
                         component.SetProgramVariable("_uiController", uiController);
