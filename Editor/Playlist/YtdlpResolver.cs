@@ -14,8 +14,15 @@ namespace Yamadev.YamaStream.Editor
 {
     public static class YtdlpResolver
     {
-        static readonly string _url = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe";
-        static readonly string _path = Path.Combine(Application.dataPath, "yt-dlp.exe");
+#if UNITY_EDITOR_WIN
+        static readonly string _filename = "yt-dlp.exe";
+#elif UNITY_EDITOR_OSX
+        static readonly string _filename = "yt-dlp_macos";
+#elif UNITY_EDITOR_LINUX
+        static readonly string _filename = "yt-dlp_linux";
+#endif
+        static readonly string _url = $"https://github.com/yt-dlp/yt-dlp/releases/latest/download/{_filename}";
+        static readonly string _path = Path.Combine(Application.dataPath, _filename);
 
         public static bool Exist => File.Exists(_path);
 
