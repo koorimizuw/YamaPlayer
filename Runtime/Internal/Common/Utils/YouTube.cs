@@ -1,4 +1,5 @@
 using UdonSharp;
+using UnityEngine;
 using VRC.SDK3.Data;
 using VRC.SDKBase;
 using Yamadev.YamaStream.Libraries.GenericDataContainer;
@@ -32,11 +33,33 @@ namespace Yamadev.YamaStream
         }
     }
 
+    public class YouTubeCaptionTrack : UdonSharpBehaviour
+    {
+        public static YouTubeCaptionTrack New(string baseUrl, string languageCode)
+        {
+            object[] result = new object[] { baseUrl, languageCode };
+            return (YouTubeCaptionTrack)(object)result;
+        }
+    }
+
+    public static class YouTubeCaptionTrackExtentions
+    {
+        public static string GetBaseUrl(this YouTubeCaptionTrack obj)
+        {
+            return (string)((object[])(object)obj)[0];
+        }
+
+        public static string GetLanguageCode(this YouTubeCaptionTrack obj)
+        {
+            return (string)((object[])(object)obj)[1];
+        }
+    }
+
     public static class YouTube
     {
         public static YouTubePlaylist ParsePlaylist(string playlistJson)
         {
-            if (string.IsNullOrEmpty(playlistJson) || !VRCJson.TryDeserializeFromJson(playlistJson, out var json)) 
+            if (string.IsNullOrEmpty(playlistJson) || !VRCJson.TryDeserializeFromJson(playlistJson, out var json))
                 return YouTubePlaylist.Empty();
             var tracks = DataList<Track>.New();
             DataDictionary dict = json.DataDictionary["playlist"].DataDictionary;
@@ -92,6 +115,41 @@ namespace Yamadev.YamaStream
                 playlistName = headerJson.DataDictionary["pageHeaderRenderer"].DataDictionary["pageTitle"].String;
             DataList<Track> tracks = ParsePlaylistRenderer(Utils.FindPairBrackets(html, index));
             return YouTubePlaylist.New(playlistName, tracks);
+        }
+
+        public static string GetTitleFromHtml(string html)
+        {
+            string keyword = "\"videoDetails\":";
+            int start = html.IndexOf(keyword) + keyword.Length;
+            if (start < 0) return string.Empty;
+
+            string jsonString = Utils.FindPairBrackets(html, start);
+            if (!string.IsNullOrEmpty(jsonString) &&
+                VRCJson.TryDeserializeFromJson(jsonString, out var json) &&
+                json.DataDictionary.TryGetValue("title", out var title))
+                return title.String;
+            return string.Empty;
+        }
+
+        public static DataList<YouTubeCaptionTrack> GetCaptionTracksFromHtml(string html)
+        {
+            var results = DataList<YouTubeCaptionTrack>.New();
+            int index = html.IndexOf("{\"playerCaptionsTracklistRenderer\":");
+            if (index >= 0)
+            {
+                string jsonString = Utils.FindPairBrackets(html, index);
+                if (string.IsNullOrEmpty(jsonString) || !VRCJson.TryDeserializeFromJson(jsonString, out var json)) return results;
+                DataList captionTracks = json.DataDictionary["playerCaptionsTracklistRenderer"].DataDictionary["captionTracks"].DataList;
+                for (int i = 0; i < captionTracks.Count; i++)
+                {
+                    string baseUrl = captionTracks[i].DataDictionary["baseUrl"].String;
+                    Debug.Log(baseUrl);
+                    string languageCode = captionTracks[i].DataDictionary["languageCode"].String;
+                    results.Add(YouTubeCaptionTrack.New(baseUrl, languageCode));
+                }
+            }
+            Debug.Log(results.GetType());
+            return results;
         }
     }
 }

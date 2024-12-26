@@ -240,7 +240,7 @@ namespace Yamadev.YamaStream.UI
             get
             {
                 if (Utilities.IsValid(_i18n)) return _i18n;
-                _i18n = Localization.Initialize(_translationTextFile.text);
+                _i18n = Localization.Initialize(_translationTextFile != null ? _translationTextFile.text : string.Empty);
                 return _i18n;
             }
         }
