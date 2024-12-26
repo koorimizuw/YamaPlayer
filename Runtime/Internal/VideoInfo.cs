@@ -57,8 +57,6 @@ namespace Yamadev.YamaStream
         }
 
         #region HTML parser
-
-
         public string GetTwitchTitleFromTwitch(string html)
         {
             int start = html.IndexOf("{\"@context\":");
