@@ -19,11 +19,12 @@ namespace Yamadev.YamaStream.Editor
         private static readonly string _avProDebugSymbol = "AVPRO_DEBUG";
         private static readonly string _avProReleaseUrl = "https://github.com/RenderHeads/UnityPlugin-AVProVideo/releases/download/3.1.3/UnityPlugin-AVProVideo-v3.1.3-Trial.unitypackage";
 
+        private static bool _avProHelperImported => Utils.FindType("RenderHeads.Media.AVProVideo.MediaPlayer", true) != null;
         private static bool _avProImported => Utils.FindType("RenderHeads.Media.AVProVideo.VideoTrack", true) != null;
 
         static AVProPlayerHelper()
         {
-            if (_avProImported || VersionManager.PackageInfo == null) return;
+            if (_avProHelperImported || VersionManager.PackageInfo == null) return;
             foreach (Sample sample in Sample.FindByPackage(VersionManager.PackageInfo.name, VersionManager.PackageInfo.version))
             {
                 if (sample.displayName == "AVProHelper")
