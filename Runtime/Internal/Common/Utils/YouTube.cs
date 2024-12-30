@@ -143,12 +143,10 @@ namespace Yamadev.YamaStream
                 for (int i = 0; i < captionTracks.Count; i++)
                 {
                     string baseUrl = captionTracks[i].DataDictionary["baseUrl"].String;
-                    Debug.Log(baseUrl);
                     string languageCode = captionTracks[i].DataDictionary["languageCode"].String;
                     results.Add(YouTubeCaptionTrack.New(baseUrl, languageCode));
                 }
             }
-            Debug.Log(results.GetType());
             return results;
         }
     }

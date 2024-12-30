@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 using Debug = UnityEngine.Debug;
 
@@ -14,10 +15,24 @@ namespace Yamadev.YamaStream.Editor
 {
     public static class YtdlpResolver
     {
-        static readonly string _url = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe";
-        static readonly string _path = Path.Combine(Application.dataPath, "yt-dlp.exe");
+#if UNITY_EDITOR_WIN
+        static readonly string _filename = "yt-dlp.exe";
+#elif UNITY_EDITOR_OSX
+        static readonly string _filename = "yt-dlp_macos";
+#elif UNITY_EDITOR_LINUX
+        static readonly string _filename = "yt-dlp_linux";
+#endif
+        static readonly string _url = $"https://github.com/yt-dlp/yt-dlp/releases/latest/download/{_filename}";
+        static readonly string _path = Path.Combine(Path.GetTempPath(), _filename);
 
         public static bool Exist => File.Exists(_path);
+
+#if UNITY_EDITOR_OSX
+        [DllImport("libc", EntryPoint = "chmod", SetLastError = true)]
+        private static extern int sys_chmod(string path, uint mode);
+
+        const int _0755 = 0x100 | 0x40 | 0x80 | 0x20 | 0x8 | 0x4 | 0x1;
+#endif
 
         public static async UniTask DownloadYtdlp()
         {
@@ -38,6 +53,9 @@ namespace Yamadev.YamaStream.Editor
                         return;
                     }
                 }
+#if UNITY_EDITOR_OSX
+                sys_chmod(_path, _0755);
+#endif
                 Debug.Log("Download Yt-dlp successed.");
             }
             finally
