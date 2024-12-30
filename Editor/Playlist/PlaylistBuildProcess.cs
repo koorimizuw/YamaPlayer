@@ -24,6 +24,7 @@ namespace Yamadev.YamaStream.Editor
                 List<YamaStream.Playlist> results = new();
                 foreach (Playlist playlist in playlists)
                 {
+                    if (!playlist.Active) continue;
                     GameObject go = new GameObject(playlist.Name);
                     if (container.TargetContent != null) go.transform.SetParent(container.TargetContent);
                     YamaStream.Playlist udon = go.AddUdonSharpComponent<YamaStream.Playlist>();

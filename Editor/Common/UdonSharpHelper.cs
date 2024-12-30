@@ -3,17 +3,12 @@ using System.Linq;
 using UdonSharp;
 using UnityEditor;
 using UnityEngine;
+using UnityEditor.Callbacks;
 
 namespace Yamadev.YamaStream.Editor
 {
-    [InitializeOnLoad]
     public static class UdonSharpHelper
     {
-        static UdonSharpHelper()
-        {
-            EditorApplication.delayCall += FixUdonSharpCompileError;
-        }
-
         static readonly string _lastCheckVersionKey = "YamaPlayer_FixUdonCompileErrorLastVersion";
         static readonly string _checkedKeyBase = "YamaPlayer_FixUdonCompileErrorChecked";
 
@@ -23,6 +18,7 @@ namespace Yamadev.YamaStream.Editor
             return AssetDatabase.GetAssetPath(asset).StartsWith(packagePath) && asset.sourceCsScript != null;
         }).Select(asset => asset.sourceCsScript).ToList();
 
+        [DidReloadScripts]
         public static void FixUdonSharpCompileError()
         {
             if (EditorApplication.isPlaying) return;
