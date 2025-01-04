@@ -96,7 +96,7 @@ namespace Yamadev.YamaStream
         public void PlayRandomTrack(Playlist playlist, int exclude = -1)
         {
             if (playlist == null || playlist.Length == 0) return;
-            if (playlist.Length == 1) PlayTrack(ActivePlaylist, 0);
+            if (playlist.Length == 1) PlayTrack(playlist, 0);
 
             var r = new System.Random();
             bool hasExclude = exclude != -1;
