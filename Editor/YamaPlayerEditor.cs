@@ -134,14 +134,15 @@ namespace Yamadev.YamaStream.Editor
 
             GenerateScreenList();
 
-            _tabScope = new TabScope(new List<TabScope.Tab>()
+            var tabs = new List<TabScope.Tab>()
             {
-                new TabScope.Tab("UI", _uiEditor.DrawUISettings),
                 new TabScope.Tab("Settings", DrawPlayerSettings),
                 new TabScope.Tab("Playlist", DrawPlaylistSettings),
                 new TabScope.Tab("Permission", DrawPermissionSettings),
                 new TabScope.Tab("Version", DrawVersionSettings),
-            });
+            };
+            if (_uiEditor != null) tabs.Insert(0, new TabScope.Tab("UI", _uiEditor.DrawUISettings));
+            _tabScope = new TabScope(tabs);
         }
 
         public void GenerateScreenList()
