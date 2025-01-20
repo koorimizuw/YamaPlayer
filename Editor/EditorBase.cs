@@ -43,7 +43,7 @@ namespace Yamadev.YamaStream.Editor
             rect.y = marginTop;
             GUI.DrawTexture(rect, logo);
 
-            GUIContent version = new GUIContent($"v{VersionManager.Version}");
+            GUIContent version = new GUIContent($"v{VersionManager.PackageInfo.version}");
             Vector2 size = Styles.Bold.CalcSize(version);
             GUI.Label(new Rect(rect.xMax, rect.yMax - size.y, size.x, size.y), version, Styles.Bold);
 
