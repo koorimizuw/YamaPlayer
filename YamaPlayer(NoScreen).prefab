@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8887943486703766005}
-  - component: {fileID: 2616545886700949789}
-  - component: {fileID: 1585854573730796157}
+  - component: {fileID: 1424714285483599709}
+  - component: {fileID: 1713343118445186348}
   m_Layer: 0
   m_Name: History
   m_TagString: Untagged
@@ -33,7 +33,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5956122998726359828}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2616545886700949789
+--- !u!114 &1424714285483599709
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -54,7 +54,7 @@ MonoBehaviour:
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes: []
-  _udonSharpBackingUdonBehaviour: {fileID: 0}
+  _udonSharpBackingUdonBehaviour: {fileID: 1713343118445186348}
   _controller: {fileID: 5039465303338196661}
   _videoInfo: {fileID: 8764063724343173871}
   _isQueue: 0
@@ -64,7 +64,7 @@ MonoBehaviour:
   _titles: []
   _urls: []
   _originalUrls: []
---- !u!114 &1585854573730796157
+--- !u!114 &1713343118445186348
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -312,8 +312,8 @@ MonoBehaviour:
   _volume: 0.1
   _audioSources:
   - {fileID: 3651401619470499243}
-  _queue: {fileID: 7562531815099976384}
-  _history: {fileID: 2616545886700949789}
+  _queue: {fileID: 5399105241407967208}
+  _history: {fileID: 1424714285483599709}
   _playlists: []
   _playlistTemplate: {fileID: 5848197045268904230}
   _forwardInterval: 0
@@ -361,8 +361,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5953341394512041320}
-  - component: {fileID: 7562531815099976384}
-  - component: {fileID: 399702497718720889}
+  - component: {fileID: 5399105241407967208}
+  - component: {fileID: 4294523235893536651}
   m_Layer: 0
   m_Name: Queue
   m_TagString: Untagged
@@ -385,7 +385,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5956122998726359828}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7562531815099976384
+--- !u!114 &5399105241407967208
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -406,7 +406,7 @@ MonoBehaviour:
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes: []
-  _udonSharpBackingUdonBehaviour: {fileID: 0}
+  _udonSharpBackingUdonBehaviour: {fileID: 4294523235893536651}
   _controller: {fileID: 5039465303338196661}
   _videoInfo: {fileID: 8764063724343173871}
   _isQueue: 1
@@ -416,7 +416,7 @@ MonoBehaviour:
   _titles: []
   _urls: []
   _originalUrls: []
---- !u!114 &399702497718720889
+--- !u!114 &4294523235893536651
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
