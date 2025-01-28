@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using UnityEngine;
 using UdonSharp;
 
@@ -80,7 +79,7 @@ namespace Yamadev.YamaStream
             }
 #else
             get => false;
-            set => _useAudioLink = false;
+            set { }
 #endif
         }
 

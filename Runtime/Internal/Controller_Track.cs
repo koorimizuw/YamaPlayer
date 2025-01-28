@@ -1,5 +1,4 @@
-﻿
-using UdonSharp;
+﻿using UdonSharp;
 using VRC.SDKBase;
 
 namespace Yamadev.YamaStream
@@ -42,16 +41,25 @@ namespace Yamadev.YamaStream
         public void PlayTrack(Track track, bool isReload = false)
         {
             if (!track.GetUrl().IsValidUrl()) return;
-            if (isReload) _isReload = true;
-            if (Track.GetUrl() != string.Empty) VideoPlayerHandle.Stop();
-            VideoPlayerType = track.GetPlayerType();
+            if (isReload) _reloading = true;
+            if (Track.GetUrl() != string.Empty && (Networking.IsOwner(gameObject) || _isLocal) && !isReload)
+                Stop();
+            LoadTrack(track);
+            _state = (byte)PlayerState.Playing;
+        }
+
+        private void LoadTrack(Track track)
+        {
+            Handler.Stop();
+            ChangePlayerTyper(track.GetPlayerType());
             Track = track;
             ResolveTrack.Invoke();
-            if (Networking.IsOwner(gameObject) && !_isLocal && !isReload) RequestSerialization();
+            if (Networking.IsOwner(gameObject) && !_isLocal && !_reloading) RequestSerialization();
             foreach (Listener listener in _listeners) listener.OnUrlChanged();
-            PrintLog($"Play track: {track.GetUrl()}.");
+            PrintLog($"Load url: {track.GetUrl()}.");
         }
-        public void Resolve() => VideoPlayerHandle.PlayUrl(Track.GetVRCUrl());
+
+        public void Resolve() => Handler.LoadUrl(Track.GetVRCUrl());
 
         public override void OnPreSerialization()
         {

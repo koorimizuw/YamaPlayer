@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Components.Video;
@@ -12,37 +11,42 @@ using AudioLink;
 namespace Yamadev.YamaStream
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+    [DefaultExecutionOrder(-1000)]
+    [DisallowMultipleComponent]
     public partial class Controller : Listener
     {
-        [SerializeField] Animator _videoPlayerAnimator;
-        [SerializeField] VideoPlayerHandle[] _videoPlayerHandles;
+        [SerializeField] PlayerHandler[] _videoPlayerHandlers;
         [SerializeField] Permission _permission;
         [SerializeField] float _retryAfterSeconds = 5.1f;
         [SerializeField] int _maxErrorRetry = 5;
         [SerializeField] string _timeFormat = @"hh\:mm\:ss";
         [SerializeField] bool _isLocal;
         [SerializeField] string _version;
-        [SerializeField, UdonSynced, FieldChangeCallback(nameof(VideoPlayerType))] VideoPlayerType _videoPlayerType;
+        [SerializeField, UdonSynced, FieldChangeCallback(nameof(PlayerType))] VideoPlayerType _playerType;
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(Loop))] bool _loop;
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(SlideMode))] bool _slideMode;
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(SlideSeconds))] int _slideSeconds = 1;
-        [UdonSynced, FieldChangeCallback(nameof(Paused))] bool _paused;
-        [UdonSynced, FieldChangeCallback(nameof(Stopped))] bool _stopped = true;
+        [UdonSynced, FieldChangeCallback(nameof(SyncedState))] byte _state;
         [UdonSynced, FieldChangeCallback(nameof(Speed))] float _speed = 1f;
         [UdonSynced, FieldChangeCallback(nameof(Repeat))] Vector3 _repeat = new Vector3(0f, 0f, 999999f);
+        PlayerHandler _handler;
         Listener[] _listeners = { };
         int _errorRetryCount = 0;
-        bool _isReload;
-        float _lastSetTime = 0f;
-        float _repeatCooling = 0.6f; 
-        bool _initialized;
+        bool _reloading;
 
-        void Start() => initialize();
-
-        void Update()
+        private void Start()
         {
-            if (OutOfRepeat(VideoTime) && Time.time - _lastSetTime > _repeatCooling) 
-                SetTime(Repeat.ToRepeatStatus().GetStartTime());
+            EnsurePlayerHandler();
+            foreach (PlayerHandler handler in _videoPlayerHandlers) handler.Loop = _loop;
+            InitializeScreen();
+            UpdateAudio();
+            UpdateAudioLink();
+            foreach (PlayerHandler handler in _videoPlayerHandlers)
+                handler.SetListener(this);
+        }
+
+        private void Update()
+        {
             if (IsPlaying && Time.time - _syncFrequency > _lastSync) DoSync();
         }
 
@@ -50,20 +54,7 @@ namespace Yamadev.YamaStream
 
         public string Version => _version;
 
-        public PlayerPermission PlayerPermission => _permission == null ? PlayerPermission.Editor : _permission.PlayerPermission;
-
-        void initialize()
-        {
-            if (_initialized) return;
-            Loop = _loop;
-            _videoPlayerAnimator.Rebind();
-            initializeScreen();
-            UpdateAudio();
-            UpdateAudioLink();
-            foreach (VideoPlayerHandle handle in _videoPlayerHandles)
-                handle.Listener = this;
-            _initialized = true;
-        }
+        public PlayerPermission PlayerPermission => Utilities.IsValid(_permission) ? PlayerPermission.Editor : _permission.PlayerPermission;
 
         public void AddListener(Listener listener)
         {
@@ -73,60 +64,130 @@ namespace Yamadev.YamaStream
 
         public bool IsLocal => _isLocal;
 
-        public VideoPlayerType VideoPlayerType
+        private void EnsurePlayerHandler()
         {
-            get => _videoPlayerType;
-            set 
+            foreach (PlayerHandler handler in _videoPlayerHandlers)
             {
-                if (_videoPlayerType == value) return;
-                VideoPlayerHandle.Stop();
-                _videoPlayerType = value;
-                if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
-                foreach (Listener listener in _listeners) listener.OnPlayerChanged();
-                PrintLog($"Video player change to {_videoPlayerType}.");
-            }
-        }
-
-        public VideoPlayerHandle VideoPlayerHandle
-        {
-            get
-            {
-                foreach (VideoPlayerHandle handle in _videoPlayerHandles) 
-                    if (handle.VideoPlayerType == _videoPlayerType) return handle;
-                return null;
-            }
-        }
-
-        public bool Paused
-        {
-            get => _paused;
-            set
-            {
-                _paused = value;
-                if (_paused) VideoPlayerHandle.Pause();
-                else VideoPlayerHandle.Play();
-#if AUDIOLINK_V1
-                if (_audioLink != null && _useAudioLink)
-                    _audioLink.SetMediaPlaying(_paused ? MediaPlaying.Paused : IsLive ? MediaPlaying.Streaming : MediaPlaying.Playing);
-#endif
-                if (Networking.IsOwner(gameObject) && !_isLocal)
+                if (handler.Type == _playerType)
                 {
-                    SyncTime = VideoTime - VideoStandardDelay;
-                    RequestSerialization();
+                    _handler = handler;
+                    return;
                 }
             }
         }
 
-        public bool Stopped
+        public PlayerHandler Handler
         {
-            get => _stopped;
+            get
+            {
+                if (!_handler) EnsurePlayerHandler();
+                return _handler;
+            }
+        }
+
+        public VideoPlayerType PlayerType
+        {
+            get => _playerType;
+            set => ChangePlayerTyper(value);
+        }
+
+        public void ChangePlayerTyper(VideoPlayerType playerType)
+        {
+            if (_playerType == playerType) return;
+            Stop();
+            _playerType = playerType;
+            EnsurePlayerHandler();
+            if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
+            foreach (Listener listener in _listeners) listener.OnPlayerHandlerChanged();
+            PrintLog($"Video player changed to {_playerType.GetString()}.");
+        }
+
+        public PlayerState State => (PlayerState)_state;
+
+        public byte SyncedState
+        {
             set
             {
-                _stopped = value;
-                _isReload = false;
-                if (_stopped) VideoPlayerHandle.Stop();
-                if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
+                if (_state == value) return;
+                switch ((PlayerState)value)
+                {
+                    case PlayerState.Idle:
+                        Stop();
+                        break;
+                    case PlayerState.Playing: 
+                        Play();
+                        break;
+                    case PlayerState.Paused:
+                        Pause();
+                        break;
+                }
             }
+        }
+
+        public bool Paused => State == PlayerState.Paused;
+
+        public bool Stopped => State == PlayerState.Idle;
+
+        public void Play(bool force = false)
+        {
+            if (State == PlayerState.Playing && !force) return;
+            Handler.Play();
+            _state = (byte)PlayerState.Playing;
+            SendCustomEventDelayedFrames(nameof(CheckRepeat), 0);
+            if (KaraokeMode != KaraokeMode.None) SendCustomEventDelayedSeconds(nameof(ForceSync), 1f);
+#if AUDIOLINK_V1
+                if (Utilities.IsValid(_audioLink) && _useAudioLink)
+                    _audioLink.SetMediaPlaying(IsLive ? MediaPlaying.Streaming : MediaPlaying.Playing);
+#endif
+            if (Networking.IsOwner(gameObject) && !_isLocal)
+            {
+                SyncTime = VideoTime - VideoStandardDelay;
+                RequestSerialization();
+            }
+            foreach (Listener listener in _listeners) listener.OnVideoPlay();
+            PrintLog($"{_playerType.GetString()}: Video play.");
+        }
+
+        public void Pause()
+        {
+            if (State == PlayerState.Paused) return;
+            Handler.Pause();
+            _state = (byte)PlayerState.Paused;
+#if AUDIOLINK_V1
+                if (Utilities.IsValid(_audioLink) && _useAudioLink)
+                    _audioLink.SetMediaPlaying(MediaPlaying.Paused);
+#endif
+            if (Networking.IsOwner(gameObject) && !_isLocal)
+            {
+                SyncTime = VideoTime - VideoStandardDelay;
+                RequestSerialization();
+            }
+            foreach (Listener listener in _listeners) listener.OnVideoPause();
+            PrintLog($"{_playerType.GetString()}: Video pause.");
+        }
+
+        public void Stop()
+        {
+            if (State == PlayerState.Idle) return;
+            Handler.Stop();
+            _state = (byte)PlayerState.Idle;
+            _reloading = false;
+            _errorRetryCount = 0;
+            _repeat = new Vector3(0f, 0f, 999999f);
+            if (!string.IsNullOrEmpty(Track.GetUrl())) _history.AddTrack(Track);
+            Track = Track.New(_playerType, string.Empty, VRCUrl.Empty);
+#if AUDIOLINK_V1
+                if (Utilities.IsValid(_audioLink) && _useAudioLink)
+                    _audioLink.SetMediaPlaying(MediaPlaying.Stopped);
+#endif
+            if (Networking.IsOwner(gameObject) && !_isLocal)
+            {
+                _syncTime = 0f;
+                _serverTimeMilliseconds = 0;
+                RequestSerialization();
+            }
+            foreach (Listener listener in _listeners) listener.OnVideoStop();
+            PrintLog($"{_playerType.GetString()}: Video stop.");
         }
 
         public bool SlideMode
@@ -135,7 +196,7 @@ namespace Yamadev.YamaStream
             set
             {
                 _slideMode = value;
-                if (!_paused) Paused = true;
+                if (_slideMode) Pause();
                 if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
                 foreach (Listener listener in _listeners) listener.OnSlideModeChanged();
                 PrintLog($"Slide mode changed {_slideMode}.");
@@ -154,7 +215,7 @@ namespace Yamadev.YamaStream
             }
         }
 
-        public int SlidePage => _slideMode && !_stopped ? Mathf.FloorToInt(VideoTime) / _slideSeconds + 1 : 0;
+        public int SlidePage => _slideMode && !Stopped ? Mathf.FloorToInt(VideoTime) / _slideSeconds + 1 : 0;
 
         public int SlidePageCount => _slideMode ? Mathf.FloorToInt(Duration) / _slideSeconds : 0;
         
@@ -164,9 +225,9 @@ namespace Yamadev.YamaStream
             set
             {
                 _loop = value;
-                foreach (VideoPlayerHandle handle in _videoPlayerHandles) handle.Loop = _loop;
+                foreach (PlayerHandler handler in _videoPlayerHandlers) handler.Loop = _loop;
 #if AUDIOLINK_V1
-                if (_audioLink != null && _useAudioLink)
+                if (Utilities.IsValid(_audioLink) && _useAudioLink)
                     _audioLink.SetMediaLoop(_loop ? MediaLoop.LoopOne : MediaLoop.None);
 #endif
                 if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
@@ -177,9 +238,8 @@ namespace Yamadev.YamaStream
 
         public void UpdateSpeed()
         {
-            _videoPlayerAnimator.SetFloat("Speed", _speed);
-            _videoPlayerAnimator.Update(0f);
-            if (!_stopped && _videoPlayerType == VideoPlayerType.AVProVideoPlayer) 
+            foreach (PlayerHandler handler in _videoPlayerHandlers) handler.Speed = _speed;
+            if (!Stopped && _playerType == VideoPlayerType.AVProVideoPlayer) 
                 SendCustomEventDelayedFrames(nameof(Reload), 1);
             UpdateAudio();
         }
@@ -201,11 +261,12 @@ namespace Yamadev.YamaStream
             }
         }
 
-        public bool OutOfRepeat(float targetTime)
+        public void CheckRepeat()
         {
-            if (!IsPlaying || !Repeat.ToRepeatStatus().IsOn()) return false;
-            return targetTime > Repeat.ToRepeatStatus().GetEndTime() || targetTime < Repeat.ToRepeatStatus().GetStartTime();
-
+            var status = Repeat.ToRepeatStatus();
+            if (!IsPlaying || !status.IsOn()) return;
+            if (Handler.Time > status.GetEndTime() || Handler.Time < status.GetStartTime()) SetTime(status.GetStartTime());
+            SendCustomEventDelayedSeconds(nameof(CheckRepeat), 0.5f);
         }
 
         public Vector3 Repeat
@@ -214,6 +275,7 @@ namespace Yamadev.YamaStream
             set
             {
                 _repeat = value;
+                SendCustomEventDelayedFrames(nameof(CheckRepeat), 0);
                 if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
                 foreach (Listener listener in _listeners) listener.OnRepeatChanged();
                 RepeatStatus status = _repeat.ToRepeatStatus();
@@ -222,12 +284,16 @@ namespace Yamadev.YamaStream
             }
         }
 
-        public float LastLoaded => VideoPlayerHandle.LastLoaded;
-        public bool IsPlaying => VideoPlayerHandle.IsPlaying;
-        public float Duration => VideoPlayerHandle.Duration;
-        public float VideoTime => VideoPlayerHandle.VideoTime;
-        public bool IsLoading => VideoPlayerHandle.IsLoading;
-        public bool IsReload => _isReload;
+        public bool IsPlaying => Handler.IsPlaying;
+
+        public float Duration => Handler.Duration;
+
+        public float VideoTime => Handler.Time;
+
+        public bool IsLoading => Handler.IsLoading;
+
+        public bool IsReload => _reloading;
+
         public bool IsLive => float.IsInfinity(Duration);
 
         public void Reload()
@@ -238,11 +304,6 @@ namespace Yamadev.YamaStream
         public void ErrorRetry()
         {
             if (IsPlaying || !Track.GetUrl().IsValidUrl()) return;
-            if (Time.time - LastLoaded < _retryAfterSeconds)
-            {
-                SendCustomEventDelayedFrames(nameof(ErrorRetry), 0);
-                return;
-            }
             _resolveTrack.Invoke();
             foreach (Listener listener in _listeners) listener.OnVideoRetry();
         }
@@ -255,16 +316,15 @@ namespace Yamadev.YamaStream
 
         public void SetTime(float time)
         {
-            if (IsLive || OutOfRepeat(time)) return;
-            VideoPlayerHandle.VideoTime = time;
-            _lastSetTime = Time.time;
+            if (IsLive) return;
+            Handler.Time = time;
             if (Networking.IsOwner(gameObject) && !_isLocal)
             {
                 SyncTime = time - VideoStandardDelay;
                 RequestSerialization();
             }
             foreach (Listener listener in _listeners) listener.OnSetTime(time);
-            PrintLog($"{_videoPlayerType}: Set video time: {time}.");
+            PrintLog($"{_playerType.GetString()}: Set video time: {time}.");
         }
 
         public void SendCustomVideoEvent(string eventName)
@@ -277,82 +337,32 @@ namespace Yamadev.YamaStream
         {
             Track track = Track.New(_targetPlayer, _title, _url, _originalUrl);
             foreach (Listener listener in _listeners) listener.OnTrackSynced(track.GetUrl());
-            if (track.GetUrl() != Track.GetUrl())
-            {
-                Stopped = true;
-                PlayTrack(track);
-            }
+            if (track.GetUrl() != Track.GetUrl()) LoadTrack(track);
             DoSync(true);
-            GenerateDynamicPlaylists();
         }
 
         #region Video Event
         public override void OnVideoReady()
         {
-            foreach (Listener listener in _listeners) listener.OnVideoReady();
-            PrintLog($"{_videoPlayerType}: Video ready.");
-        }
-
-        public override void OnVideoStart() 
-        {
             _errorRetryCount = 0;
-            _stopped = false;
-            if (_paused || _slideMode) VideoPlayerHandle.Pause();
-            else VideoPlayerHandle.Play();
+            if (State == PlayerState.Playing) Play(true);
             UpdateAudio();
-#if AUDIOLINK_V1
-            if (_audioLink != null && _useAudioLink)
-                _audioLink.SetMediaPlaying(IsLive ? MediaPlaying.Streaming : MediaPlaying.Playing);
-#endif
-            if (Networking.IsOwner(gameObject) && !_isLocal && !_isReload)
+            if (Networking.IsOwner(gameObject) && !_isLocal && !_reloading)
             {
                 SyncTime = 0f;
                 RequestSerialization();
             }
             else DoSync();
             if (KaraokeMode != KaraokeMode.None) SendCustomEventDelayedSeconds(nameof(ForceSync), 1f);
+            foreach (Listener listener in _listeners) listener.OnVideoReady();
+            PrintLog($"{_playerType.GetString()}: Video ready.");
+            _reloading = false;
+        }
+
+        public override void OnVideoStart() 
+        {
             foreach (Listener listener in _listeners) listener.OnVideoStart();
-            PrintLog($"{_videoPlayerType}: Video start.");
-            _isReload = false;
-        }
-
-        public override void OnVideoPlay()
-        {
-            _paused = false;
-            if (KaraokeMode != KaraokeMode.None) SendCustomEventDelayedSeconds(nameof(ForceSync), 1f);
-            foreach (Listener listener in _listeners) listener.OnVideoPlay();
-            PrintLog($"{_videoPlayerType}: Video play.");
-        }
-
-        public override void OnVideoPause()
-        {
-            _paused = true;
-            foreach (Listener listener in _listeners) listener.OnVideoPause();
-            PrintLog($"{_videoPlayerType}: Video pause.");
-        }
-
-        public override void OnVideoStop()
-        {
-            if (!_isReload)
-            {
-                _paused = false;
-                _stopped = true;
-                _errorRetryCount = 0;
-                _repeat = new Vector3(0f, 0f, 999999f);
-                if (!string.IsNullOrEmpty(Track.GetUrl())) _history.AddTrack(Track);
-                Track = Track.New(_videoPlayerType, string.Empty, VRCUrl.Empty);
-#if AUDIOLINK_V1
-                if (_audioLink != null && _useAudioLink)
-                    _audioLink.SetMediaPlaying(MediaPlaying.Stopped);
-#endif
-                if (Networking.IsOwner(gameObject) && !_isLocal)
-                {
-                    ClearSync();
-                    RequestSerialization();
-                }
-            }
-            foreach (Listener listener in _listeners) listener.OnVideoStop();
-            PrintLog($"{_videoPlayerType}: Video stop.");
+            PrintLog($"{_playerType.GetString()}: Video start.");
         }
 
         public override void OnVideoLoop()
@@ -363,21 +373,25 @@ namespace Yamadev.YamaStream
                 RequestSerialization();
             }
             foreach (Listener listener in _listeners) listener.OnVideoLoop();
-            PrintLog($"{_videoPlayerType}: Video loop.");
+            PrintLog($"{_playerType.GetString()}: Video loop.");
         }
 
         public override void OnVideoEnd()
         {
-            if (Networking.IsOwner(gameObject) && !_isLocal && _forwardInterval >= 0)
-                SendCustomEventDelayedSeconds(nameof(RunForward), _forwardInterval);
+            if (Networking.IsOwner(gameObject) || _isLocal)
+            {
+                if ((_activePlaylistIndex >= 0 || _queue.Length > 0) && _forwardInterval >= 0)
+                    SendCustomEventDelayedSeconds(nameof(Forward), _forwardInterval);
+                else Stop();
+            }
             foreach (Listener listener in _listeners) listener.OnVideoEnd();
-            PrintLog($"{_videoPlayerType}: Video end.");
+            PrintLog($"{_playerType.GetString()}: Video end.");
         }
 
         public override void OnVideoError(VideoError videoError)
         {
 #if AUDIOLINK_V1
-            if (_audioLink != null && _useAudioLink)
+            if (Utilities.IsValid(_audioLink) && _useAudioLink)
                 _audioLink.SetMediaPlaying(MediaPlaying.Error);
 #endif
             if (videoError != VideoError.AccessDenied)
@@ -385,12 +399,19 @@ namespace Yamadev.YamaStream
                 if (_errorRetryCount < _maxErrorRetry)
                 {
                     _errorRetryCount++;
-                    SendCustomEventDelayedFrames(nameof(ErrorRetry), 0);
+                    SendCustomEventDelayedSeconds(nameof(ErrorRetry), _retryAfterSeconds);
                 } else _errorRetryCount = 0;
             }
             foreach (Listener listener in _listeners) listener.OnVideoError(videoError);
-            PrintLog($"{_videoPlayerType}: Video error {videoError}.");
+            PrintLog($"{_playerType.GetString()}: Video error {videoError}.");
         }
         #endregion
+    }
+
+    public enum PlayerState
+    {
+        Idle,
+        Playing,
+        Paused,
     }
 }

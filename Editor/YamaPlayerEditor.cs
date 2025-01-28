@@ -83,7 +83,7 @@ namespace Yamadev.YamaStream.Editor
                 _mute = _controllerSerializedObject.FindProperty("_mute");
                 _loop = _controllerSerializedObject.FindProperty("_loop");
                 _shuffle = _controllerSerializedObject.FindProperty("_shuffle");
-                _defaultPlayerEngine = _controllerSerializedObject.FindProperty("_videoPlayerType");
+                _defaultPlayerEngine = _controllerSerializedObject.FindProperty("_playerType");
                 _forwardInterval = _controllerSerializedObject.FindProperty("_forwardInterval");
                 _screenTypes = _controllerSerializedObject.FindProperty("_screenTypes");
                 _screens = _controllerSerializedObject.FindProperty("_screens");
