@@ -7,8 +7,8 @@ namespace Yamadev.YamaStream
     {
         public static RepeatStatus New(ulong packed)
         {
-            bool flag = (packed & (1UL << 63)) != 0;
-            ulong clearedPacked = packed & ~(1UL << 63);
+            bool flag = (packed & (1ul << 63)) != 0;
+            ulong clearedPacked = packed & ~(1ul << 63);
             uint startBits = (uint)((clearedPacked >> 32) & 0xFFFFFFFF);
             uint endBits = (uint)(clearedPacked & 0xFFFFFFFF);
 
@@ -31,7 +31,7 @@ namespace Yamadev.YamaStream
         public static ulong Pack(this RepeatStatus status)
         {
             var arr = status.UnPack();
-            ulong flagBit = ((bool)arr[0] ? 1UL : 0UL) << 63;
+            ulong flagBit = ((bool)arr[0] ? 1ul : 0ul) << 63;
             uint startBits = BitConverter.ToUInt32(BitConverter.GetBytes((float)arr[1]), 0);
             uint endBits = BitConverter.ToUInt32(BitConverter.GetBytes((float)arr[2]), 0);
 

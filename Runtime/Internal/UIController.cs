@@ -269,7 +269,7 @@ namespace Yamadev.YamaStream.UI
         {
             UpdateUI();
             if (_controller.PlayerType == VideoPlayerType.UnityVideoPlayer || !CheckPermission()) return;
-            if (_modal == null || (_controller.Stopped && !_controller.IsLoading))
+            if (!_modal || (_controller.Stopped && !_controller.IsLoading))
             {
                 SetUnityPlayerEvent();
                 return;
@@ -293,7 +293,7 @@ namespace Yamadev.YamaStream.UI
         {
             UpdateUI();
             if (_controller.PlayerType == VideoPlayerType.AVProVideoPlayer || !CheckPermission()) return;
-            if (_modal == null || (_controller.Stopped && !_controller.IsLoading))
+            if (!_modal || (_controller.Stopped && !_controller.IsLoading))
             {
                 SetAVProPlayerEvent();
                 return;
@@ -317,7 +317,7 @@ namespace Yamadev.YamaStream.UI
         {
             UpdateUI();
             if (_controller.PlayerType == VideoPlayerType.ImageViewer || !CheckPermission()) return;
-            if (_modal == null || (_controller.Stopped && !_controller.IsLoading))
+            if (!_modal || (_controller.Stopped && !_controller.IsLoading))
             {
                 SetImageViewerEvent();
                 return;
@@ -341,12 +341,12 @@ namespace Yamadev.YamaStream.UI
         public void PlayUrlTop() => PlayUrlBase(_urlInputFieldTop);
         public void PlayUrlBase(VRCUrlInputField urlInputField)
         {
-            if (urlInputField == null || !urlInputField.GetUrl().Get().IsValidUrl() || !CheckPermission()) 
+            if (!urlInputField || !urlInputField.GetUrl().Get().IsValidUrl() || !CheckPermission()) 
             { 
                 urlInputField.SetUrl(VRCUrl.Empty); 
                 return; 
             }
-            if (_controller.Stopped && !_controller.IsLoading || _modal == null) 
+            if (_controller.Stopped && !_controller.IsLoading || !_modal) 
             {
                 _controller.TakeOwnership();
                 _controller.PlayTrack(Track.New(_controller.PlayerType, "", urlInputField.GetUrl()));
@@ -398,7 +398,7 @@ namespace Yamadev.YamaStream.UI
 
         public void AddUrlToQueueEventBase(VRCUrlInputField urlInputField)
         {
-            if (urlInputField == null) return;
+            if (!urlInputField) return;
             _controller.Queue.TakeOwnership();
             _controller.Queue.AddTrack(Track.New(GetVideoPlayerSelectorValue(), "", urlInputField.GetUrl()));
             urlInputField.SetUrl(VRCUrl.Empty);
@@ -410,7 +410,7 @@ namespace Yamadev.YamaStream.UI
         public void PlayUrlTopEvent() => PlayUrlEventBase(_urlInputFieldTop);
         public void PlayUrlEventBase(VRCUrlInputField urlInputField)
         {
-            if (urlInputField == null) return;
+            if (!urlInputField) return;
             _controller.TakeOwnership();
             _controller.PlayTrack(Track.New(GetVideoPlayerSelectorValue(), "", urlInputField.GetUrl()));
             urlInputField.SetUrl(VRCUrl.Empty);
@@ -444,7 +444,7 @@ namespace Yamadev.YamaStream.UI
         public void SetTime()
         {
             _progressDrag = false;
-            if (_progress == null || !CheckPermission() || _controller.Stopped) return;
+            if (!_progress || !CheckPermission() || _controller.Stopped) return;
             _controller.TakeOwnership();
             if (_controller.SlideMode) _controller.SetPage((int)_progress.value);
             else _controller.SetTime(_controller.Duration * _progress.value);
@@ -452,7 +452,7 @@ namespace Yamadev.YamaStream.UI
 
         public void SetTimeByHelper()
         {
-            if (_progressHelper == null || !CheckPermission()) return;
+            if (!_progressHelper || !CheckPermission()) return;
             _controller.TakeOwnership();
             _controller.SetTime(_controller.Duration * _progressHelper.Percent);
         }
@@ -514,7 +514,7 @@ namespace Yamadev.YamaStream.UI
 
         public void SetRepeatStart()
         {
-            if (_repeatSlider == null || _controller.Stopped || !CheckPermission()) return;
+            if (!_repeatSlider || _controller.Stopped || !CheckPermission()) return;
             RepeatStatus status = RepeatStatus.New(_controller.Repeat);
             if (!status.IsOn())
             {
@@ -527,7 +527,7 @@ namespace Yamadev.YamaStream.UI
 
         public void SetRepeatEnd()
         {
-            if (_repeatSlider == null || _controller.Stopped || !CheckPermission()) return;
+            if (!_repeatSlider || _controller.Stopped || !CheckPermission()) return;
             RepeatStatus status = RepeatStatus.New(_controller.Repeat);
             if (!status.IsOn())
             {
@@ -577,12 +577,12 @@ namespace Yamadev.YamaStream.UI
 
         public void SetAudioLinkOn()
         {
-            if (_audioLinkOn == null || !_audioLinkOn.isOn) return;
+            if (!_audioLinkOn || !_audioLinkOn.isOn) return;
             _controller.UseAudioLink = true;
         }
         public void SetAudioLinkOff()
         {
-            if (_audioLinkOff == null || !_audioLinkOff.isOn) return;
+            if (!_audioLinkOff || !_audioLinkOff.isOn) return;
             _controller.UseAudioLink = false;
         }
 
@@ -612,12 +612,12 @@ namespace Yamadev.YamaStream.UI
 
         public void SetMirrorInverse()
         {
-            if (_mirrorInversion == null || !_mirrorInversion.isOn) return;
+            if (!_mirrorInversion || !_mirrorInversion.isOn) return;
             _controller.MirrorInverse = true;
         }
         public void SetMirrorInverseOff()
         {
-            if (_mirrorInversionOff == null || !_mirrorInversionOff.isOn) return;
+            if (!_mirrorInversionOff || !_mirrorInversionOff.isOn) return;
             _controller.MirrorInverse = false;
         }
 
@@ -684,7 +684,7 @@ namespace Yamadev.YamaStream.UI
 
         public void OpenKaraokeMemberModal()
         {
-            if (_modal == null || _controller.KaraokeMode == KaraokeMode.None) return;
+            if (!_modal || _controller.KaraokeMode == KaraokeMode.None) return;
             UdonEvent callback = _controller.IsKaraokeMember ? UdonEvent.New(this, nameof(LeaveKaraokeMembers)) : UdonEvent.New(this, nameof(JoinKaraokeMembers));
             string executeText = _controller.IsKaraokeMember ? i18n.GetValue("leaveMember") : i18n.GetValue("joinMember");
             _modal.Show(i18n.GetValue("karaokeMember"), string.Join("\n", _controller.KaraokeMembers), callback, i18n.GetValue("close"), executeText);
@@ -692,7 +692,7 @@ namespace Yamadev.YamaStream.UI
 
         public void SetPermission()
         {
-            if (_controller.Permission == null || _permission == null || _permissionIndex < 0) return;
+            if (!_controller.Permission || !_permission || _permissionIndex < 0) return;
             int index = Array.IndexOf(_permission.Indexes, _permissionIndex);
             if (index >= 0 &&
                 _permission.GetComponent<ScrollRect>().content.GetChild(index).TryFind("Dropdown", out var dr) && 
@@ -708,7 +708,7 @@ namespace Yamadev.YamaStream.UI
     
         public void GeneratePlaylistView()
         {
-            if (_playlists == null) return;
+            if (!_playlists) return;
             _playlists.CallbackEvent = UdonEvent.New(this, nameof(UpdatePlaylistsContent));
             _playlists.Length = _controller.Playlists.Length;
         }
@@ -734,7 +734,7 @@ namespace Yamadev.YamaStream.UI
         {
             get
             {
-                if (_playlistSelector == null) return false;
+                if (!_playlistSelector) return false;
                 Toggle[] toggles = _playlistSelector.GetComponentsInChildren<Toggle>();
                 return toggles[0].isOn;
             }
@@ -743,7 +743,7 @@ namespace Yamadev.YamaStream.UI
         {
             get
             {
-                if (_playlistSelector == null) return false;
+                if (!_playlistSelector) return false;
                 Toggle[] toggles = _playlistSelector.GetComponentsInChildren<Toggle>();
                 return toggles[1].isOn;
             }
@@ -751,7 +751,7 @@ namespace Yamadev.YamaStream.UI
 
         public void GeneratePlaylistTracks()
         {
-            if (_playlists == null || _playlistTracks == null) return;
+            if (!_playlists || !_playlistTracks) return;
             if (!_isQueuePage && !_isHistoryPage && _playlistIndex < 0) return;
 
             Playlist playlist = _isQueuePage ? _controller.Queue : _isHistoryPage ? _controller.History : _controller.Playlists[_playlistIndex];
@@ -809,7 +809,7 @@ namespace Yamadev.YamaStream.UI
         public void RemoveFromQueue()
         {
             if (!CheckPermission()) return;
-            if (_playlistTracks == null || _playlistTrackIndex < 0) return;
+            if (!_playlistTracks || _playlistTrackIndex < 0) return;
 
             _controller.Queue.TakeOwnership();
             if (_playlistTrackIndex < _controller.Queue.Length) _controller.Queue.RemoveTrack(_playlistTrackIndex);
@@ -818,7 +818,7 @@ namespace Yamadev.YamaStream.UI
         public void AddPlaylistTrackToQueue()
         {
             if (!CheckPermission()) return;
-            if (_playlistTracks == null || _playlistTrackIndex < 0) return;
+            if (!_playlistTracks || _playlistTrackIndex < 0) return;
 
             Playlist playlist = _isHistoryPage ? _controller.History :
                 _playlistIndex >= 0 && _playlistIndex < _controller.Playlists.Length ? _controller.Playlists[_playlistIndex] : null;
@@ -842,7 +842,7 @@ namespace Yamadev.YamaStream.UI
         public void PlayPlaylistTrack()
         {
             if (!CheckPermission()) return;
-            if (_playlistTracks == null || _playlistTrackIndex < 0) return;
+            if (!_playlistTracks || _playlistTrackIndex < 0) return;
 
             Playlist playlist = _isHistoryPage ? _controller.History : 
                 _playlistIndex >= 0 && _playlistIndex < _controller.Playlists.Length ? _controller.Playlists[_playlistIndex] : null;
@@ -852,7 +852,7 @@ namespace Yamadev.YamaStream.UI
 
         public void AddDynamicPlaylist()
         {
-            if (_dynamicPlaylistUrlInput == null || !_dynamicPlaylistUrlInput.GetUrl().IsValid()) return;
+            if (!_dynamicPlaylistUrlInput || !_dynamicPlaylistUrlInput.GetUrl().IsValid()) return;
             _controller.TakeOwnership();
             _controller.AddDynamicPlaylist(_dynamicPlaylistUrlInput.GetUrl());
             _dynamicPlaylistUrlInput.SetUrl(VRCUrl.Empty);
@@ -979,7 +979,7 @@ namespace Yamadev.YamaStream.UI
         {
             if (Utilities.IsValid(_loading)) _loading.SetActive(true);
             if (Utilities.IsValid(_animator)) _animator.SetBool("Loading", false);
-            if (_message == null) return;
+            if (!_message) return;
             switch (videoError)
             {
                 case VideoError.Unknown:
@@ -1011,7 +1011,7 @@ namespace Yamadev.YamaStream.UI
 
         public void GeneratePermissionView()
         {
-            if (_controller.Permission == null || _permission == null) return;
+            if (!_controller.Permission || !_permission) return;
             _permission.CallbackEvent = UdonEvent.New(this, nameof(UpdatePermissionView));
             _permission.Length = _controller.Permission.PermissionData.Count;
 
