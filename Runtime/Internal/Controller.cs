@@ -104,7 +104,7 @@ namespace Yamadev.YamaStream
 
         public PlayerState State => (PlayerState)_state;
 
-        public byte SyncedState
+        private byte SyncedState
         {
             set
             {
@@ -139,7 +139,7 @@ namespace Yamadev.YamaStream
                 if (Utilities.IsValid(_audioLink) && _useAudioLink)
                     _audioLink.SetMediaPlaying(IsLive ? MediaPlaying.Streaming : MediaPlaying.Playing);
 #endif
-            if (Networking.IsOwner(gameObject) && !_isLocal)
+            if (Networking.IsOwner(gameObject) && !_isLocal && !_reloading)
             {
                 SyncTime = VideoTime - VideoStandardDelay;
                 RequestSerialization();
@@ -269,7 +269,7 @@ namespace Yamadev.YamaStream
             SendCustomEventDelayedSeconds(nameof(CheckRepeat), 0.5f);
         }
 
-        public ulong Repeat
+        private ulong Repeat
         {
             get => _repeat;
             set
@@ -283,6 +283,12 @@ namespace Yamadev.YamaStream
             }
         }
 
+        public RepeatStatus RepeatStatus
+        {
+            get => RepeatStatus.New(_repeat);
+            set => Repeat = value.Pack();
+        }
+
         public bool IsPlaying => Handler.IsPlaying;
 
         public float Duration => Handler.Duration;
@@ -291,14 +297,7 @@ namespace Yamadev.YamaStream
 
         public bool IsLoading => Handler.IsLoading;
 
-        public bool IsReload => _reloading;
-
         public bool IsLive => float.IsInfinity(Duration);
-
-        public void Reload()
-        {
-            if (!Stopped && !IsLoading) PlayTrack(Track, true);
-        }
 
         public void ErrorRetry()
         {

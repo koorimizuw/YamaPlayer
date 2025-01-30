@@ -38,28 +38,33 @@ namespace Yamadev.YamaStream
             set => _resolveTrack = value;
         }
 
-        public void PlayTrack(Track track, bool isReload = false)
+        public void PlayTrack(Track track)
         {
             if (!track.GetUrl().IsValidUrl()) return;
-            if (isReload) _reloading = true;
-            if (Track.GetUrl() != string.Empty && (Networking.IsOwner(gameObject) || _isLocal) && !isReload)
+            if (Track.GetUrl() != string.Empty && (Networking.IsOwner(gameObject) || _isLocal))
                 Stop();
             LoadTrack(track);
             _state = (byte)PlayerState.Playing;
         }
 
-        private void LoadTrack(Track track)
+        private void LoadTrack(Track track, bool isReload = false)
         {
+            _reloading = isReload;
             Handler.Stop();
-            ChangePlayerTyper(track.GetPlayerType());
+            if (!isReload) ChangePlayerTyper(track.GetPlayerType());
             Track = track;
             ResolveTrack.Invoke();
-            if (Networking.IsOwner(gameObject) && !_isLocal && !_reloading) RequestSerialization();
+            if (Networking.IsOwner(gameObject) && !_isLocal && !isReload) RequestSerialization();
             foreach (Listener listener in _listeners) listener.OnUrlChanged();
             PrintLog($"Load url: {track.GetUrl()}.");
         }
 
         public void Resolve() => Handler.LoadUrl(Track.GetVRCUrl());
+
+        public void Reload()
+        {
+            if (!Stopped && !IsLoading) LoadTrack(Track, true);
+        }
 
         public override void OnPreSerialization()
         {

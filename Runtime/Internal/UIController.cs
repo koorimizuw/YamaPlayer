@@ -505,22 +505,22 @@ namespace Yamadev.YamaStream.UI
         public void SetRepeat(bool on)
         {
             if (!CheckPermission()) return;
-            RepeatStatus status = RepeatStatus.New(_controller.Repeat);
+            RepeatStatus status = _controller.RepeatStatus;
             if (on) status.TurnOn(); 
             else status.TurnOff();
             _controller.TakeOwnership();
-            _controller.Repeat = status.Pack();
+            _controller.RepeatStatus = status;
         }
 
         public void SetRepeatStart()
         {
             if (!_repeatSlider || _controller.Stopped || !CheckPermission()) return;
-            RepeatStatus status = RepeatStatus.New(_controller.Repeat);
+            RepeatStatus status = _controller.RepeatStatus;
             if (!status.IsOn())
             {
                 status.SetStartTime(_controller.IsLive ? 0f : Mathf.Clamp(_controller.Duration * _repeatSlider.SliderLeft.value, 0f, _controller.Duration));
                 _controller.TakeOwnership();
-                _controller.Repeat = status.Pack();
+                _controller.RepeatStatus = status;
             }
             else _repeatSlider.SliderLeft.SetValueWithoutNotify(status.GetStartTime() / _controller.Duration);
         }
@@ -528,12 +528,12 @@ namespace Yamadev.YamaStream.UI
         public void SetRepeatEnd()
         {
             if (!_repeatSlider || _controller.Stopped || !CheckPermission()) return;
-            RepeatStatus status = RepeatStatus.New(_controller.Repeat);
+            RepeatStatus status = _controller.RepeatStatus;
             if (!status.IsOn())
             {
                 status.SetEndTime(_controller.IsLive ? 0f : Mathf.Clamp(_controller.Duration * _repeatSlider.SliderRight.value, 0f, _controller.Duration));
                 _controller.TakeOwnership();
-                _controller.Repeat = status.Pack();
+                _controller.RepeatStatus = status;
             }
             else _repeatSlider.SliderRight.SetValueWithoutNotify(status.GetEndTime() / _controller.Duration);
         }
@@ -909,7 +909,7 @@ namespace Yamadev.YamaStream.UI
 
         private void UpdatePlaybackView()
         {
-            RepeatStatus repeatStatus = RepeatStatus.New(_controller.Repeat);
+            RepeatStatus repeatStatus = _controller.RepeatStatus;
             if (Utilities.IsValid(_play)) _play.gameObject.SetActive(!_controller.IsPlaying);
             if (Utilities.IsValid(_pause)) _pause.gameObject.SetActive(_controller.IsPlaying);
             if (Utilities.IsValid(_loop)) _loop.gameObject.SetActive(!_controller.Loop);
@@ -1002,7 +1002,7 @@ namespace Yamadev.YamaStream.UI
             }
         }
 
-        void UpdateLoadingView()
+        private void UpdateLoadingView()
         {
             if (Utilities.IsValid(_loading)) _loading.SetActive(_controller.IsLoading);
             if (Utilities.IsValid(_animator)) _animator.SetBool("Loading", _controller.IsLoading);
