@@ -505,37 +505,37 @@ namespace Yamadev.YamaStream.UI
         public void SetRepeat(bool on)
         {
             if (!CheckPermission()) return;
-            RepeatStatus status = _controller.Repeat.ToRepeatStatus();
+            RepeatStatus status = RepeatStatus.New(_controller.Repeat);
             if (on) status.TurnOn(); 
             else status.TurnOff();
             _controller.TakeOwnership();
-            _controller.Repeat = status.ToVector3();
+            _controller.Repeat = status.Pack();
         }
 
         public void SetRepeatStart()
         {
-            if (_repeatSlider == null || _controller.Stopped) return;
-            if (!_controller.Repeat.ToRepeatStatus().IsOn())
+            if (_repeatSlider == null || _controller.Stopped || !CheckPermission()) return;
+            RepeatStatus status = RepeatStatus.New(_controller.Repeat);
+            if (!status.IsOn())
             {
-                RepeatStatus status = _controller.Repeat.ToRepeatStatus();
                 status.SetStartTime(_controller.IsLive ? 0f : Mathf.Clamp(_controller.Duration * _repeatSlider.SliderLeft.value, 0f, _controller.Duration));
                 _controller.TakeOwnership();
-                _controller.Repeat = status.ToVector3();
+                _controller.Repeat = status.Pack();
             }
-            else _repeatSlider.SliderLeft.SetValueWithoutNotify(_controller.Repeat.ToRepeatStatus().GetStartTime() / _controller.Duration);
+            else _repeatSlider.SliderLeft.SetValueWithoutNotify(status.GetStartTime() / _controller.Duration);
         }
 
         public void SetRepeatEnd()
         {
-            if (_repeatSlider == null || _controller.Stopped) return;
-            if (!_controller.Repeat.ToRepeatStatus().IsOn())
+            if (_repeatSlider == null || _controller.Stopped || !CheckPermission()) return;
+            RepeatStatus status = RepeatStatus.New(_controller.Repeat);
+            if (!status.IsOn())
             {
-                RepeatStatus status = _controller.Repeat.ToRepeatStatus();
-                status.SetEndTime(_controller.IsLive ? 999999f : Mathf.Clamp(_controller.Duration * _repeatSlider.SliderRight.value, 0f, _controller.Duration));
+                status.SetEndTime(_controller.IsLive ? 0f : Mathf.Clamp(_controller.Duration * _repeatSlider.SliderRight.value, 0f, _controller.Duration));
                 _controller.TakeOwnership();
-                _controller.Repeat = status.ToVector3();
+                _controller.Repeat = status.Pack();
             }
-            else _repeatSlider.SliderRight.SetValueWithoutNotify(_controller.Repeat.ToRepeatStatus().GetEndTime() / _controller.Duration);
+            else _repeatSlider.SliderRight.SetValueWithoutNotify(status.GetEndTime() / _controller.Duration);
         }
 
         public void SetShuffle()
@@ -909,21 +909,22 @@ namespace Yamadev.YamaStream.UI
 
         private void UpdatePlaybackView()
         {
+            RepeatStatus repeatStatus = RepeatStatus.New(_controller.Repeat);
             if (Utilities.IsValid(_play)) _play.gameObject.SetActive(!_controller.IsPlaying);
             if (Utilities.IsValid(_pause)) _pause.gameObject.SetActive(_controller.IsPlaying);
             if (Utilities.IsValid(_loop)) _loop.gameObject.SetActive(!_controller.Loop);
             if (Utilities.IsValid(_loopOff)) _loopOff.gameObject.SetActive(_controller.Loop);
             if (Utilities.IsValid(_speedSlider)) _speedSlider.SetValueWithoutNotify((float)Math.Round(_controller.Speed * 20));
             if (Utilities.IsValid(_speedText)) _speedText.text = $"{_controller.Speed:F2}x";
-            if (Utilities.IsValid(_repeatOff)) _repeatOff.SetIsOnWithoutNotify(!_controller.Repeat.ToRepeatStatus().IsOn());
-            if (Utilities.IsValid(_repeat)) _repeat.SetIsOnWithoutNotify(_controller.Repeat.ToRepeatStatus().IsOn());
+            if (Utilities.IsValid(_repeatOff)) _repeatOff.SetIsOnWithoutNotify(!repeatStatus.IsOn());
+            if (Utilities.IsValid(_repeat)) _repeat.SetIsOnWithoutNotify(repeatStatus.IsOn());
             if (Utilities.IsValid(_repeatSlider) && Utilities.IsValid(_repeatStartTime) && Utilities.IsValid(_repeatEndTime))
             {
                 string notSetText = i18n.GetValue("notSet");
-                string startText = _controller.Repeat.ToRepeatStatus().GetStartTime() == 0 ? notSetText : TimeSpan.FromSeconds(_controller.Repeat.ToRepeatStatus().GetStartTime()).ToString(_timeFormat);
-                string endText = _controller.Repeat.ToRepeatStatus().GetEndTime() >= _controller.Duration || _controller.IsLive ? notSetText : TimeSpan.FromSeconds(_controller.Repeat.ToRepeatStatus().GetEndTime()).ToString(_timeFormat);
-                _repeatSlider.SliderLeft.SetValueWithoutNotify(_controller.IsLive || !_controller.IsPlaying ? 0f : Mathf.Clamp(_controller.Repeat.ToRepeatStatus().GetStartTime() / _controller.Duration, 0f, 1f));
-                _repeatSlider.SliderRight.SetValueWithoutNotify(_controller.IsLive || !_controller.IsPlaying ? 1f : Mathf.Clamp(_controller.Repeat.ToRepeatStatus().GetEndTime() / _controller.Duration, 0f, 1f));
+                string startText = repeatStatus.GetStartTime() == 0 ? notSetText : TimeSpan.FromSeconds(repeatStatus.GetStartTime()).ToString(_timeFormat);
+                string endText = repeatStatus.GetEndTime() >= _controller.Duration || _controller.IsLive ? notSetText : TimeSpan.FromSeconds(repeatStatus.GetEndTime()).ToString(_timeFormat);
+                _repeatSlider.SliderLeft.SetValueWithoutNotify(_controller.IsLive || !_controller.IsPlaying ? 0f : Mathf.Clamp(repeatStatus.GetStartTime() / _controller.Duration, 0f, 1f));
+                _repeatSlider.SliderRight.SetValueWithoutNotify(_controller.IsLive || !_controller.IsPlaying ? 1f : Mathf.Clamp(repeatStatus.GetEndTime() / _controller.Duration, 0f, 1f));
                 _repeatStartTime.text = $"{i18n.GetValue("start")}(A): {startText}";
                 _repeatEndTime.text = $"{i18n.GetValue("end")}(B): {endText}";
             }

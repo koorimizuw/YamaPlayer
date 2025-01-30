@@ -1,4 +1,3 @@
-
 using UdonSharp;
 using VRC.SDK3.Data;
 using System;

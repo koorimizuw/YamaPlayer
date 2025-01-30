@@ -28,7 +28,7 @@ namespace Yamadev.YamaStream
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(SlideSeconds))] int _slideSeconds = 1;
         [UdonSynced, FieldChangeCallback(nameof(SyncedState))] byte _state;
         [UdonSynced, FieldChangeCallback(nameof(Speed))] float _speed = 1f;
-        [UdonSynced, FieldChangeCallback(nameof(Repeat))] Vector3 _repeat = new Vector3(0f, 0f, 999999f);
+        [UdonSynced, FieldChangeCallback(nameof(Repeat))] ulong _repeat;
         PlayerHandler _handler;
         Listener[] _listeners = { };
         int _errorRetryCount = 0;
@@ -173,7 +173,7 @@ namespace Yamadev.YamaStream
             _state = (byte)PlayerState.Idle;
             _reloading = false;
             _errorRetryCount = 0;
-            _repeat = new Vector3(0f, 0f, 999999f);
+            _repeat = 0;
             if (!string.IsNullOrEmpty(Track.GetUrl())) _history.AddTrack(Track);
             Track = Track.New(_playerType, string.Empty, VRCUrl.Empty);
 #if AUDIOLINK_V1
@@ -263,13 +263,13 @@ namespace Yamadev.YamaStream
 
         public void CheckRepeat()
         {
-            var status = Repeat.ToRepeatStatus();
+            RepeatStatus status = RepeatStatus.New(_repeat);
             if (!IsPlaying || !status.IsOn()) return;
             if (Handler.Time > status.GetEndTime() || Handler.Time < status.GetStartTime()) SetTime(status.GetStartTime());
             SendCustomEventDelayedSeconds(nameof(CheckRepeat), 0.5f);
         }
 
-        public Vector3 Repeat
+        public ulong Repeat
         {
             get => _repeat;
             set
@@ -278,9 +278,8 @@ namespace Yamadev.YamaStream
                 SendCustomEventDelayedFrames(nameof(CheckRepeat), 0);
                 if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
                 foreach (Listener listener in _listeners) listener.OnRepeatChanged();
-                RepeatStatus status = _repeat.ToRepeatStatus();
+                RepeatStatus status = RepeatStatus.New(_repeat);
                 if (status.IsOn()) PrintLog($"Repeat on, start: {status.GetStartTime()}, end: {status.GetEndTime()}.");
-                else PrintLog($"Repeat off.");
             }
         }
 

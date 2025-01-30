@@ -1,9 +1,8 @@
-﻿using UdonSharp;
-using VRC.SDKBase;
+﻿using VRC.SDKBase;
 
 namespace Yamadev.YamaStream
 {
-    public class Track : UdonSharpBehaviour
+    public class Track : ObjectClass
     {
         // 0. VideoPlayerType
         // 1. string: title
@@ -12,63 +11,59 @@ namespace Yamadev.YamaStream
         public static Track New(VideoPlayerType player, string title, VRCUrl url)
         {
             object[] track = new object[] { player, title, url, string.Empty };
-            return (Track)(object)track;
+            return track.ForceCast<Track>();
         }
 
         public static Track New(VideoPlayerType player, string title, VRCUrl url, string originalUrl)
         {
             object[] track = new object[] { player, title, url, originalUrl };
-            return (Track)(object)track;
+            return track.ForceCast<Track>();
         }
 
         public static Track Empty()
         {
             object[] track = new object[] { VideoPlayerType.AVProVideoPlayer, string.Empty, VRCUrl.Empty, string.Empty };
-            return (Track)(object)track;
+            return track.ForceCast<Track>();
         }
     }
 
     public static class TrackExtentions
     {
-        public static bool IsValid(this Track obj)
+        public static VideoPlayerType GetPlayerType(this Track track)
         {
-            return ((object[])(object)obj).Length > 0;
+            return (VideoPlayerType)track.UnPack()[0];
         }
 
-        public static VideoPlayerType GetPlayerType(this Track obj)
+        public static bool HasTitle(this Track track)
         {
-            return (VideoPlayerType)((object[])(object)obj)[0];
+            return !string.IsNullOrEmpty((string)track.UnPack()[1]);
         }
 
-        public static bool HasTitle(this Track obj)
+        public static string GetTitle(this Track track)
         {
-            return !string.IsNullOrEmpty((string)((object[])(object)obj)[1]);
+            return (string)track.UnPack()[1];
         }
 
-        public static string GetTitle(this Track obj)
+        public static void SetTitle(this Track track, string title)
         {
-            return (string)((object[])(object)obj)[1];
+            ((object[])(object)track)[1] = title;
         }
 
-        public static void SetTitle(this Track obj, string title)
+        public static VRCUrl GetVRCUrl(this Track track)
         {
-            ((object[])(object)obj)[1] = title;
+            return (VRCUrl)track.UnPack()[2];
         }
 
-        public static VRCUrl GetVRCUrl(this Track obj)
+        public static string GetOriginalUrl(this Track track)
         {
-            return (VRCUrl)((object[])(object)obj)[2];
+            return (string)track.UnPack()[3];
         }
 
-        public static string GetOriginalUrl(this Track obj)
+        public static string GetUrl(this Track track)
         {
-            return (string)((object[])(object)obj)[3];
-        }
-
-        public static string GetUrl(this Track obj)
-        {
-            string originalUrl = (string)((object[])(object)obj)[3];
-            return string.IsNullOrEmpty(originalUrl) ? ((VRCUrl)((object[])(object)obj)[2]).Get() : originalUrl;
+            var arr = track.UnPack();
+            string originalUrl = (string)arr[3];
+            return string.IsNullOrEmpty(originalUrl) ? ((VRCUrl)arr[2]).Get() : originalUrl;
         }
     }
 }
