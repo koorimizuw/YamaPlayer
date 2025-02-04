@@ -17,7 +17,6 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] bool _disableUIOnPickUp = true;
         [SerializeField, Range(0f, 10f)] float _disableUIDistance = 0f;
         [SerializeField] Font _font;
-        [SerializeField, HideInInspector] string[] _supportedLanguages = new string[0];
         [SerializeField] TextAsset _updateLogFile;
         [SerializeField] TextAsset _translationTextFile;
 
