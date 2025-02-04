@@ -50428,7 +50428,8 @@ MonoBehaviour:
   _controller: {fileID: 0}
   _disableUIOnPickUp: 1
   _disableUIDistance: 0
-  _font: {fileID: 0}
+  _font: {fileID: 12800000, guid: 6488e13b806b0524dbadc43e3a9bd5fb, type: 3}
+  _supportedLanguages: []
   _updateLogFile: {fileID: 4900000, guid: 011c1aa791634cf45b66a6811ad47c8a, type: 3}
   _translationTextFile: {fileID: 4900000, guid: 02e2b6ce10f26f94fb504aba7ccd2bfe, type: 3}
   _primaryColor: {r: 0.9372549, g: 0.38431373, b: 0.5686275, a: 1}

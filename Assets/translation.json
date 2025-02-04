@@ -1,5 +1,5 @@
 {
-    "ja-JP": {
+    "ja": {
         "options": "オプション",
         "settings": "設定",
         "general": "全般",
@@ -99,7 +99,7 @@
         "moveDown": "下へ移動",
         "remove": "削除"
     },
-    "en-US": {
+    "en": {
         "options": "Options",
         "settings": "Settings",
         "general": "General",
@@ -399,7 +399,7 @@
         "moveDown": "往下移動",
         "remove": "刪除"
     },
-    "ko-KR": {
+    "ko": {
         "options": "옵션",
         "settings": "설정",
         "settingsTitle": "설정",

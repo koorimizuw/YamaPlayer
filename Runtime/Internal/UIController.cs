@@ -17,6 +17,7 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] bool _disableUIOnPickUp = true;
         [SerializeField, Range(0f, 10f)] float _disableUIDistance = 0f;
         [SerializeField] Font _font;
+        [SerializeField, HideInInspector] string[] _supportedLanguages = new string[0];
         [SerializeField] TextAsset _updateLogFile;
         [SerializeField] TextAsset _translationTextFile;
 
@@ -631,11 +632,11 @@ namespace Yamadev.YamaStream.UI
         public void SetMaxResolution4320() => _controller.MaxResolution = 4320;
 
         public void SetLanguageAuto() => SetLanguage(null);
-        public void SetLanguageJapanese() => SetLanguage("ja-JP");
+        public void SetLanguageJapanese() => SetLanguage("ja");
         public void SetLanguageChineseChina() => SetLanguage("zh-CN");
         public void SetLanguageChineseTaiwan() => SetLanguage("zh-TW");
-        public void SetLanguageKorean() => SetLanguage("ko-KR");
-        public void SetLanguageEnglish() =>SetLanguage("en-US");
+        public void SetLanguageKorean() => SetLanguage("ko");
+        public void SetLanguageEnglish() =>SetLanguage("en");
 
         public void SetLanguage(string language)
         {
