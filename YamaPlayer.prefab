@@ -110,7 +110,7 @@ MonoBehaviour:
   targetMaterialProperty: _MainTex
   aspectRatio: 2
   targetAudioSources:
-  - {fileID: 0}
+  - {fileID: 2669994199959185851}
   maximumResolution: 1080
 --- !u!114 &8253088399685443043
 MonoBehaviour:
@@ -1055,7 +1055,7 @@ MonoBehaviour:
   m_Script: {fileID: 1361866905, guid: 661092b4961be7145bfbe56e1e62337b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  videoPlayer: {fileID: 0}
+  videoPlayer: {fileID: 547286446532838875}
   mode: 0
 --- !u!114 &6389461777023775101
 MonoBehaviour:

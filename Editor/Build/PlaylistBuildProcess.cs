@@ -1,22 +1,19 @@
-using UnityEditor;
-using UnityEditor.Build;
-using UnityEditor.Build.Reporting;
-using UnityEngine;
-using UnityEngine.SceneManagement;
-using VRC.SDKBase;
-using Yamadev.YamaStream.Script;
-using System.Linq;
-using VRC.Utility;
 using System.Collections.Generic;
+using System.Linq;
 using UdonSharpEditor;
+using UnityEditor;
+using UnityEngine;
+using VRC.SDKBase;
+using VRC.Utility;
+using Yamadev.YamaStream.Script;
 
 namespace Yamadev.YamaStream.Editor
 {
-    public class PlaylistBuildProcess : IProcessSceneWithReport
+    public class PlaylistBuildProcess : IYamaPlayerBuildProcess
     {
         public int callbackOrder => -100;
 
-        public void OnProcessScene(Scene scene, BuildReport report)
+        public void Process()
         {
             foreach (PlayListContainer container in Utils.FindComponentsInHierarthy<PlayListContainer>())
             {

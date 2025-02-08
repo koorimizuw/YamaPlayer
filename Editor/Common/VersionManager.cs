@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 
 #if USE_VPM_RESOLVER
 using VRC.PackageManagement.Resolver;
@@ -25,6 +26,10 @@ namespace Yamadev.YamaStream.Editor
         public static string Newest;
         const string _autoUpdateKey = "YamaPlayer_AutoUpdate";
         const string _checkBetaKey = "YamaPlayer_CheckBetaUpdate";
+
+        public static Assembly EditorAssembly => typeof(VersionManager).Assembly;
+
+        public static Assembly RuntimeAssembly => typeof(Controller).Assembly;
 
         static VersionManager()
         {

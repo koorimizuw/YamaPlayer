@@ -890,11 +890,11 @@ namespace Yamadev.YamaStream.UI
         private void UpdateProgressView()
         {
             if (Utilities.IsValid(_videoTime)) _videoTime.text = _controller.SlideMode ? _controller.SlidePage.ToString() : TimeSpan.FromSeconds(_controller.VideoTime).ToString(_timeFormat);
-            if (Utilities.IsValid(_duration)) _duration.text = _controller.SlideMode ? _controller.SlidePageCount.ToString() : _controller.IsLive ? "Live" : TimeSpan.FromSeconds(_controller.Duration).ToString(_timeFormat);
+            if (Utilities.IsValid(_duration)) _duration.text = _controller.SlideMode ? _controller.SlidePageCount.ToString() : _controller.PlayerType == VideoPlayerType.ImageViewer ? "Image" : _controller.IsLive ? "Live" : TimeSpan.FromSeconds(_controller.Duration).ToString(_timeFormat);
             if (Utilities.IsValid(_progress) && !_progressDrag) _progress.SetValueWithoutNotify(_controller.SlideMode ? _controller.SlidePage : _controller.IsLive ? 1f : Mathf.Clamp(_controller.Duration == 0f ? 0f : _controller.VideoTime / _controller.Duration, 0f, 1f));
             if (Utilities.IsValid(_progressHelper) && Utilities.IsValid(_progressTooltip))
             {
-                _progressHelper.gameObject.SetActive(!_controller.Stopped && !_controller.IsLive && !_controller.SlideMode);
+                _progressHelper.gameObject.SetActive(!_controller.Stopped && !_controller.IsLive && !_controller.SlideMode && _controller.PlayerType != VideoPlayerType.ImageViewer);
                 if (_controller.IsLive) _progressTooltip.text = "Live";
                 else _progressTooltip.text = TimeSpan.FromSeconds(_controller.Duration * _progressHelper.Percent).ToString(_timeFormat);
             }
