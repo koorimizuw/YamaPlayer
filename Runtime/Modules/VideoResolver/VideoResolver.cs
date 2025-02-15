@@ -64,7 +64,7 @@ namespace Yamadev.YamaStream.Modules
         }
 
 #if WEB_UNIT_INCLUDED
-        public override void OnRequestSuccess(IVRCStringDownload result) => _controller.VideoPlayerHandle.PlayUrl(_callbackUrl);
+        public override void OnRequestSuccess(IVRCStringDownload result) => _controller.Handler.LoadUrl(_callbackUrl);
 #endif
 
         public void PlayYoutubeVideo(string url)

@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -81,12 +80,6 @@ namespace Yamadev.YamaStream
             }
         }
 
-        public void ClearSync()
-        {
-            _syncTime = 0f;
-            _serverTimeMilliseconds = 0;
-        }
-
         public float NetworkOffset => Paused ? 0 : (Networking.GetServerTimeInMilliseconds() - _serverTimeMilliseconds) / 1000f * Speed;
         public void ForceSync() => DoSync(true);
         public void DoSync(bool force = false)
@@ -94,7 +87,7 @@ namespace Yamadev.YamaStream
             if (IsLive || Stopped || _serverTimeMilliseconds == 0) return;
             float targetTime = Mathf.Clamp(_syncTime + NetworkOffset + VideoStandardDelay, 0f, Duration);
             float timeMargin = Mathf.Abs(VideoTime - targetTime);
-            if (force || timeMargin >= _syncMargin) VideoPlayerHandle.VideoTime = targetTime;
+            if (force || timeMargin >= _syncMargin) Handler.Time = targetTime;
             _lastSync = Time.time;
         }
 

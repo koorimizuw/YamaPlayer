@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using UnityEngine;
 using VRC.SDKBase;
 
@@ -75,12 +74,14 @@ namespace Yamadev.YamaStream
                 array = array3;
             }
         }
+
         public static T[] Add<T>(this T[] arr, T item)
         {
             Resize(ref arr, arr.Length + 1);
             arr[arr.Length - 1] = item;
             return arr;
         }
+
         public static T[] Remove<T>(this T[] arr, int index)
         {
             if (index < 0 || index > arr.Length - 1) return arr;
@@ -88,6 +89,7 @@ namespace Yamadev.YamaStream
             Resize(ref arr, arr.Length - 1);
             return arr;
         }
+
         public static T[] Remove<T>(this T[] arr, T item)
         {
             int index = Array.IndexOf(arr, item);

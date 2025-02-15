@@ -1,6 +1,4 @@
-﻿
-using Cysharp.Threading.Tasks;
-using NUnit.Framework;
+﻿using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -164,6 +162,10 @@ namespace Yamadev.YamaStream.Editor
                     EditorGUIUtility.labelWidth = 80;
                     using (var check = new EditorGUI.ChangeCheckScope())
                     {
+                        Rect numberRect = rect;
+                        string number = $"#{index + 1}";
+                        numberRect.xMin = rect.width - number.Length * 8f + 20f;
+                        EditorGUI.LabelField(numberRect, number);
                         Rect playerRect = rect;
                         playerRect.xMax = 240;
                         VideoPlayerType mode = (VideoPlayerType)EditorGUI.Popup(playerRect, Localization.Get("videoPlayerType"), (int)track.Mode, Enum.GetNames(typeof(VideoPlayerType)));

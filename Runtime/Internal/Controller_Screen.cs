@@ -11,25 +11,17 @@ namespace Yamadev.YamaStream
         [SerializeField] ScreenType[] _screenTypes;
         [SerializeField] Object[] _screens;
         [SerializeField] string[] _textureProperties;
-        MaterialPropertyBlock _properties;
+        MaterialPropertyBlock _propertyBlock;
 
-        void initializeScreen()
+        private void InitializeScreen()
         {
-            MirrorInverse = _mirrorInverse;
-            MaxResolution = _maxResolution;
-            Emission = _emission;
+            _propertyBlock = new MaterialPropertyBlock();
+            Handler.MaxResolution = _maxResolution;
+            _propertyBlock.SetInt("_MirrorFlip", _mirrorInverse ? 1 : 0);
+            _propertyBlock.SetFloat("_Emission", _emission);
         }
 
-        public MaterialPropertyBlock MaterialProperty
-        {
-            get
-            {
-                if (_properties == null ) _properties = new MaterialPropertyBlock();
-                return _properties;
-            }
-        }
-
-        public Texture Texture => VideoPlayerHandle.Texture;
+        public Texture Texture => Handler.Texture;
 
         public Object[] Screens => _screens;
 
@@ -38,11 +30,10 @@ namespace Yamadev.YamaStream
             get => _maxResolution;
             set
             {
-                bool valueChanged = value != _maxResolution;
+                if (value == _maxResolution) return;
                 _maxResolution = value;
-                _videoPlayerAnimator.SetFloat("Resolution", value / 4320f);
-                _videoPlayerAnimator.Update(0f);
-                if (!_stopped) SendCustomEventDelayedFrames(nameof(Reload), 1);
+                Handler.MaxResolution = value;
+                if (!Stopped) SendCustomEventDelayedFrames(nameof(Reload), 0);
                 foreach (Listener listener in _listeners) listener.OnMaxResolutionChanged();
             }
         }
@@ -53,7 +44,7 @@ namespace Yamadev.YamaStream
             set
             {
                 _mirrorInverse = value;
-                MaterialProperty.SetInt("_MirrorFlip", value ? 1 : 0);
+                _propertyBlock.SetInt("_MirrorFlip", value ? 1 : 0);
                 foreach (Listener listener in _listeners) listener.OnMirrorInversionChanged();
             }
         }
@@ -64,33 +55,33 @@ namespace Yamadev.YamaStream
             set
             {
                 _emission = value;
-                MaterialProperty.SetFloat("_Emission", value);
+                _propertyBlock.SetFloat("_Emission", value);
                 foreach (Listener listener in _listeners) listener.OnEmissionChanged();
             }
         }
 
-        public override void OnTextureUpdated()
+        public override void OnTextureUpdated(Texture texture)
         {
-            if (Texture == null) return;
-
-            int isAVPro = VideoPlayerType == VideoPlayerType.AVProVideoPlayer ? 1 : 0;
             for (int i = 0; i < _screens.Length; i++)
             {
-                Object screen = _screens[i];
-                if (screen == null) continue;
+                if (!_screens[i]) continue;
 
                 string textureProperty = _textureProperties[i];
                 switch (_screenTypes[i])
                 {
                     case ScreenType.Renderer:
-                        MaterialProperty.SetTexture(textureProperty, Texture);
-                        ((Renderer)screen).SetPropertyBlock(MaterialProperty, 0);
+                        if (!texture) ((Renderer)_screens[i]).SetPropertyBlock(new MaterialPropertyBlock(), 0);
+                        else
+                        {
+                            _propertyBlock.SetTexture(textureProperty, texture);
+                            ((Renderer)_screens[i]).SetPropertyBlock(_propertyBlock, 0);
+                        }
                         break;
                     case ScreenType.RawImage:
-                        ((RawImage)screen).texture = Texture;
+                        ((RawImage)_screens[i]).texture = texture;
                         break;
                     case ScreenType.Material:
-                        ((Material)screen).SetTexture(textureProperty, Texture);
+                        ((Material)_screens[i]).SetTexture(textureProperty, texture);
                         break;
                 }
             }
