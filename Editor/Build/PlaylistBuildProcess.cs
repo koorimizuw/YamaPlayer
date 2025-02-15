@@ -11,14 +11,14 @@ namespace Yamadev.YamaStream.Editor
 {
     public class PlaylistBuildProcess : IYamaPlayerBuildProcess
     {
-        public int callbackOrder => -100;
+        public int callbackOrder => -2000;
 
         public void Process()
         {
             foreach (PlayListContainer container in Utils.FindComponentsInHierarthy<PlayListContainer>())
             {
                 List<Playlist> playlists = container.ReadPlaylists();
-                List<YamaStream.Playlist> results = new();
+                List<YamaStream.Playlist> results = new List<YamaStream.Playlist>();
                 foreach (Playlist playlist in playlists)
                 {
                     if (!playlist.Active) continue;
