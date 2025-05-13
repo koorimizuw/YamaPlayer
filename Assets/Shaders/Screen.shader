@@ -34,10 +34,10 @@ Shader "Yamadev/YamaStream/Screen"
 	    };
     
 	    void surf (Input IN, inout SurfaceOutputStandard o) {
-			float4 color = GetTexture(_MainTex, IN.uv_MainTex, _MainTex_TexelSize, _AspectRatio, _MirrorFlip && _VRChatMirrorMode);
-            o.Albedo = _BaseColor + color;
-            o.Alpha = color;
-            o.Emission = color * _Emission;
+			float4 videoTex = GetTexture(_MainTex, IN.uv_MainTex, _MainTex_TexelSize, _AspectRatio, _MirrorFlip && _VRChatMirrorMode);
+            o.Albedo = _BaseColor.rgb + videoTex.rgb * (1 - _Emission);
+            o.Alpha = _BaseColor.a;
+            o.Emission = videoTex * _Emission;
 		}
 		ENDCG
 	}
