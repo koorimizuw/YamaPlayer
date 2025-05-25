@@ -123,7 +123,9 @@
     "setUpAudioLinkConfirm": "AudioLinkを自動設定しますか？",
     "setUpAudioLinkFailed": "Audio Linkの自動設定に失敗しました、Audio Linkのパッケージが破損しているかご確認ください。",
     "syncSettings": "同期設定",
-    "localMode": "ローカルモード"
+    "localMode": "ローカルモード",
+    "useVRCLV": "VRCLVを使用",
+    "vrclvNotImported": "VRCLVが導入されていません。"
   },
   "en-US": {
     "ui": "UI",
@@ -249,7 +251,9 @@
     "setUpAudioLinkConfirm": "Do you want to automatically set up AudioLink?",
     "setUpAudioLinkFailed": "Audio Link automatic setup failed, please check if the Audio Link package is corrupted.",
     "syncSettings": "Sync Settings",
-    "localMode": "Local Mode"
+    "localMode": "Local Mode",
+    "useVRCLV": "Use VRCLV",
+    "vrclvNotImported": "VRCLV is not imported."
   },
   "zh-CN": {
     "ui": "UI",
@@ -375,7 +379,9 @@
     "setUpAudioLinkConfirm": "要自动设置AudioLink吗？",
     "setUpAudioLinkFailed": "Audio Link自动设置失败，请检查Audio Link包是否损坏。",
     "syncSettings": "同步设置",
-    "localMode": "本地模式"
+    "localMode": "本地模式",
+    "useVRCLV": "使用VRCLV",
+    "vrclvNotImported": "VRCLV未导入。"
   },
   "zh-TW": {
     "ui": "UI",
@@ -501,7 +507,9 @@
     "setUpAudioLinkConfirm": "要自動設定AudioLink嗎？",
     "setUpAudioLinkFailed": "Audio Link自動設定失敗，請檢查Audio Link包是否損壞。",
     "syncSettings": "同步設定",
-    "localMode": "本地模式"
+    "localMode": "本地模式",
+    "useVRCLV": "使用VRCLV",
+    "vrclvNotImported": "VRCLV未導入。"
   },
   "ko-KR": {
     "ui": "UI",
@@ -627,6 +635,8 @@
     "setUpAudioLinkConfirm": "AudioLink를 자동으로 설정하시겠습니까?",
     "setUpAudioLinkFailed": "Audio Link 자동 설정 실패, Audio Link 패키지가 손상되었는지 확인하십시오.",
     "syncSettings": "동기화 설정",
-    "localMode": "로컬 모드"
+    "localMode": "로컬 모드",
+    "useVRCLV": "VRCLV 사용",
+    "vrclvNotImported": "VRCLV가 도입되지 않았습니다."
   }
 }

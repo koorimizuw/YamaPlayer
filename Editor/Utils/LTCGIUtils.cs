@@ -11,7 +11,7 @@ namespace Yamadev.YamaStream.Editor
         const string _crtGuid = "a9024879323f03444be1a5332baee58e";
         const string _ltcgiControllerGuid = "4b1aac09caa0ea54ba902102643bb545";
 
-        public static CustomRenderTexture YamaPlayerCRT =>
+        public static CustomRenderTexture LTCGICRT =>
             AssetDatabase.LoadAssetAtPath<CustomRenderTexture>(AssetDatabase.GUIDToAssetPath(_crtGuid));
 
         public static LTCGI_Controller GetOrAddLTCGIController()
@@ -32,7 +32,7 @@ namespace Yamadev.YamaStream.Editor
         public static void ClearLTCGISettings()
         {
             foreach (Controller controller in Utils.FindComponentsInHierarthy<Controller>())
-                controller.RemoveScreenProperty(YamaPlayerCRT.material);
+                controller.RemoveScreenProperty(LTCGICRT.material);
             foreach (LTCGI_Screen ltcgiScreen in Utils.FindComponentsInHierarthy<LTCGI_Screen>())
                 Object.DestroyImmediate(ltcgiScreen);
         }
