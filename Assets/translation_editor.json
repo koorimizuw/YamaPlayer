@@ -124,8 +124,8 @@
     "setUpAudioLinkFailed": "Audio Linkの自動設定に失敗しました、Audio Linkのパッケージが破損しているかご確認ください。",
     "syncSettings": "同期設定",
     "localMode": "ローカルモード",
-    "useVRCLV": "VRCLVを使用",
-    "vrclvNotImported": "VRCLVが導入されていません。"
+    "useVRCLV": "Light Volume TVGIを使用",
+    "vrclvNotImported": "Light Volumeが導入されていません。"
   },
   "en-US": {
     "ui": "UI",
@@ -252,8 +252,8 @@
     "setUpAudioLinkFailed": "Audio Link automatic setup failed, please check if the Audio Link package is corrupted.",
     "syncSettings": "Sync Settings",
     "localMode": "Local Mode",
-    "useVRCLV": "Use VRCLV",
-    "vrclvNotImported": "VRCLV is not imported."
+    "useVRCLV": "Use Light Volume TVGI",
+    "vrclvNotImported": "Light Volume is not imported."
   },
   "zh-CN": {
     "ui": "UI",
@@ -380,8 +380,8 @@
     "setUpAudioLinkFailed": "Audio Link自动设置失败，请检查Audio Link包是否损坏。",
     "syncSettings": "同步设置",
     "localMode": "本地模式",
-    "useVRCLV": "使用VRCLV",
-    "vrclvNotImported": "VRCLV未导入。"
+    "useVRCLV": "使用Light Volume TVGI",
+    "vrclvNotImported": "Light Volume未导入。"
   },
   "zh-TW": {
     "ui": "UI",
@@ -508,8 +508,8 @@
     "setUpAudioLinkFailed": "Audio Link自動設定失敗，請檢查Audio Link包是否損壞。",
     "syncSettings": "同步設定",
     "localMode": "本地模式",
-    "useVRCLV": "使用VRCLV",
-    "vrclvNotImported": "VRCLV未導入。"
+    "useVRCLV": "使用Light Volume TVGI",
+    "vrclvNotImported": "Light Volume未導入。"
   },
   "ko-KR": {
     "ui": "UI",
@@ -636,7 +636,7 @@
     "setUpAudioLinkFailed": "Audio Link 자동 설정 실패, Audio Link 패키지가 손상되었는지 확인하십시오.",
     "syncSettings": "동기화 설정",
     "localMode": "로컬 모드",
-    "useVRCLV": "VRCLV 사용",
-    "vrclvNotImported": "VRCLV가 도입되지 않았습니다."
+    "useVRCLV": "Light Volume TVGI 사용",
+    "vrclvNotImported": "Light Volume가 도입되지 않았습니다."
   }
 }
