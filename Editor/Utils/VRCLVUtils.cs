@@ -24,8 +24,22 @@ namespace Yamadev.YamaStream.Editor
             return tvgi;
         }
 
+        public static LightVolumeSetup GetOrAddLVSetup()
+        {
+            LightVolumeSetup[] setups = Utils.FindComponentsInHierarthy<LightVolumeSetup>();
+            if (setups.Length > 0) return setups[0];
+
+            LightVolumeSetup setup = new GameObject("Light Volume Manager").AddComponent<LightVolumeSetup>();
+            setup.SyncUdonScript();
+
+            return setup;
+        }
+
         public static void SetUpVRCLV(this YamaPlayer player)
         {
+            LightVolumeSetup setup = GetOrAddLVSetup();
+            setup.AutoUpdateVolumes = true;
+
             LightVolumeTVGI tvgi = GetOrAddLVTVGI();
             tvgi.TargetRenderTexture = TVGICRT;
 
@@ -41,7 +55,7 @@ namespace Yamadev.YamaStream.Editor
             {
                 if (tvgi.TargetRenderTexture == TVGICRT)
                 {
-                    Object.DestroyImmediate(tvgi.gameObject);
+                    tvgi.TargetRenderTexture = null;
                 }
             }
         }

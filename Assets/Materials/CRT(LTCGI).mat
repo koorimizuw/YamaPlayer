@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: CRT
+  m_Name: CRT(LTCGI)
   m_Shader: {fileID: 4800000, guid: a4b0cd8fce959354d889ab43aae70b05, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
