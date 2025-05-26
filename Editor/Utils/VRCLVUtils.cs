@@ -45,6 +45,8 @@ namespace Yamadev.YamaStream.Editor
 
             Controller controller = player.GetComponentInChildren<Controller>();
             controller.AddScreenProperty(ScreenType.Material, TVGICRT.material);
+
+            Selection.activeObject = tvgi;
         }
 
         public static void RemoveVRCLV()
