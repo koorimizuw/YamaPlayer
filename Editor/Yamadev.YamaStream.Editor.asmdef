@@ -36,6 +36,11 @@
             "define": "USE_VPM_RESOLVER"
         },
         {
+            "name": "at.pimaker.ltcgi",
+            "expression": "",
+            "define": "USE_LTCGI"
+        },
+        {
             "name": "red.sim.lightvolumes",
             "expression": "",
             "define": "VRC_LIGHT_VOLUMES_INCLUDED"

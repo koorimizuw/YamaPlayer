@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using VRCLightVolumes;
 #endif
 
-#if LTCGI_INCLUDED
+#if USE_LTCGI
 using pi.LTCGI;
 #endif
 
@@ -80,7 +80,7 @@ namespace Yamadev.YamaStream.Editor
             _target = target as YamaPlayer;
 
             _controller = _target.GetComponentInChildren<Controller>();
-            if (_controller != null )
+            if (_controller != null)
             {
                 _controllerSerializedObject = new SerializedObject(_controller);
                 _localMode = _controllerSerializedObject.FindProperty("_isLocal");
@@ -125,13 +125,13 @@ namespace Yamadev.YamaStream.Editor
                 _uiEditor = new UIEditor(_uiController);
             }
             _avPro = _target.GetComponentInChildren<VRCAVProVideoPlayer>();
-            if (_avPro != null )
+            if (_avPro != null)
             {
                 _avProSerializedObject = new SerializedObject(_avPro);
                 _useLowLatency = _avProSerializedObject.FindProperty("useLowLatency");
             }
 
-#if LTCGI_INCLUDED
+#if USE_LTCGI
             for (int i = 0; i < _screens.arraySize; i++)
             {
                 if (Utils.FindComponentsInHierarthy<LTCGI_Controller>().Length > 0 &&
@@ -285,7 +285,7 @@ namespace Yamadev.YamaStream.Editor
                 displayedOptions: playlistNames
             );
 
-            List<string> playlistItemNames = _playlists[_autoPlayPlaylistIndex.intValue].Tracks.Select(i => i.Title.Replace("/", "|")).ToList(); 
+            List<string> playlistItemNames = _playlists[_autoPlayPlaylistIndex.intValue].Tracks.Select(i => i.Title.Replace("/", "|")).ToList();
             playlistItemNames.Insert(0, Localization.Get("random"));
             if (_autoPlayPlaylistTrackIndex.intValue >= playlistItemNames.Count - 1) _autoPlayPlaylistTrackIndex.intValue = playlistItemNames.Count - 2;
             _autoPlayPlaylistTrackIndex.intValue = EditorGUILayout.Popup(
@@ -297,7 +297,7 @@ namespace Yamadev.YamaStream.Editor
 
         public void SetUpLTCGI()
         {
-#if LTCGI_INCLUDED
+#if USE_LTCGI
             if (_controller == null) return;
             foreach (Controller controller in Utils.FindComponentsInHierarthy<Controller>())
             {
@@ -322,7 +322,7 @@ namespace Yamadev.YamaStream.Editor
 
         public void RemoveLTCGI()
         {
-#if LTCGI_INCLUDED
+#if USE_LTCGI
             if (_controller == null) return;
             if (Styles.DisplayConfirmDialog(Localization.Get("removeLTCGI"), Localization.Get("removeLTCGIConfirm")))
             {
@@ -412,7 +412,7 @@ namespace Yamadev.YamaStream.Editor
 #else
                 EditorGUILayout.LabelField("Audio Link", Localization.Get("audioLinkNotImported"));
 #endif
-#if LTCGI_INCLUDED
+#if USE_LTCGI
                 if (EditorGUILayout.Toggle(Localization.Get("useLTCGI"), _useLTCGI))
                 {
                     if (!_useLTCGI) SetUpLTCGI();
@@ -449,14 +449,14 @@ namespace Yamadev.YamaStream.Editor
             _screenList?.DoLayoutList();
 
         }
-#endregion
+        #endregion
 
         #region Playlist Settings
         public void DrawPlaylistSettings()
         {
             using (new SectionScope(Localization.Get("playlist")))
             {
-                if (GUILayout.Button(Localization.Get("editPlaylist"))) 
+                if (GUILayout.Button(Localization.Get("editPlaylist")))
                     PlaylistEditor.ShowPlaylistEditorWindow(_target);
             }
 
