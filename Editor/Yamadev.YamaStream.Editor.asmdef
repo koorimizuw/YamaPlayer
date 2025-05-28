@@ -16,7 +16,9 @@
         "GUID:d1e8c2ba944807d4a9213e2de6930a0b",
         "GUID:1c1872759067452448543f856b252b80",
         "GUID:f51ebe6a0ceec4240a699833d6309b23",
-        "GUID:627c4d5cd580ddf41bd320e784fe8b9d"
+        "GUID:627c4d5cd580ddf41bd320e784fe8b9d",
+        "GUID:d8a84397f42e52047b4aa117d7c10706",
+        "GUID:a7ff01b0ae211b5439bf8d957d1583a8"
     ],
     "includePlatforms": [
         "Editor"
@@ -32,6 +34,11 @@
             "name": "com.vrchat.core.vpm-resolver",
             "expression": "",
             "define": "USE_VPM_RESOLVER"
+        },
+        {
+            "name": "red.sim.lightvolumes",
+            "expression": "",
+            "define": "VRC_LIGHT_VOLUMES_INCLUDED"
         }
     ],
     "noEngineReferences": false

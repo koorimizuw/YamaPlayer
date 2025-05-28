@@ -18,7 +18,7 @@ namespace Yamadev.YamaStream
 
         void Start()
         {
-            if (!Networking.IsMaster) return;
+            if (!Networking.IsMaster && !_controller.IsLocal) return;
             SendCustomEventDelayedSeconds(nameof(PlayDefaultTrack), _delay);
         }
 

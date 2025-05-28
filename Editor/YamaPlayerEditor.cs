@@ -10,6 +10,14 @@ using Yamadev.YamaStream.UI;
 using Yamadev.YamaStream.Script;
 using System.Collections.Generic;
 
+#if VRC_LIGHT_VOLUMES_INCLUDED
+using VRCLightVolumes;
+#endif
+
+#if LTCGI_INCLUDED
+using pi.LTCGI;
+#endif
+
 namespace Yamadev.YamaStream.Editor
 {
     [CustomEditor(typeof(YamaPlayer))]
@@ -63,6 +71,7 @@ namespace Yamadev.YamaStream.Editor
         PlayList[] _playlists;
         TabScope _tabScope;
         bool _useLTCGI;
+        bool _useVRCLV;
 
         private void OnEnable()
         {
@@ -125,11 +134,23 @@ namespace Yamadev.YamaStream.Editor
 #if LTCGI_INCLUDED
             for (int i = 0; i < _screens.arraySize; i++)
             {
-                if (_screens.GetArrayElementAtIndex(i).objectReferenceValue == LTCGIUtils.YamaPlayerCRT.material)
+                if (Utils.FindComponentsInHierarthy<LTCGI_Controller>().Length > 0 &&
+                    _screens.GetArrayElementAtIndex(i).objectReferenceValue == LTCGIUtils.LTCGICRT.material)
                     _useLTCGI = true;
             }
 #else
             _useLTCGI = false;
+#endif
+
+#if VRC_LIGHT_VOLUMES_INCLUDED
+            for (int i = 0; i < _screens.arraySize; i++)
+            {
+                LightVolumeTVGI[] tvgis = Utils.FindComponentsInHierarthy<LightVolumeTVGI>();
+                if (tvgis.Any(tvgi => tvgi.TargetRenderTexture == VRCLVUtils.TVGICRT))
+                    _useVRCLV = true;
+            }
+#else
+            _useVRCLV = false;
 #endif
 
             GenerateScreenList();
@@ -280,18 +301,18 @@ namespace Yamadev.YamaStream.Editor
             if (_controller == null) return;
             foreach (Controller controller in Utils.FindComponentsInHierarthy<Controller>())
             {
-                if (Array.IndexOf(controller.Screens, LTCGIUtils.YamaPlayerCRT.material) >= 0 &&
+                if (Array.IndexOf(controller.Screens, LTCGIUtils.LTCGICRT.material) >= 0 &&
                     controller != _controller &&
                     !Styles.DisplayConfirmDialog(Localization.Get("ltcgiSetOnOtherPlayer"), Localization.Get("clearLTCGISettings"))) return;
             }
             LTCGIUtils.ClearLTCGISettings();
-            _controller.AddScreenProperty(ScreenType.Material, LTCGIUtils.YamaPlayerCRT.material);
+            _controller.AddScreenProperty(ScreenType.Material, LTCGIUtils.LTCGICRT.material);
             var ltcgiController = LTCGIUtils.GetOrAddLTCGIController();
             if (ltcgiController == null)
             {
                 EditorUtility.DisplayDialog(Localization.Get("setUpFailed"), Localization.Get("setUpLTCGIFailed"), "OK");
             }
-            ltcgiController.VideoTexture = LTCGIUtils.YamaPlayerCRT;
+            ltcgiController.VideoTexture = LTCGIUtils.LTCGICRT;
             bool applyToSubScreens = Styles.DisplayConfirmDialog(Localization.Get("applyToSubScreens"), Localization.Get("applyToSubScreensConfirm"));
             _target.SetUpLTCGIScreen(applyToSubScreens);
             _useLTCGI = true;
@@ -403,6 +424,26 @@ namespace Yamadev.YamaStream.Editor
                 // EditorGUILayout.LabelField("　", Localization.Get("useLTCGIDesc"));
 #else
                 EditorGUILayout.LabelField("LTCGI", Localization.Get("ltcgiNotImported"));
+#endif
+#if VRC_LIGHT_VOLUMES_INCLUDED
+                if (EditorGUILayout.Toggle(Localization.Get("useVRCLV"), _useVRCLV))
+                {
+                    if (!_useVRCLV)
+                    {
+                        VRCLVUtils.SetUpVRCLV(_target);
+                        _useVRCLV = true;
+                    }
+                }
+                else
+                {
+                    if (_useVRCLV)
+                    {
+                        VRCLVUtils.RemoveVRCLV();
+                        _useVRCLV = false;
+                    }
+                }
+#else
+                EditorGUILayout.LabelField("VRCLV", Localization.Get("vrclvNotImported"));
 #endif
             }
             _screenList?.DoLayoutList();
