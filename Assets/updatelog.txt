@@ -1,5 +1,8 @@
 更新履歴:
 
+v1.5.12
+LTCGIのシンボルをVersion Definesに移行
+
 v1.5.11
 LVTVGIのテクスチャ自動設定を実装
 

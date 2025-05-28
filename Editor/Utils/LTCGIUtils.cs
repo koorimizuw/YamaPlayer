@@ -1,4 +1,4 @@
-#if LTCGI_INCLUDED
+#if USE_LTCGI
 using pi.LTCGI;
 using UnityEditor;
 using UnityEngine;
