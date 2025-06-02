@@ -1,5 +1,4 @@
-﻿
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 using VRC.SDK3.Components;
 using Yamadev.YamaStream.UI;
@@ -10,13 +9,16 @@ namespace Yamadev.YamaStream.Editor
     [CustomEditor(typeof(YamaPlayerController))]
     public class YamaPlayerControllerEditor : EditorBase
     {
-        SerializedProperty _yamaPlayer;
-        VRCPickup _vrcPickup;
-        SerializedObject _vrcPickupSerializedObject;
-        SerializedProperty _pickup;
-        YamaPlayerController _target;
-        UIController _uiController;
-        UISettings _uiEditor;
+        private YamaPlayerController _target;
+
+        private UIController _uiController;
+        private Controller _controller;
+        private VRCPickup _vrcPickup;
+
+        private UISettings _uiSettings;
+        private SerializedObject _pickupSerializedObject;
+        private SerializedProperty _pickupable;
+        private SerializedProperty _yamaPlayer;
         bool _globalSync;
 
         void OnEnable()
@@ -24,14 +26,16 @@ namespace Yamadev.YamaStream.Editor
             Title = target.name;
             _target = target as YamaPlayerController;
 
+            if (Application.isPlaying) return;
+
             _uiController = _target.GetComponentInChildren<UIController>(true);
-            if (_uiController != null) _uiEditor = new UISettings(_uiController);
+            _uiSettings = new UISettings(_uiController);
 
             _vrcPickup = _target.GetComponentInChildren<VRCPickup>(true);
             if (_vrcPickup != null)
             {
-                _vrcPickupSerializedObject = new SerializedObject(_vrcPickup);
-                _pickup = _vrcPickupSerializedObject.FindProperty("pickupable");
+                _pickupSerializedObject = new SerializedObject(_vrcPickup);
+                _pickupable = _pickupSerializedObject.FindProperty("pickupable");
             }
 
             _yamaPlayer = serializedObject.FindProperty("YamaPlayer");
@@ -42,18 +46,101 @@ namespace Yamadev.YamaStream.Editor
             base.OnInspectorGUI();
             serializedObject.Update();
 
-            EditorGUILayout.Space(32f);
+            if (Application.isPlaying)
+            {
+                EditorGUILayout.HelpBox("YamaPlayer is not available in the play mode.", MessageType.Info);
+                return;
+            }
 
-            EditorGUILayout.PropertyField(_yamaPlayer);
-            EditorGUILayout.LabelField("　", Localization.Get("targetPlayer"));
-            Styles.DrawDivider();
+            EditorGUILayout.Space(8f);
 
+            using (new SectionScope())
+            {
+                EditorGUILayout.PropertyField(_yamaPlayer);
+            }
+
+            using (new SectionScope())
+            {
+                DrawPickupSettings();
+            }
+
+            DrawUISettings();
+
+            ApplyModifiedProperties();
+        }
+
+        private void DrawUISettings()
+        {
+            using (new SectionScope(!_uiSettings.UIDisabled))
+            {
+                _uiSettings.DrawDisableUISettings();
+            }
+
+            if (_uiSettings.UIDisabled)
+            {
+                EditorGUILayout.Space(4f);
+                _uiSettings.DrawUIDisabledMessage();
+                return;
+            }
+
+            using (new SectionScope("Color"))
+            {
+                _uiSettings.DrawColorSettings();
+            }
+
+            using (new SectionScope("Font"))
+            {
+                _uiSettings.DrawFontSettings();
+            }
+
+            using (new SectionScope("Idle Image"))
+            {
+                _uiSettings.DrawIdleImageSettings();
+            }
+
+            using (new SectionScope())
+            {
+                _uiSettings.DrawDefaultOpenSettings();
+            }
+
+            using (new SectionScope(false))
+            {
+                _uiSettings.DrawPickupSettings();
+            }
+        }
+
+        private void DrawTargetPlayerSettings()
+        {
+            using (var check = new EditorGUI.ChangeCheckScope())
+            {
+                EditorGUILayout.PropertyField(_yamaPlayer);
+                EditorGUILayout.LabelField("　", Localization.Get("targetPlayer"));
+                if (check.changed && _yamaPlayer.objectReferenceValue != null)
+                {
+                    Controller controller = (_yamaPlayer.objectReferenceValue as YamaPlayer)?.GetComponentInChildren<Controller>();
+                    if (controller != null)
+                    {
+                        _uiSettings.SetController(controller);
+                        YamaPlayerScreen screen = _target.gameObject.GetComponentInChildren<YamaPlayerScreen>();
+                        if (screen != null)
+                        {
+                            SerializedObject serializedObject = new SerializedObject(screen);
+                            serializedObject.FindProperty("controller").objectReferenceValue = controller;
+                            serializedObject.ApplyModifiedProperties();
+                        }
+                    }
+                }
+            }
+        }
+
+        private void DrawPickupSettings()
+        {
             VRCPickup vrcPickup = _target.GetComponentInChildren<VRCPickup>();
             if (vrcPickup != null)
             {
-                EditorGUILayout.PropertyField(_pickup, Localization.GetLayout("pickUp"));
+                EditorGUILayout.PropertyField(_pickupable, Localization.GetLayout("pickUp"));
                 EditorGUILayout.LabelField("　", Localization.Get("pickUpDesc"));
-                if (_pickup.boolValue)
+                if (_pickupable.boolValue)
                 {
                     VRCObjectSync objectSync = vrcPickup.gameObject.GetComponent<VRCObjectSync>();
                     _globalSync = objectSync != null;
@@ -62,30 +149,14 @@ namespace Yamadev.YamaStream.Editor
                     if (_globalSync && objectSync == null) vrcPickup.gameObject.AddComponent<VRCObjectSync>();
                     if (!_globalSync && objectSync != null) GameObject.DestroyImmediate(objectSync);
                 }
-                Styles.DrawDivider();
             }
-
-            // _uiEditor.DrawUISettings();
-
-            ApplyModifiedProperties();
         }
 
-        internal void ApplyModifiedProperties()
+        private void ApplyModifiedProperties()
         {
             serializedObject.ApplyModifiedProperties();
-            _vrcPickupSerializedObject?.ApplyModifiedProperties();
-
-            Controller controller = (_yamaPlayer.objectReferenceValue as YamaPlayer)?.GetComponentInChildren<Controller>();
-            if (controller == null) return;
-
-            //if (_uiEditor != null) _uiEditor.SetController(controller);
-            YamaPlayerScreen screen = _target.gameObject.GetComponentInChildren<YamaPlayerScreen>();
-            if (screen != null)
-            {
-                SerializedObject serializedObject = new SerializedObject(screen);
-                serializedObject.FindProperty("_controller").objectReferenceValue = controller;
-                serializedObject.ApplyModifiedProperties();
-            }
+            _uiSettings?.ApplyModifiedProperties();
+            _pickupSerializedObject?.ApplyModifiedProperties();
         }
     }
 }

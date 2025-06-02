@@ -173,6 +173,12 @@ namespace Yamadev.YamaStream.Editor
                     text.font = _font.objectReferenceValue as Font;
         }
 
+        public void SetController(Controller controller)
+        {
+            _controller.objectReferenceValue = controller;
+            ApplyModifiedProperties();
+        }
+
         public void ApplyModifiedProperties()
         {
             try

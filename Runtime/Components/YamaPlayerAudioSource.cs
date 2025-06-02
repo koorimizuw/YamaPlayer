@@ -1,21 +1,13 @@
-﻿
-using UdonSharp;
-using UnityEngine;
+﻿using UnityEngine;
 using VRC.SDK3.Components;
 
 namespace Yamadev.YamaStream
 {
     [RequireComponent(typeof(AudioSource))]
     [RequireComponent(typeof(VRCSpatialAudioSource))]
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class YamaPlayerAudioSource : UdonSharpBehaviour
+    [DisallowMultipleComponent]
+    public class YamaPlayerAudioSource : MonoBehaviour
     {
-        [SerializeField] Controller _controller;
-        void Start()
-        {
-            if (_controller == null) return;
-            AudioSource audioSource = GetComponent<AudioSource>();
-            _controller.AddAudioSource(audioSource);
-        }
+        public Controller controller;
     }
 }

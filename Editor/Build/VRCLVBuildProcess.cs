@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UdonSharpEditor;
 using UnityEditor;
 using UnityEngine;
-using VRC.Udon;
-
 
 #if USE_VRCLV
 using VRCLightVolumes;
