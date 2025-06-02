@@ -26,7 +26,7 @@ namespace Yamadev.YamaStream.Editor
             }
         }
 
-        public void SetupScreen(YamaPlayerScreen screen)
+        private void SetupScreen(YamaPlayerScreen screen)
         {
             if (screen == null || screen.controller == null)
             {
@@ -37,7 +37,7 @@ namespace Yamadev.YamaStream.Editor
             screen.controller.AddScreen(screen.Type, screen.Reference);
         }
 
-        public void AssignLTCGITexture()
+        private void AssignLTCGITexture()
         {
 #if USE_LTCGI
             try
@@ -56,7 +56,7 @@ namespace Yamadev.YamaStream.Editor
 #endif
         }
 
-        public Controller FindLTCGIActivedController()
+        private Controller FindLTCGIActivedController()
         {
 #if USE_LTCGI
        var controllers = GameObject.FindObjectsOfType<Controller>();
