@@ -16,7 +16,7 @@ namespace Yamadev.YamaStream.Editor
         SerializedProperty _pickup;
         YamaPlayerController _target;
         UIController _uiController;
-        UIEditor _uiEditor;
+        UISettings _uiEditor;
         bool _globalSync;
 
         void OnEnable()
@@ -25,7 +25,7 @@ namespace Yamadev.YamaStream.Editor
             _target = target as YamaPlayerController;
 
             _uiController = _target.GetComponentInChildren<UIController>(true);
-            if (_uiController != null) _uiEditor = new UIEditor(_uiController);
+            if (_uiController != null) _uiEditor = new UISettings(_uiController);
 
             _vrcPickup = _target.GetComponentInChildren<VRCPickup>(true);
             if (_vrcPickup != null)
@@ -65,7 +65,7 @@ namespace Yamadev.YamaStream.Editor
                 Styles.DrawDivider();
             }
 
-            _uiEditor.DrawUISettings();
+            // _uiEditor.DrawUISettings();
 
             ApplyModifiedProperties();
         }
@@ -78,7 +78,7 @@ namespace Yamadev.YamaStream.Editor
             Controller controller = (_yamaPlayer.objectReferenceValue as YamaPlayer)?.GetComponentInChildren<Controller>();
             if (controller == null) return;
 
-            if (_uiEditor != null) _uiEditor.SetController(controller);
+            //if (_uiEditor != null) _uiEditor.SetController(controller);
             YamaPlayerScreen screen = _target.gameObject.GetComponentInChildren<YamaPlayerScreen>();
             if (screen != null)
             {

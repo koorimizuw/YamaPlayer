@@ -4,6 +4,11 @@ v1.6.0
 画像表示機能を実装
 URLコピー機能を実装
 軽量化
+AVProResolverのイベントハンドラーを実装
+自動アサインを実装
+
+v1.5.12
+LTCGIのシンボルをVersion Definesに移行
 
 v1.5.11
 LVTVGIのテクスチャ自動設定を実装

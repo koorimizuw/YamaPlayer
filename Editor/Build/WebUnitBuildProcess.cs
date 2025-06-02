@@ -1,12 +1,10 @@
 #if WEB_UNIT_INCLUDED
-using UdonSharpEditor;
 using UnityEngine;
 using VRC.SDK3.Components;
 using VRC.SDKBase;
 using Yamadev.YamachanWebUnit;
 using Yamadev.YamaStream.Modules;
 using Yamadev.YamaStream.UI;
-
 
 namespace Yamadev.YamaStream.Editor
 {
@@ -16,10 +14,11 @@ namespace Yamadev.YamaStream.Editor
 
         public void Process()
         {
-            Client client = new GameObject("WebUnitClient").AddUdonSharpComponent<Client>();
-            UdonSharpEditorUtility.GetBackingUdonBehaviour(client).SyncMethod = Networking.SyncType.None;
+            Client client = new GameObject("WebUnitClient").AddUdonSharpComponent<Client>(Networking.SyncType.None);
             foreach (VideoResolver resolver in Utils.FindComponentsInHierarthy<VideoResolver>())
+            {
                 resolver.SetProgramVariable("_client", client);
+            }
 
             foreach (UIController uiController in Utils.FindComponentsInHierarthy<UIController>())
             {

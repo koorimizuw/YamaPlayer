@@ -1,5 +1,4 @@
-﻿
-using UdonSharp;
+﻿using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon.Common;
@@ -7,24 +6,46 @@ using static VRC.SDKBase.VRCPlayerApi;
 
 namespace Yamadev.YamaStream
 {
+    [AutoAssign]
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class InputController : UdonSharpBehaviour
     {
-        Vector3 _mousePosition = Vector3.zero;
         bool _rightHand = true;
+        bool _isVr = false;
+        bool _initialized = false;
+        VRCPlayerApi _localPlayer;
+
+        private void Start() => Initialize();
+
+        private void Initialize()
+        {
+            if (_initialized || !Utilities.IsValid(Networking.LocalPlayer)) return;
+            _localPlayer = Networking.LocalPlayer;
+            _isVr = _localPlayer.IsUserInVR();
+            _initialized = true;
+        }
+
+        public TrackingDataType TrackingDataType
+        {
+            get
+            {
+                if (!_isVr) return TrackingDataType.Head;
+                return _rightHand ? TrackingDataType.RightHand : TrackingDataType.LeftHand;
+            }
+        }
 
         public Vector3 GetMousePosition()
         {
-            if (!Utilities.IsValid(Networking.LocalPlayer)) return Vector3.zero;
-            bool isVr = Networking.LocalPlayer.IsUserInVR();
-            TrackingDataType trackingDataType = isVr ? _rightHand ? TrackingDataType.RightHand : TrackingDataType.LeftHand : TrackingDataType.Head;
-            TrackingData trackingData = Networking.LocalPlayer.GetTrackingData(trackingDataType);
+            Initialize();
+            if (!_initialized) return Vector3.zero;
+
+            TrackingData trackingData = _localPlayer.GetTrackingData(TrackingDataType);
             Quaternion rotation = trackingData.rotation;
-            if (isVr) rotation *= Quaternion.Euler(0, 40f, 0);
+            if (_isVr) rotation *= Quaternion.Euler(0, 40f, 0);
             return GetRayPoint(trackingData.position, rotation * Vector3.forward);
         }
 
-        public static Vector3 GetRayPoint(Vector3 origin, Vector3 direction)
+        private static Vector3 GetRayPoint(Vector3 origin, Vector3 direction)
         {
             RaycastHit[] hits = Physics.RaycastAll(origin, direction, Mathf.Infinity);
             float distance = Mathf.Infinity;
@@ -46,16 +67,12 @@ namespace Yamadev.YamaStream
 
         public override void InputUse(bool value, UdonInputEventArgs args)
         {
-            if (args.handType == HandType.RIGHT) _rightHand = true;
-            else if (args.handType == HandType.LEFT) _rightHand = false;
+            _rightHand = args.handType == HandType.RIGHT;
         }
 
         public override void InputGrab(bool value, UdonInputEventArgs args)
         {
-            if (args.handType == HandType.RIGHT) _rightHand = true;
-            else if (args.handType == HandType.LEFT) _rightHand = false;
+            _rightHand = args.handType == HandType.RIGHT;
         }
-
-        public Vector3 MousePosition => GetMousePosition();
     }
 }

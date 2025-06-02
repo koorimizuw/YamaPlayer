@@ -13,7 +13,7 @@ namespace Yamadev.YamaStream
         [SerializeField] Playlist _history;
         [SerializeField] Playlist[] _playlists;
         [SerializeField] Playlist _playlistTemplate;
-        [SerializeField] float _forwardInterval = 0;
+        [SerializeField, Range(0, 60)] float _forwardInterval = 0;
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(ShufflePlay))] bool _shuffle = false;
         [UdonSynced] int _activePlaylistIndex = -1;
         [UdonSynced] int _playingTrackIndex = -1;

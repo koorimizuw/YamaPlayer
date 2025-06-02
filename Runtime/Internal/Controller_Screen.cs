@@ -5,13 +5,15 @@ namespace Yamadev.YamaStream
 {
     public partial class Controller
     {
-        [SerializeField] int _maxResolution;
-        [SerializeField] bool _mirrorInverse = true;
-        [SerializeField, Range(0f, 1f)] float _emission = 1f;
-        [SerializeField] ScreenType[] _screenTypes;
-        [SerializeField] Object[] _screens;
-        [SerializeField] string[] _textureProperties;
-        MaterialPropertyBlock _propertyBlock;
+        [SerializeField] private int _maxResolution;
+        [SerializeField] private bool _mirrorInverse = true;
+        [SerializeField, Range(0f, 1f)] private float _emission = 1f;
+        [SerializeField] private bool _useLTCGI = false;
+        [SerializeField] private bool _useLightVolumes = false;
+        [SerializeField] private ScreenType[] _screenTypes;
+        [SerializeField] private Object[] _screens;
+        [SerializeField] private string[] _textureProperties;
+        private MaterialPropertyBlock _propertyBlock;
 
         private void InitializeScreen()
         {

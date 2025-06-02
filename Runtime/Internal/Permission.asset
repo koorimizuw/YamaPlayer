@@ -241,13 +241,13 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _grantInstanceOwner
+      Data: _grantPermissionToInstanceOwner
     - Name: $v
       Entry: 7
       Data: 16|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
-      Data: _grantInstanceOwner
+      Data: _grantPermissionToInstanceOwner
     - Name: <UserType>k__BackingField
       Entry: 7
       Data: 17|System.RuntimeType, mscorlib
@@ -301,13 +301,13 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _grantInstanceMaster
+      Data: _grantPermissionToInstanceMaster
     - Name: $v
       Entry: 7
       Data: 20|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
-      Data: _grantInstanceMaster
+      Data: _grantPermissionToInstanceMaster
     - Name: <UserType>k__BackingField
       Entry: 9
       Data: 17

@@ -9,6 +9,7 @@
         "GUID:befb3e42bf02a9b488522ef543d61aa0",
         "GUID:1b3abf7e59395d84c84b48d69677daaa",
         "GUID:58281da7f948e9644aceb5d0178bf06b",
+        "GUID:52cd646ddd37a4d4590c40aab61efc17",
         "GUID:d3802d62b65ae4848a923cbbdd4653e9",
         "GUID:3ca842002c51d0a43b73e45298809a13",
         "GUID:6e9c6119ac4eb334284fb7b4bc6d1f05",
@@ -36,9 +37,19 @@
             "define": "USE_VPM_RESOLVER"
         },
         {
+            "name": "at.pimaker.ltcgi",
+            "expression": "",
+            "define": "USE_LTCGI"
+        },
+        {
             "name": "red.sim.lightvolumes",
             "expression": "",
-            "define": "VRC_LIGHT_VOLUMES_INCLUDED"
+            "define": "USE_VRCLV"
+        },
+        {
+            "name": "com.llealloo.audiolink",
+            "expression": "",
+            "define": "USE_AUDIOLINK"
         }
     ],
     "noEngineReferences": false

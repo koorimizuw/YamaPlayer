@@ -4,10 +4,6 @@ using UnityEngine;
 using VRC.SDK3.Components.Video;
 using VRC.SDKBase;
 
-#if AUDIOLINK_V1
-using AudioLink;
-#endif
-
 namespace Yamadev.YamaStream
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
@@ -135,10 +131,11 @@ namespace Yamadev.YamaStream
             _state = (byte)PlayerState.Playing;
             SendCustomEventDelayedFrames(nameof(CheckRepeat), 0);
             if (KaraokeMode != KaraokeMode.None) SendCustomEventDelayedSeconds(nameof(ForceSync), 1f);
-#if AUDIOLINK_V1
-                if (Utilities.IsValid(_audioLink) && _useAudioLink)
-                    _audioLink.SetMediaPlaying(IsLive ? MediaPlaying.Streaming : MediaPlaying.Playing);
-#endif
+            if (Utilities.IsValid(_audioLink) && _useAudioLink)
+            {
+                ((Material)_audioLink.GetProgramVariable("audioMaterial")).SetFloat("_MediaPlaying", IsLive ? 5 : 1);
+                // _audioLink.SetMediaPlaying(IsLive ? MediaPlaying.Streaming : MediaPlaying.Playing);
+            }
             if (Networking.IsOwner(gameObject) && !_isLocal && !_reloading)
             {
                 SyncTime = VideoTime - VideoStandardDelay;
@@ -153,10 +150,11 @@ namespace Yamadev.YamaStream
             if (State == PlayerState.Paused) return;
             Handler.Pause();
             _state = (byte)PlayerState.Paused;
-#if AUDIOLINK_V1
-                if (Utilities.IsValid(_audioLink) && _useAudioLink)
-                    _audioLink.SetMediaPlaying(MediaPlaying.Paused);
-#endif
+            if (Utilities.IsValid(_audioLink) && _useAudioLink)
+            {
+                ((Material)_audioLink.GetProgramVariable("audioMaterial")).SetFloat("_MediaPlaying", 2); // _audioLink.SetMediaPlaying(MediaPlaying.Paused);
+
+            }
             if (Networking.IsOwner(gameObject) && !_isLocal)
             {
                 SyncTime = VideoTime - VideoStandardDelay;
@@ -176,10 +174,11 @@ namespace Yamadev.YamaStream
             _repeat = 0;
             if (!string.IsNullOrEmpty(Track.GetUrl())) _history.AddTrack(Track);
             Track = Track.New(_playerType, string.Empty, VRCUrl.Empty);
-#if AUDIOLINK_V1
-                if (Utilities.IsValid(_audioLink) && _useAudioLink)
-                    _audioLink.SetMediaPlaying(MediaPlaying.Stopped);
-#endif
+            if (Utilities.IsValid(_audioLink) && _useAudioLink)
+            {
+                ((Material)_audioLink.GetProgramVariable("audioMaterial")).SetFloat("_MediaPlaying", 3);  // _audioLink.SetMediaPlaying(MediaPlaying.Stopped);
+            }
+            
             if (Networking.IsOwner(gameObject) && !_isLocal)
             {
                 _syncTime = 0f;
@@ -226,10 +225,12 @@ namespace Yamadev.YamaStream
             {
                 _loop = value;
                 foreach (PlayerHandler handler in _videoPlayerHandlers) handler.Loop = _loop;
-#if AUDIOLINK_V1
                 if (Utilities.IsValid(_audioLink) && _useAudioLink)
-                    _audioLink.SetMediaLoop(_loop ? MediaLoop.LoopOne : MediaLoop.None);
-#endif
+                {
+                    ((Material)_audioLink.GetProgramVariable("audioMaterial")).SetFloat("_MediaPlaying", _loop ? 2 : 0); 
+                    // _audioLink.SetMediaLoop(_loop ? MediaLoop.LoopOne : MediaLoop.None);
+                }
+
                 if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
                 foreach (Listener listener in _listeners) listener.OnLoopChanged();
                 PrintLog($"Loop changed {_loop}.");
@@ -388,10 +389,10 @@ namespace Yamadev.YamaStream
 
         public override void OnVideoError(VideoError videoError)
         {
-#if AUDIOLINK_V1
             if (Utilities.IsValid(_audioLink) && _useAudioLink)
-                _audioLink.SetMediaPlaying(MediaPlaying.Error);
-#endif
+            {
+                ((Material)_audioLink.GetProgramVariable("audioMaterial")).SetFloat("_MediaPlaying", 6); // _audioLink.SetMediaPlaying(MediaPlaying.Error);
+            }
             if (videoError != VideoError.AccessDenied)
             {
                 if (_errorRetryCount < _maxErrorRetry)
