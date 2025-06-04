@@ -27,9 +27,9 @@ namespace Yamadev.YamaStream.Editor
 
         public static void DrawDivider()
         {
-            EditorGUILayout.Space(12f);
+            EditorGUILayout.Space(8f);
             DrawLine(new Color(0.5f, 0.5f, 0.5f, 1));
-            EditorGUILayout.Space(12f);
+            EditorGUILayout.Space(8f);
         }
 
         public static void DrawLine(Color color, float height = 0.5f)

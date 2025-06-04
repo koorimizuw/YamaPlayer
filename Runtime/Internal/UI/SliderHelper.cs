@@ -13,6 +13,7 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] RectTransform _tooltip;
         RectTransform _trans;
         float _percent = 0f;
+
         void Start()
         {
             _trans = GetComponent<RectTransform>();
@@ -22,7 +23,7 @@ namespace Yamadev.YamaStream.UI
 
         public override void PostLateUpdate()
         {
-            Vector3 localPosition = _trans.InverseTransformPoint(_inputController.MousePosition);
+            Vector3 localPosition = _trans.InverseTransformPoint(_inputController.GetMousePosition());
             float localX = localPosition.x + (_trans.rect.width * (1 - _trans.pivot.x));
             _percent = localX / _trans.rect.width;
 

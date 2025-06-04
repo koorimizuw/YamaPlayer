@@ -13,11 +13,11 @@ namespace Yamadev.YamaStream
         [SerializeField] Playlist _history;
         [SerializeField] Playlist[] _playlists;
         [SerializeField] Playlist _playlistTemplate;
-        [SerializeField] float _forwardInterval = 0;
+        [SerializeField, Range(0, 60)] float _forwardInterval = 0;
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(ShufflePlay))] bool _shuffle = false;
         [UdonSynced] int _activePlaylistIndex = -1;
         [UdonSynced] int _playingTrackIndex = -1;
-        [UdonSynced] VRCUrl[] _dynamicUrls = new VRCUrl[] { };
+        [UdonSynced, FieldChangeCallback(nameof(DynamicUrls))] VRCUrl[] _dynamicUrls = new VRCUrl[] { };
         Playlist[] _dynamicPlaylists = new Playlist[] { };
 
         public Playlist[] Playlists
@@ -37,6 +37,11 @@ namespace Yamadev.YamaStream
                 if (_activePlaylistIndex < 0 || _activePlaylistIndex >= Playlists.Length) return null;
                 return Playlists[_activePlaylistIndex];
             }
+        }
+
+        public VRCUrl[] DynamicUrls
+        {
+            set => GenerateDynamicPlaylists();
         }
 
         public int PlayingTrackIndex => _playingTrackIndex;
@@ -77,6 +82,12 @@ namespace Yamadev.YamaStream
             SendCustomVideoEvent(nameof(Listener.OnPlaylistsUpdated));
         }
 
+        public void ClearPlaylistIndexes()
+        {
+            _activePlaylistIndex = -1;
+            _playingTrackIndex = -1;
+        }
+
         public void PlayTrack(Playlist playlist, int index)
         {
             bool isQueueOrHistory = playlist == _queue || playlist == _history;
@@ -108,12 +119,6 @@ namespace Yamadev.YamaStream
                 return;
             }
             PlayTrack(playlist, next);
-        }
-
-        public void RunForward()
-        {
-            if (IsPlaying || IsLoading) return;
-            Forward();
         }
 
         public void Forward()

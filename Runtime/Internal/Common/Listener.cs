@@ -1,5 +1,4 @@
-﻿
-using UdonSharp;
+﻿using UnityEngine;
 using VRC.SDK3.Components.Video;
 
 namespace Yamadev.YamaStream
@@ -15,7 +14,7 @@ namespace Yamadev.YamaStream
         public override void OnVideoReady() { }
         public override void OnVideoStart() { }
         public virtual void OnVideoStop() { }
-        public virtual void OnTextureUpdated() { }
+        public virtual void OnTextureUpdated(Texture texture) { }
         public virtual void OnVideoReloaded() { }
         #endregion
 
@@ -48,7 +47,7 @@ namespace Yamadev.YamaStream
         public virtual void OnLoopChanged() { }
         public virtual void OnShufflePlayChanged() { }
         public virtual void OnOwnerChanged() { }
-        public virtual void OnPlayerChanged() { }
+        public virtual void OnPlayerHandlerChanged() { }
         public virtual void OnVideoRetry() { }
         public virtual void OnLanguageChanged() { }
         public virtual void OnUseAudioLinkChanged() { }

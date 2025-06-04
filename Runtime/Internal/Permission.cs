@@ -13,8 +13,8 @@ namespace Yamadev.YamaStream
         [SerializeField] Controller _controller;
         [SerializeField] PlayerPermission _defaultPermission = PlayerPermission.Editor;
         [SerializeField] string[] _ownerList = new string[] { };
-        [SerializeField] bool _grantInstanceOwner = true;
-        [SerializeField] bool _grantInstanceMaster;
+        [SerializeField] bool _grantPermissionToInstanceOwner = true;
+        [SerializeField] bool _grantPermissionToInstanceMaster = true;
         [UdonSynced] string _permissionString;
         DataDictionary _permission = new DataDictionary();
         bool _initialized = false;
@@ -26,8 +26,8 @@ namespace Yamadev.YamaStream
 
         public bool IsPlayerOwner(VRCPlayerApi player)
         {
-            if (_grantInstanceOwner && player.isInstanceOwner) return true;
-            if (_grantInstanceMaster && player.isMaster) return true;
+            if (_grantPermissionToInstanceOwner && player.isInstanceOwner) return true;
+            if (_grantPermissionToInstanceMaster && player.isMaster) return true;
             return Array.IndexOf(_ownerList, player.displayName) >= 0;
         }
 

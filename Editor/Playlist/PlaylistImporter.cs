@@ -276,11 +276,7 @@ namespace Yamadev.YamaStream.Editor
                 List<string> jsonList = await YtdlpResolver.GetPlaylist(playlistId);
                 List<YouTubePlaylistTrack> tracks = jsonList.Select(x => JsonUtility.FromJson<YouTubePlaylistTrack>(x)).ToList();
                 if (tracks.Count > 0) result.Name = tracks[0].playlist;
-                result.Tracks = tracks.Where(track =>
-                {
-                    if (publicVideoOnly) return track.duration != 0;
-                    return true;
-                }).Select(track => new PlaylistTrack
+                result.Tracks = tracks.Select(track => new PlaylistTrack
                 {
                     Mode = VideoPlayerType.AVProVideoPlayer,
                     Title = track.title,

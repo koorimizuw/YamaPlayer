@@ -15,8 +15,9 @@ namespace Yamadev.YamaStream.Editor
         public override void OnInspectorGUI()
         {
             DrawLogoAndVersion(_marginTop);
-            EditorGUILayout.Space(16f);
+            EditorGUILayout.Space(12f);
             DrawLanguageSelector();
+            EditorGUILayout.Space(8f);
         }
 
         public void DrawLanguageSelector()

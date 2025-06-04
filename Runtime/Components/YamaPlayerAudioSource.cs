@@ -1,21 +1,32 @@
-﻿
-using UdonSharp;
-using UnityEngine;
+﻿using UnityEngine;
 using VRC.SDK3.Components;
+using VRC.SDK3.Video.Components.AVPro;
 
 namespace Yamadev.YamaStream
 {
     [RequireComponent(typeof(AudioSource))]
+    [RequireComponent(typeof(VRCAVProVideoSpeaker))]
     [RequireComponent(typeof(VRCSpatialAudioSource))]
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class YamaPlayerAudioSource : UdonSharpBehaviour
+    [DisallowMultipleComponent]
+    public class YamaPlayerAudioSource : MonoBehaviour
     {
-        [SerializeField] Controller _controller;
-        void Start()
+        public Controller controller;
+        public VRCAVProVideoSpeaker.ChannelMode channelMode;
+
+        public AudioSource AudioSource
         {
-            if (_controller == null) return;
-            AudioSource audioSource = GetComponent<AudioSource>();
-            _controller.AddAudioSource(audioSource);
+            get
+            {
+                return GetComponent<AudioSource>();
+            }
+        }
+
+        public VRCAVProVideoSpeaker AVProSpeaker
+        {
+            get
+            {
+                return GetComponent<VRCAVProVideoSpeaker>();
+            }
         }
     }
 }
