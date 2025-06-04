@@ -1,4 +1,5 @@
-﻿using VRC.SDKBase;
+﻿using UnityEngine.Playables;
+using VRC.SDKBase;
 
 namespace Yamadev.YamaStream
 {
@@ -8,21 +9,28 @@ namespace Yamadev.YamaStream
         // 1. string: title
         // 2. VRCUrl: url
         // 3. string: original url when use url resolve system
+        // 4: timeline: playable director
         public static Track New(VideoPlayerType player, string title, VRCUrl url)
         {
-            object[] track = new object[] { player, title, url, string.Empty };
+            object[] track = new object[] { player, title, url, string.Empty, null };
             return track.ForceCast<Track>();
         }
 
         public static Track New(VideoPlayerType player, string title, VRCUrl url, string originalUrl)
         {
-            object[] track = new object[] { player, title, url, originalUrl };
+            object[] track = new object[] { player, title, url, originalUrl, null };
+            return track.ForceCast<Track>();
+        }
+
+        public static Track New(VideoPlayerType player, string title, VRCUrl url, string originalUrl, PlayableDirector timeline)
+        {
+            object[] track = new object[] { player, title, url, originalUrl, timeline };
             return track.ForceCast<Track>();
         }
 
         public static Track Empty()
         {
-            object[] track = new object[] { VideoPlayerType.AVProVideoPlayer, string.Empty, VRCUrl.Empty, string.Empty };
+            object[] track = new object[] { VideoPlayerType.AVProVideoPlayer, string.Empty, VRCUrl.Empty, string.Empty, null };
             return track.ForceCast<Track>();
         }
     }
@@ -57,6 +65,11 @@ namespace Yamadev.YamaStream
         public static string GetOriginalUrl(this Track track)
         {
             return (string)track.UnPack()[3];
+        }
+
+        public static PlayableDirector GetTimeline(this Track track)
+        {
+            return (PlayableDirector)track.UnPack()[4];
         }
 
         public static string GetUrl(this Track track)

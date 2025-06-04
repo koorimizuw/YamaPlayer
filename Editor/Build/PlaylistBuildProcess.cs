@@ -115,19 +115,13 @@ namespace Yamadev.YamaStream.Editor
                 var titles = playlist.Tracks.Select(track => track.Title ?? string.Empty).ToArray();
                 var urls = playlist.Tracks.Select(track => new VRCUrl(track.Url ?? string.Empty)).ToArray();
                 var originalUrls = playlist.Tracks.Select(track => string.Empty).ToArray();
+                var timelines = playlist.Tracks.Select(track => track.PlayableDirector).ToArray();
 
                 udonPlaylist.SetProgramVariable("_videoPlayerTypes", videoPlayerTypes);
                 udonPlaylist.SetProgramVariable("_titles", titles);
                 udonPlaylist.SetProgramVariable("_urls", urls);
                 udonPlaylist.SetProgramVariable("_originalUrls", originalUrls);
-            }
-            else
-            {
-                Debug.LogWarning($"Playlist '{playlist.Name}' has no tracks");
-                udonPlaylist.SetProgramVariable("_videoPlayerTypes", new VideoPlayerType[0]);
-                udonPlaylist.SetProgramVariable("_titles", new string[0]);
-                udonPlaylist.SetProgramVariable("_urls", new VRCUrl[0]);
-                udonPlaylist.SetProgramVariable("_originalUrls", new string[0]);
+                udonPlaylist.SetProgramVariable("_timelines", timelines);
             }
         }
 

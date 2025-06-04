@@ -349,6 +349,7 @@ namespace Yamadev.YamaStream.UI
             if (_controller.Stopped && !_controller.IsLoading || !_modal) 
             {
                 _controller.TakeOwnership();
+                _controller.ClearPlaylistIndexes();
                 _controller.PlayTrack(Track.New(_controller.PlayerType, "", urlInputField.GetUrl()));
                 urlInputField.SetUrl(VRCUrl.Empty);
                 return; 
@@ -412,6 +413,7 @@ namespace Yamadev.YamaStream.UI
         {
             if (!urlInputField) return;
             _controller.TakeOwnership();
+            _controller.ClearPlaylistIndexes();
             _controller.PlayTrack(Track.New(GetVideoPlayerSelectorValue(), "", urlInputField.GetUrl()));
             urlInputField.SetUrl(VRCUrl.Empty);
             HideVideoPlayerSelector();
@@ -436,6 +438,7 @@ namespace Yamadev.YamaStream.UI
         {
             if (!CheckPermission()) return;
             _controller.TakeOwnership();
+            _controller.ClearPlaylistIndexes();
             _controller.Stop();
         }
 

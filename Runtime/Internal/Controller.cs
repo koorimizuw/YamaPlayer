@@ -141,6 +141,12 @@ namespace Yamadev.YamaStream
                 SyncTime = VideoTime - VideoStandardDelay;
                 RequestSerialization();
             }
+            var timeline = Track.GetTimeline();
+            if (Utilities.IsValid(timeline))
+            {
+                timeline.time = SyncTime;
+                timeline.Play();
+            }
             foreach (Listener listener in _listeners) listener.OnVideoPlay();
             PrintLog($"{_playerType.GetString()}: Video play.");
         }
@@ -160,6 +166,12 @@ namespace Yamadev.YamaStream
                 SyncTime = VideoTime - VideoStandardDelay;
                 RequestSerialization();
             }
+            var timeline = Track.GetTimeline();
+            if (Utilities.IsValid(timeline))
+            {
+                timeline.time = SyncTime;
+                timeline.Pause();
+            }
             foreach (Listener listener in _listeners) listener.OnVideoPause();
             PrintLog($"{_playerType.GetString()}: Video pause.");
         }
@@ -172,13 +184,18 @@ namespace Yamadev.YamaStream
             _reloading = false;
             _errorRetryCount = 0;
             _repeat = 0;
+            var timeline = Track.GetTimeline();
+            if (Utilities.IsValid(timeline))
+            {
+                timeline.Stop();
+                timeline.gameObject.SetActive(false);
+            }
             if (!string.IsNullOrEmpty(Track.GetUrl())) _history.AddTrack(Track);
             Track = Track.New(_playerType, string.Empty, VRCUrl.Empty);
             if (Utilities.IsValid(_audioLink) && _useAudioLink)
             {
                 ((Material)_audioLink.GetProgramVariable("audioMaterial")).SetFloat("_MediaPlaying", 3);  // _audioLink.SetMediaPlaying(MediaPlaying.Stopped);
             }
-            
             if (Networking.IsOwner(gameObject) && !_isLocal)
             {
                 _syncTime = 0f;
@@ -322,6 +339,11 @@ namespace Yamadev.YamaStream
                 SyncTime = time - VideoStandardDelay;
                 RequestSerialization();
             }
+            var timeline = Track.GetTimeline();
+            if (Utilities.IsValid(timeline))
+            {
+                timeline.time = time;
+            }
             foreach (Listener listener in _listeners) listener.OnSetTime(time);
             PrintLog($"{_playerType.GetString()}: Set video time: {time}.");
         }
@@ -334,9 +356,26 @@ namespace Yamadev.YamaStream
 
         public override void OnDeserialization()
         {
-            Track track = Track.New(_targetPlayer, _title, _url, _originalUrl);
+            Track track;
+            if (ActivePlaylist != null && _playingTrackIndex >= 0)
+            {
+                track = ActivePlaylist.GetTrack(_playingTrackIndex);
+            }
+            else
+            {
+                track = Track.New(_targetPlayer, _title, _url, _originalUrl);
+            }
             foreach (Listener listener in _listeners) listener.OnTrackSynced(track.GetUrl());
-            if (track.GetUrl() != Track.GetUrl()) LoadTrack(track);
+            if (track.GetUrl() != Track.GetUrl())
+            {
+                var timeline = Track.GetTimeline();
+                if (Utilities.IsValid(timeline))
+                {
+                    timeline.Stop();
+                    timeline.gameObject.SetActive(false);
+                }
+                LoadTrack(track);
+            }
             DoSync(true);
         }
 
@@ -352,6 +391,17 @@ namespace Yamadev.YamaStream
                 RequestSerialization();
             }
             else DoSync();
+            var timeline = Track.GetTimeline();
+            if (Utilities.IsValid(timeline))
+            {
+                if (!timeline.gameObject.activeSelf || !timeline.enabled)
+                {
+                    timeline.gameObject.SetActive(true);
+                    timeline.enabled = true;
+                }
+                timeline.time = 0f;
+                timeline.Play();
+            }
             if (KaraokeMode != KaraokeMode.None) SendCustomEventDelayedSeconds(nameof(ForceSync), 1f);
             foreach (Listener listener in _listeners) listener.OnVideoReady();
             PrintLog($"{_playerType.GetString()}: Video ready.");
@@ -370,6 +420,12 @@ namespace Yamadev.YamaStream
             {
                 SyncTime = 0f;
                 RequestSerialization();
+            }
+            var timeline = Track.GetTimeline();
+            if (Utilities.IsValid(timeline))
+            {
+                timeline.time = 0f;
+                timeline.Play();
             }
             foreach (Listener listener in _listeners) listener.OnVideoLoop();
             PrintLog($"{_playerType.GetString()}: Video loop.");

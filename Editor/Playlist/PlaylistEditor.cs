@@ -5,21 +5,23 @@ using System.IO;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.Playables;
 using Yamadev.YamaStream.Script;
 
 namespace Yamadev.YamaStream.Editor
 {
     public class PlaylistEditor : EditorWindow
     {
-        YamaPlayer _player;
-        List<Playlist> _playlists;
-        ReorderableList _playlistsTable;
-        ReorderableList _playlistTracksTable;
-        Vector2 _leftScrollPos, _rightScrollPos;
-        Playlist _selectedPlaylist;
-        bool _useYoutubePlaylistName;
-        VideoPlayerType _defaultTrackMode = VideoPlayerType.AVProVideoPlayer;
-        bool _isDirty;
+        private YamaPlayer _player;
+        private List<Playlist> _playlists;
+        private ReorderableList _playlistsTable;
+        private ReorderableList _playlistTracksTable;
+        private Vector2 _leftScrollPos, _rightScrollPos;
+        private Playlist _selectedPlaylist;
+        private bool _useYoutubePlaylistName;
+        private VideoPlayerType _defaultTrackMode = VideoPlayerType.AVProVideoPlayer;
+        private bool _isEasyMode = true;
+        private bool _isDirty;
 
         public YamaPlayer YamaPlayer
         {
@@ -173,6 +175,11 @@ namespace Yamadev.YamaStream.Editor
                         string title = EditorGUI.TextField(rect, Localization.Get("title"), track.Title);
                         rect.y += EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
                         string url = EditorGUI.TextField(rect, "Url", track.Url);
+                        if (!_isEasyMode)
+                        {
+                            rect.y += EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
+                            track.PlayableDirector = EditorGUI.ObjectField(rect, "Timeline", track.PlayableDirector, typeof(PlayableDirector), true) as PlayableDirector;
+                        }
                         if (check.changed)
                         {
                             track.Mode = mode;
@@ -184,7 +191,7 @@ namespace Yamadev.YamaStream.Editor
                     EditorGUIUtility.labelWidth = labelWidth;
                 },
                 onReorderCallback = (ReorderableList list) => _isDirty = true,
-                elementHeight = (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 3,
+                elementHeightCallback = (index => (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * (_isEasyMode ? 3 : 4)),
                 showDefaultBackground = false,
             };
         }
@@ -249,6 +256,10 @@ namespace Yamadev.YamaStream.Editor
             {
                 using (new EditorGUILayout.HorizontalScope())
                 {
+                    _isEasyMode = EditorGUILayout.Popup("表示モード", _isEasyMode ? 0 :1, new string[] { "標準設定", "詳細設定" }) == 0;
+                }
+                using (new EditorGUILayout.HorizontalScope())
+                {
                     _defaultTrackMode = (VideoPlayerType)EditorGUILayout.Popup(Localization.Get("videoPlayerType"), (int)_defaultTrackMode, Enum.GetNames(typeof(VideoPlayerType)));
                     if (GUILayout.Button(Localization.Get("applyForAll"), GUILayout.ExpandWidth(false)))
                     {
@@ -258,7 +269,6 @@ namespace Yamadev.YamaStream.Editor
                     }
                 }
                 _useYoutubePlaylistName = EditorGUILayout.Toggle(Localization.Get("overwritePlaylistName"), _useYoutubePlaylistName);
-                EditorGUILayout.Space();
                 using (new EditorGUILayout.HorizontalScope())
                 {
                     _selectedPlaylist.YoutubeListId = EditorGUILayout.TextField(_selectedPlaylist.YoutubeListId);
@@ -306,6 +316,7 @@ namespace Yamadev.YamaStream.Editor
                     tracks.GetArrayElementAtIndex(j).FindPropertyRelative("Mode").intValue = (int)playlist.Tracks[j].Mode;
                     tracks.GetArrayElementAtIndex(j).FindPropertyRelative("Title").stringValue = playlist.Tracks[j].Title;
                     tracks.GetArrayElementAtIndex(j).FindPropertyRelative("Url").stringValue = playlist.Tracks[j].Url;
+                    tracks.GetArrayElementAtIndex(j).FindPropertyRelative("PlayableDirector").objectReferenceValue = playlist.Tracks[j].PlayableDirector;
                 }
                 serializedObject.ApplyModifiedProperties();
                 obj.SetActive(playlist.Active);

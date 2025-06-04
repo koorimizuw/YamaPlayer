@@ -82,6 +82,12 @@ namespace Yamadev.YamaStream
             SendCustomVideoEvent(nameof(Listener.OnPlaylistsUpdated));
         }
 
+        public void ClearPlaylistIndexes()
+        {
+            _activePlaylistIndex = -1;
+            _playingTrackIndex = -1;
+        }
+
         public void PlayTrack(Playlist playlist, int index)
         {
             bool isQueueOrHistory = playlist == _queue || playlist == _history;

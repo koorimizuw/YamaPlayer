@@ -87,7 +87,7 @@ namespace Yamadev.YamaStream
             if (IsLive || Stopped || _serverTimeMilliseconds == 0) return;
             float targetTime = Mathf.Clamp(_syncTime + NetworkOffset + VideoStandardDelay, 0f, Duration);
             float timeMargin = Mathf.Abs(VideoTime - targetTime);
-            if (force || timeMargin >= _syncMargin) Handler.Time = targetTime;
+            if (force || timeMargin >= _syncMargin) SetTime(targetTime);
             _lastSync = Time.time;
         }
 

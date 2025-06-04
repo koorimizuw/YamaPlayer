@@ -43,7 +43,7 @@ namespace Yamadev.YamaStream.Editor
             _controller = _target.GetComponentInChildren<Controller>(true);
             _autoPlay = _target.GetComponentInChildren<AutoPlay>(true);
             _permission = _target.GetComponentInChildren<Permission>(true);
-            _playlists = _target.GetComponentsInChildren<PlayList>(true);
+            _playlists = _target.GetComponentsInChildren<PlayList>();
 
             _uiSettings = new UISettings(_uiController);
             _controllerSettings = new ControllerSettings(_controller);

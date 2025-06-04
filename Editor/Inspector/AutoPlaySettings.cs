@@ -134,7 +134,7 @@ namespace Yamadev.YamaStream.Editor
             }
 
             var selectedPlaylist = _playlists[playlistIndex];
-            if (selectedPlaylist?.Tracks == null)
+            if (selectedPlaylist?.Tracks == null || selectedPlaylist.Tracks.Length == 0)
             {
                 EditorGUILayout.HelpBox("No tracks found in the selected playlist.", MessageType.Error);
                 return;

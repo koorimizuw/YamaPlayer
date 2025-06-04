@@ -1,5 +1,6 @@
 ﻿using UdonSharp;
 using UnityEngine;
+using UnityEngine.Playables;
 using VRC.SDK3.StringLoading;
 using VRC.SDKBase;
 using VRC.Udon.Common.Interfaces;
@@ -15,12 +16,11 @@ namespace Yamadev.YamaStream
         [SerializeField] bool _isQueue = false;
         [SerializeField] bool _isHistory = false;
         [SerializeField] string _playlistName;
-        #region Udon Sync Variables
         [SerializeField, UdonSynced] VideoPlayerType[] _videoPlayerTypes = new VideoPlayerType[] { };
         [SerializeField, UdonSynced] string[] _titles = new string[] { };
         [SerializeField, UdonSynced] VRCUrl[] _urls = new VRCUrl[] { };
         [SerializeField, UdonSynced] string[] _originalUrls = new string[] { };
-        #endregion
+        [SerializeField] PlayableDirector[] _timelines = new PlayableDirector[] { };
         DataList<Track> _tracks;
         bool _isLoading;
         bool _loaded;
@@ -32,7 +32,8 @@ namespace Yamadev.YamaStream
             _tracks = DataList<Track>.New();
             for (int i = 0; i < _urls.Length; i++)
             {
-                Track track = Track.New(_videoPlayerTypes[i], _titles[i], _urls[i], _originalUrls[i]);
+                var timeline = i < _timelines.Length ? _timelines[i] : null;
+                Track track = Track.New(_videoPlayerTypes[i], _titles[i], _urls[i], _originalUrls[i], timeline);
                 _tracks.Add(track);
             }
         }
