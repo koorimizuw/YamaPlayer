@@ -37,27 +37,19 @@ namespace Yamadev.YamaStream.Editor
 
         private static bool ShowDownloadConfirmationDialog()
         {
+            var title = IsAvailable ? Localization.Get("updateYtdlp") : Localization.Get("downloadYtdlp");
+            var message = IsAvailable ? Localization.Get("updateYtdlpMessage") : Localization.Get("downloadYtdlpMessage");
             return EditorUtility.DisplayDialog(
-                "Download yt-dlp",
-                "yt-dlp is required to process playlists. Would you like to download it?",
-                "Yes",
-                "No"
+                title,
+                message,
+                Localization.Get("yes"),
+                Localization.Get("no")
             );
         }
 
         public static async UniTask<bool> EnsureYtdlpAvailable()
         {
-            if (IsAvailable)
-            {
-                Debug.Log("yt-dlp is already available.");
-                return true;
-            }
-
-            if (!ShowDownloadConfirmationDialog())
-            {
-                Debug.LogWarning("yt-dlp download was cancelled by user.");
-                return false;
-            }
+            if (IsAvailable) return true;
 
             return await DownloadYtdlpExecutable();
         }
@@ -66,26 +58,32 @@ namespace Yamadev.YamaStream.Editor
         {
             if (string.IsNullOrEmpty(playlistUrl))
             {
-                Debug.LogError("Playlist URL cannot be null or empty.");
+                Debug.LogError(Localization.Get("playlistUrlCannotBeNullOrEmpty"));
                 return new List<string>();
             }
 
             if (!await EnsureYtdlpAvailable())
             {
-                Debug.LogError("yt-dlp is not available. Cannot retrieve playlist.");
+                Debug.LogError(Localization.Get("ytdlpNotAvailable"));
                 return new List<string>();
             }
 
             return await ExecutePlaylistExtraction(playlistUrl);
         }
 
-        private static async UniTask<bool> DownloadYtdlpExecutable()
+        public static async UniTask<bool> DownloadYtdlpExecutable()
         {
-            const string progressTitle = "Downloading yt-dlp";
+            if (!ShowDownloadConfirmationDialog())
+            {
+                Debug.LogWarning(Localization.Get("ytdlpDownloadCancelledByUser"));
+                return false;
+            }
+
+            var progressTitle = Localization.Get("downloadingYtdlp");
 
             try
             {
-                EditorUtility.DisplayProgressBar(progressTitle, "Downloading yt-dlp executable...", 0.5f);
+                EditorUtility.DisplayProgressBar(progressTitle, Localization.Get("downloadingYtdlpExecutable"), 0.5f);
 
                 using (var request = UnityWebRequest.Get(DownloadUrl))
                 {
@@ -99,22 +97,22 @@ namespace Yamadev.YamaStream.Editor
 
                     if (request.result != UnityWebRequest.Result.Success)
                     {
-                        Debug.LogError($"Failed to download yt-dlp: {request.error}");
+                        Debug.LogError($"{Localization.Get("failedToDownloadYtdlp")}: {request.error}");
                         return false;
                     }
                 }
 
                 if (!SetExecutablePermissions())
                 {
-                    Debug.LogWarning("Failed to set executable permissions, but download completed.");
+                    Debug.LogWarning(Localization.Get("failedToSetExecutablePermissionsButDownloadCompleted"));
                 }
 
-                Debug.Log("yt-dlp downloaded successfully.");
+                Debug.Log(Localization.Get("ytdlpDownloadedSuccessfully"));
                 return true;
             }
             catch (Exception ex)
             {
-                Debug.LogError($"Exception occurred while downloading yt-dlp: {ex.Message}");
+                Debug.LogError($"{Localization.Get("exceptionOccurredWhileDownloadingYtdlp")}: {ex.Message}");
                 return false;
             }
             finally
@@ -133,7 +131,7 @@ namespace Yamadev.YamaStream.Editor
             }
             catch (Exception ex)
             {
-                Debug.LogWarning($"Failed to set executable permissions: {ex.Message}");
+                Debug.LogWarning($"{Localization.Get("failedToSetExecutablePermissions")}: {ex.Message}");
                 return false;
             }
 #else
@@ -143,11 +141,11 @@ namespace Yamadev.YamaStream.Editor
 
         private static async UniTask<List<string>> ExecutePlaylistExtraction(string playlistUrl)
         {
-            const string progressTitle = "Extracting Playlist";
+            var progressTitle = Localization.Get("extractingPlaylist");
 
             try
             {
-                EditorUtility.DisplayProgressBar(progressTitle, $"Extracting playlist from: {playlistUrl}", 0.5f);
+                EditorUtility.DisplayProgressBar(progressTitle, $"{Localization.Get("extractingPlaylistFrom")}: {playlistUrl}", 0.5f);
 
                 var processInfo = CreatePlaylistExtractionProcess(playlistUrl);
 
@@ -155,7 +153,7 @@ namespace Yamadev.YamaStream.Editor
                 {
                     if (process == null)
                     {
-                        throw new InvalidOperationException("Failed to start yt-dlp process.");
+                        throw new InvalidOperationException(Localization.Get("failedToStartYtdlpProcess"));
                     }
 
                     var outputTask = process.StandardOutput.ReadToEndAsync();
@@ -171,7 +169,7 @@ namespace Yamadev.YamaStream.Editor
             }
             catch (Exception ex)
             {
-                Debug.LogError($"Exception occurred while extracting playlist: {ex.Message}");
+                Debug.LogError($"{Localization.Get("exceptionOccurredWhileExtractingPlaylist")}: {ex.Message}");
                 return new List<string>();
             }
             finally
@@ -203,7 +201,7 @@ namespace Yamadev.YamaStream.Editor
         {
             if (string.IsNullOrEmpty(output))
             {
-                Debug.LogWarning("yt-dlp returned empty output.");
+                Debug.LogWarning(Localization.Get("ytDlpReturnedEmptyOutput"));
                 return new List<string>();
             }
 
