@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using UnityEngine;
 using Cysharp.Threading.Tasks;
 using UnityEditor;
 using UnityEngine.Networking;
@@ -7,7 +6,6 @@ using System.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 using Debug = UnityEngine.Debug;
 
@@ -16,47 +14,106 @@ namespace Yamadev.YamaStream.Editor
     public static class YtdlpResolver
     {
 #if UNITY_EDITOR_WIN
-        static readonly string _filename = "yt-dlp.exe";
+        private const string FILENAME = "yt-dlp.exe";
 #elif UNITY_EDITOR_OSX
-        static readonly string _filename = "yt-dlp_macos";
+        private const string FILENAME = "yt-dlp_macos";
+        private const uint EXECUTABLE_PERMISSION = 0x100 | 0x40 | 0x80 | 0x20 | 0x8 | 0x4 | 0x1; // 0755
 #elif UNITY_EDITOR_LINUX
-        static readonly string _filename = "yt-dlp_linux";
+        private const string FILENAME = "yt-dlp_linux";
+#else
+        private const string FILENAME = "yt-dlp";
 #endif
-        static readonly string _url = $"https://github.com/yt-dlp/yt-dlp/releases/latest/download/{_filename}";
-        static readonly string _path = Path.Combine(Path.GetTempPath(), _filename);
 
-        public static bool Exist => File.Exists(_path);
+        private static readonly string DownloadUrl = $"https://github.com/yt-dlp/yt-dlp/releases/latest/download/{FILENAME}";
+        private static readonly string ExecutablePath = Path.Combine(Path.GetTempPath(), FILENAME);
 
-#if UNITY_EDITOR_OSX
+
+#if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX
         [DllImport("libc", EntryPoint = "chmod", SetLastError = true)]
-        private static extern int sys_chmod(string path, uint mode);
-
-        const int _0755 = 0x100 | 0x40 | 0x80 | 0x20 | 0x8 | 0x4 | 0x1;
+        private static extern int SetFilePermissions(string path, uint mode);
 #endif
 
-        public static async UniTask DownloadYtdlp()
+        public static bool IsAvailable => File.Exists(ExecutablePath);
+
+        private static bool ShowDownloadConfirmationDialog()
         {
-            if (Exist) return;
-            if (!EditorUtility.DisplayDialog("Download Yt-dlp", "Download Yt-dlp?", "Yes", "No")) return;
+            var title = IsAvailable ? Localization.Get("updateYtdlp") : Localization.Get("downloadYtdlp");
+            var message = IsAvailable ? Localization.Get("updateYtdlpMessage") : Localization.Get("downloadYtdlpMessage");
+            return EditorUtility.DisplayDialog(
+                title,
+                message,
+                Localization.Get("yes"),
+                Localization.Get("no")
+            );
+        }
+
+        public static async UniTask<bool> EnsureYtdlpAvailable()
+        {
+            if (IsAvailable) return true;
+
+            return await DownloadYtdlpExecutable();
+        }
+
+        public static async UniTask<List<string>> GetPlaylist(string playlistUrl)
+        {
+            if (string.IsNullOrEmpty(playlistUrl))
+            {
+                Debug.LogError(Localization.Get("playlistUrlCannotBeNullOrEmpty"));
+                return new List<string>();
+            }
+
+            if (!await EnsureYtdlpAvailable())
+            {
+                Debug.LogError(Localization.Get("ytdlpNotAvailable"));
+                return new List<string>();
+            }
+
+            return await ExecutePlaylistExtraction(playlistUrl);
+        }
+
+        public static async UniTask<bool> DownloadYtdlpExecutable()
+        {
+            if (!ShowDownloadConfirmationDialog())
+            {
+                Debug.LogWarning(Localization.Get("ytdlpDownloadCancelledByUser"));
+                return false;
+            }
+
+            var progressTitle = Localization.Get("downloadingYtdlp");
+
             try
             {
-                using (var request = UnityWebRequest.Get(_url))
+                EditorUtility.DisplayProgressBar(progressTitle, Localization.Get("downloadingYtdlpExecutable"), 0.5f);
+
+                using (var request = UnityWebRequest.Get(DownloadUrl))
                 {
-                    DownloadHandlerFile handler = new DownloadHandlerFile(_path) { removeFileOnAbort = true };
-                    request.downloadHandler = handler;
+                    var downloadHandler = new DownloadHandlerFile(ExecutablePath)
+                    {
+                        removeFileOnAbort = true
+                    };
+                    request.downloadHandler = downloadHandler;
+
                     await request.SendWebRequest();
-                    EditorUtility.DisplayProgressBar("Downloading...", "Download Yt-dlp...", 0);
+
                     if (request.result != UnityWebRequest.Result.Success)
                     {
-                        Debug.Log("Download Yt-dlp failed.");
-                        EditorUtility.ClearProgressBar();
-                        return;
+                        Debug.LogError($"{Localization.Get("failedToDownloadYtdlp")}: {request.error}");
+                        return false;
                     }
                 }
-#if UNITY_EDITOR_OSX
-                sys_chmod(_path, _0755);
-#endif
-                Debug.Log("Download Yt-dlp successed.");
+
+                if (!SetExecutablePermissions())
+                {
+                    Debug.LogWarning(Localization.Get("failedToSetExecutablePermissionsButDownloadCompleted"));
+                }
+
+                Debug.Log(Localization.Get("ytdlpDownloadedSuccessfully"));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"{Localization.Get("exceptionOccurredWhileDownloadingYtdlp")}: {ex.Message}");
+                return false;
             }
             finally
             {
@@ -64,32 +121,96 @@ namespace Yamadev.YamaStream.Editor
             }
         }
 
-        public static async UniTask<List<string>> GetPlaylist(string url)
+        private static bool SetExecutablePermissions()
         {
-            if (!Exist) await DownloadYtdlp();
-            if (!Exist) return new();
+#if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX
             try
             {
-                EditorUtility.DisplayProgressBar("Getting Playlist", $"Getting Playlist from ${url}", 0);
-                ProcessStartInfo startInfo = new ProcessStartInfo(_path, $"--extractor-args \"youtube:lang=ja\" --flat-playlist --no-write-playlist-metafiles --no-exec -sijo - {url}")
+                int result = SetFilePermissions(ExecutablePath, EXECUTABLE_PERMISSION);
+                return result == 0;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"{Localization.Get("failedToSetExecutablePermissions")}: {ex.Message}");
+                return false;
+            }
+#else
+            return true;
+#endif
+        }
+
+        private static async UniTask<List<string>> ExecutePlaylistExtraction(string playlistUrl)
+        {
+            var progressTitle = Localization.Get("extractingPlaylist");
+
+            try
+            {
+                EditorUtility.DisplayProgressBar(progressTitle, $"{Localization.Get("extractingPlaylistFrom")}: {playlistUrl}", 0.5f);
+
+                var processInfo = CreatePlaylistExtractionProcess(playlistUrl);
+
+                using (var process = Process.Start(processInfo))
                 {
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true,
-                };
-                Process process = Process.Start(startInfo);
-                if (process == null)
-                {
-                    throw new ArgumentException("Process cannot start.");
+                    if (process == null)
+                    {
+                        throw new InvalidOperationException(Localization.Get("failedToStartYtdlpProcess"));
+                    }
+
+                    var outputTask = process.StandardOutput.ReadToEndAsync();
+                    var errorTask = process.StandardError.ReadToEndAsync();
+
+                    await UniTask.WhenAll(
+                        outputTask.AsUniTask(),
+                        errorTask.AsUniTask()
+                    );
+
+                    return ParsePlaylistOutput(errorTask.Result);
                 }
-                string output = await process.StandardError.ReadToEndAsync();
-                return output.Split("\n").Where(line => line.StartsWith("{")).ToList();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"{Localization.Get("exceptionOccurredWhileExtractingPlaylist")}: {ex.Message}");
+                return new List<string>();
             }
             finally
             {
                 EditorUtility.ClearProgressBar();
             }
+        }
+
+        private static ProcessStartInfo CreatePlaylistExtractionProcess(string playlistUrl)
+        {
+            var arguments = $"--extractor-args \"youtube:lang=ja\" " +
+                           $"--flat-playlist " +
+                           $"--no-write-playlist-metafiles " +
+                           $"--no-exec " +
+                           $"-sijo - " +
+                           $"\"{playlistUrl}\"";
+
+            return new ProcessStartInfo(ExecutablePath, arguments)
+            {
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                WorkingDirectory = Path.GetTempPath()
+            };
+        }
+
+        private static List<string> ParsePlaylistOutput(string output)
+        {
+            if (string.IsNullOrEmpty(output))
+            {
+                Debug.LogWarning(Localization.Get("ytDlpReturnedEmptyOutput"));
+                return new List<string>();
+            }
+
+            var jsonLines = output
+                .Split('\n')
+                .Where(line => !string.IsNullOrWhiteSpace(line) && line.Trim().StartsWith("{"))
+                .ToList();
+
+            return jsonLines;
         }
     }
 }

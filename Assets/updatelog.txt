@@ -1,5 +1,8 @@
 更新履歴:
 
+v1.5.13
+yt-dlp更新機能を実装
+
 v1.5.12
 LTCGIのシンボルをVersion Definesに移行
 

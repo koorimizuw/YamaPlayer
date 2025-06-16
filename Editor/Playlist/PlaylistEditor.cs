@@ -74,11 +74,11 @@ namespace Yamadev.YamaStream.Editor
             {
                 onAddCallback = (list) =>
                 {
-                    _playlists.Add(new Playlist 
-                    {  
-                        Active = true, 
-                        Name = Localization.Get("newPlaylist"), 
-                        Tracks = new List<PlaylistTrack>() 
+                    _playlists.Add(new Playlist
+                    {
+                        Active = true,
+                        Name = Localization.Get("newPlaylist"),
+                        Tracks = new List<PlaylistTrack>()
                     });
                     _isDirty = true;
                 },
@@ -192,6 +192,13 @@ namespace Yamadev.YamaStream.Editor
             using (new EditorGUILayout.HorizontalScope(EditorStyles.toolbar))
             {
                 YamaPlayer = EditorGUILayout.ObjectField(YamaPlayer, typeof(YamaPlayer), true) as YamaPlayer;
+
+                var ytdlpButtonText = YtdlpResolver.IsAvailable ? Localization.Get("updateYtdlp") : Localization.Get("downloadYtdlp");
+                if (GUILayout.Button(ytdlpButtonText, EditorStyles.toolbarButton, GUILayout.ExpandWidth(false)))
+                {
+                    YtdlpResolver.DownloadYtdlpExecutable().Forget();
+                }
+
                 if (GUILayout.Button(Localization.Get("importFromJson"), EditorStyles.toolbarButton, GUILayout.ExpandWidth(false))) Import();
                 if (GUILayout.Button(Localization.Get("exportToJson"), EditorStyles.toolbarButton, GUILayout.ExpandWidth(false))) Export();
                 using (new EditorGUI.DisabledGroupScope(!_isDirty))
@@ -280,7 +287,7 @@ namespace Yamadev.YamaStream.Editor
 
         void ConfirmSave()
         {
-            if (_isDirty && 
+            if (_isDirty &&
                 EditorUtility.DisplayDialog(Localization.Get("notSaved"), Localization.Get("confirmSave"), Localization.Get("save"), Localization.Get("notSave")))
                 Save();
         }
@@ -314,9 +321,10 @@ namespace Yamadev.YamaStream.Editor
         }
 
         #region Exporter
-        [Serializable] class Playlists 
-        { 
-            public List<Playlist> playlists;  
+        [Serializable]
+        class Playlists
+        {
+            public List<Playlist> playlists;
         }
 
         public void Export()
