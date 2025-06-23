@@ -15,7 +15,7 @@ namespace Yamadev.YamaStream.Editor
 
         private readonly SerializedProperty _localMode;
         private readonly SerializedProperty _volume;
-        private readonly SerializedProperty _mirrorInverse;
+        private readonly SerializedProperty _mirrorFlip;
         private readonly SerializedProperty _emission;
         private readonly SerializedProperty _mute;
         private readonly SerializedProperty _loop;
@@ -39,7 +39,7 @@ namespace Yamadev.YamaStream.Editor
 
                 _localMode = _controllerSerializedObject.FindProperty("_isLocal");
                 _volume = _controllerSerializedObject.FindProperty("_volume");
-                _mirrorInverse = _controllerSerializedObject.FindProperty("_mirrorInverse");
+                _mirrorFlip = _controllerSerializedObject.FindProperty("_mirrorFlip");
                 _emission = _controllerSerializedObject.FindProperty("_emission");
                 _mute = _controllerSerializedObject.FindProperty("_mute");
                 _loop = _controllerSerializedObject.FindProperty("_loop");
@@ -80,7 +80,7 @@ namespace Yamadev.YamaStream.Editor
 
         public void DrawVideoSettings()
         {
-            EditorGUILayout.PropertyField(_mirrorInverse, Localization.GetLayout("mirrorInverse"));
+            EditorGUILayout.PropertyField(_mirrorFlip, Localization.GetLayout("mirrorInverse"));
             EditorGUILayout.PropertyField(_emission, Localization.GetLayout("brightness"));
         }
 

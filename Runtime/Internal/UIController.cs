@@ -10,17 +10,14 @@ using VRC.SDKBase;
 namespace Yamadev.YamaStream.UI
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class UIController : Listener
+    public partial class UIController : Listener
     {
-        // [Header("Settings")]
         [SerializeField] Controller _controller;
         [SerializeField] bool _disableUIOnPickUp = true;
         [SerializeField, Range(0f, 10f)] float _disableUIDistance = 0f;
         [SerializeField] Font _font;
         [SerializeField] TextAsset _updateLogFile;
-        [SerializeField] TextAsset _translationTextFile;
 
-        // [Header("Color")]
         [SerializeField] Color _primaryColor = new Color(240f / 256f, 98f / 256f, 146f / 256f, 1.0f);
         [SerializeField] Color _secondaryColor = new Color(248f / 256f, 187f / 256f, 208f / 256f, 31f / 256f);
         [SerializeField] Color _ownerColor;
@@ -28,31 +25,25 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] Color _editorColor;
         [SerializeField] Color _viewerColor;
 
-        // [Header("Modal")]
         [SerializeField] Modal _modal;
         [SerializeField] ToggleGroup _modalVideoPlayerSelector;
         [SerializeField] Toggle _modalUnityPlayer;
         [SerializeField] Toggle _modalAVProPlayer;
         [SerializeField] Toggle _modalImageViewer;
 
-        // [Header("Animation")]
         [SerializeField] Animator _animator;
-        [SerializeField] bool _defaultPlaylistOpen;
 
-        [Header("Main UI - Track Info")]
         [SerializeField] VRCUrlInputField _urlInputField;
         [SerializeField] VRCUrlInputField _urlInputFieldTop;
         [SerializeField] Text _title;
         [SerializeField] Text _url;
 
-        [Header("Main UI - Progress")]
         [SerializeField] Text _videoTime;
         [SerializeField] Text _duration;
         [SerializeField] Slider _progress;
         [SerializeField] SliderHelper _progressHelper;
         [SerializeField] Text _progressTooltip;
 
-        [Header("Main UI - Playback")]
         [SerializeField] Button _play;
         [SerializeField] Button _pause;
         [SerializeField] Button _loop;
@@ -60,7 +51,6 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] Button _inorderPlay;
         [SerializeField] Button _shufflePlay;
 
-        [Header("Main UI - Audio")]
         [SerializeField] Button _mute;
         [SerializeField] Button _muteOff;
         [SerializeField] Slider _volume;
@@ -72,14 +62,6 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] Toggle _audioLinkOn;
         [SerializeField] Toggle _audioLinkOff;
 
-        [Header("Main UI - Playlist")]
-        [SerializeField] Transform _playlistSelector;
-        [SerializeField] LoopScroll _playlists;
-        [SerializeField] Text _playlistName;
-        [SerializeField] LoopScroll _playlistTracks;
-        [SerializeField] VRCUrlInputField _dynamicPlaylistUrlInput;
-
-        [Header("Settings - Playback")]
         [SerializeField] Toggle _unityPlayer;
         [SerializeField] Toggle _avProPlayer;
         [SerializeField] Toggle _imageViewer;
@@ -96,20 +78,16 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] Toggle _karaokeModeDance;
         [SerializeField] GameObject _karaokeModal;
 
-        [Header("Settings - Permission")]
         [SerializeField] LoopScroll _permission;
         [SerializeField] GameObject _permissionEntry;
         [SerializeField] GameObject _permissionPage;
 
-        [Header("Loading")]
         [SerializeField] GameObject _loading;
         [SerializeField] Text _message;
 
-        [Header("Idle")]
         [SerializeField] Image _idle;
         [SerializeField] Sprite _idleImage;
 
-        [Header("Screen Renderer")]
         [SerializeField] Slider _emissionSlider;
         [SerializeField] Text _emissionText;
         [SerializeField] Toggle _maxResolution144;
@@ -123,93 +101,19 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] Toggle _mirrorInversion;
         [SerializeField] Toggle _mirrorInversionOff;
 
-        [Header("Version")]
         [SerializeField] Text _versionText;
         [SerializeField] Text _updateLog;
 
-        [Header("Slide")]
         [SerializeField] Toggle _slideOn;
         [SerializeField] Toggle _slideOff;
         [SerializeField] Toggle _slide1s;
         [SerializeField] Toggle _slide2s;
         [SerializeField] Toggle _slide3s;
 
-        [Header("Translation - SideBar")]
-        [SerializeField] Text _options;
-        [SerializeField] Text _settings;
-        [SerializeField] Text _playlist;
-        [SerializeField] Text _videoSearch;
-        [SerializeField] Text _version;
-
-        [Header("Translation - General")]
-        [SerializeField] Text _returnToMain;
-        [SerializeField] Text _inputUrl;
-        [SerializeField] Text _loopPlayText;
-        [SerializeField] Text _loopPlayText2;
-        [SerializeField] Text _shufflePlayText;
-        [SerializeField] Text _shufflePlayText2;
-        [SerializeField] Text _imageViewerModalText;
-        [SerializeField] Text _karaokeMember;
-        [SerializeField] Text _settingsTitle;
-        [SerializeField] Text _playback;
-        [SerializeField] Text _videoAndAudio;
-        [SerializeField] Text _other;
-        [SerializeField] Text _videoPlayer;
-        [SerializeField] Text _videoPlayerDesc;
-        [SerializeField] Text _imageViewerText;
-        [SerializeField] Text _playbackSpeed;
-        [SerializeField] Text _playbackSpeedDesc;
-        [SerializeField] Text _slower;
-        [SerializeField] Text _faster;
-        [SerializeField] Text _repeatPlay;
-        [SerializeField] Text _repeatPlayDesc;
-        [SerializeField] Text _repeatOnText;
-        [SerializeField] Text _repeatOffText;
-        [SerializeField] Text _maxResolution;
-        [SerializeField] Text _maxResolutionDesc;
-        [SerializeField] Text _mirrorInversionTitle;
-        [SerializeField] Text _mirrorInversionDesc;
-        [SerializeField] Text _mirrorInversionOnText;
-        [SerializeField] Text _mirrorInversionOffText;
-        [SerializeField] Text _brightness;
-        [SerializeField] Text _brightnessDesc;
-        [SerializeField] Text _audioLinkDesc;
-        [SerializeField] Text _audioLinkOnText;
-        [SerializeField] Text _audioLinkOffText;
-        [SerializeField] Text _karaokeModeText;
-        [SerializeField] Text _karaokeModeDesc;
-        [SerializeField] Text _karaokeModeOnText;
-        [SerializeField] Text _danceModeOnText;
-        [SerializeField] Text _karaokeModeOffText;
-        [SerializeField] Text _localDelay;
-        [SerializeField] Text _localDelayDesc;
-        [SerializeField] Text _languageSelect;
-        [SerializeField] Text _slideMode;
-        [SerializeField] Text _slideModeDesc;
-        [SerializeField] Text _slideOnText;
-        [SerializeField] Text _slideOffText;
-        [SerializeField] Text _slideSeconds;
-        [SerializeField] Text _slideSecondsDesc;
-        [SerializeField] Text _slide1sText;
-        [SerializeField] Text _slide2sText;
-        [SerializeField] Text _slide3sText;
-        [SerializeField] Text _permissionTitle;
-        [SerializeField] Text _permissionDesc;
-
-        [Header("Translation - Playlist")]
-        [SerializeField] Text _playlistTitle;
-        [SerializeField] Text _playQueue;
-        [SerializeField] Text _playHistory;
-        [SerializeField] Text _addVideoLink;
-        [SerializeField] Text _addLiveLink;
-
-        Localization _i18n;
-        BoxCollider _uiBoxCollider;
-        string _timeFormat = @"hh\:mm\:ss";
-        bool _progressDrag = false;
-        int _permissionIndex = -1;
-        int _playlistIndex = -1;
-        int _playlistTrackIndex = -1;
+        private BoxCollider _uiBoxCollider;
+        private string _timeFormat = @"hh\:mm\:ss";
+        private bool _progressDrag = false;
+        private int _permissionIndex = -1;
 
         void Start()
         {
@@ -234,31 +138,21 @@ namespace Yamadev.YamaStream.UI
                 _uiBoxCollider.enabled = !OutOfDistance && (!_disableUIOnPickUp || !Networking.LocalPlayer.PickUpInHand());
         }
 
-        private bool OutOfDistance => _disableUIDistance > 0 && 
+        private bool OutOfDistance => _disableUIDistance > 0 &&
             Utilities.IsValid(Networking.LocalPlayer) &&
             (Networking.LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin).position - transform.position).sqrMagnitude > _disableUIDistance;
-
-        Localization i18n
-        {
-            get
-            {
-                if (Utilities.IsValid(_i18n)) return _i18n;
-                _i18n = Localization.Initialize(Utilities.IsValid(_translationTextFile) ? _translationTextFile.text : string.Empty);
-                return _i18n;
-            }
-        }
 
         public Color PrimaryColor => _primaryColor;
         public Color SecondaryColor => _secondaryColor;
 
-        public bool CheckPermission()
+        private bool IsPermissionGranted()
         {
             if ((int)_controller.PlayerPermission >= (int)PlayerPermission.Editor) return true;
             if (Utilities.IsValid(_modal))
             {
-                _modal.Title = i18n.GetValue("noPermission");
-                _modal.Message = i18n.GetValue("noPermissionMessage");
-                _modal.CancelText = i18n.GetValue("close");
+                _modal.Title = I18n.GetValue("noPermission");
+                _modal.Message = I18n.GetValue("noPermissionMessage");
+                _modal.CancelText = I18n.GetValue("close");
                 _modal.CloseEvent = UdonEvent.Empty();
                 _modal.Open(0);
             }
@@ -268,16 +162,16 @@ namespace Yamadev.YamaStream.UI
         public void SetUnityPlayer()
         {
             UpdateUI();
-            if (_controller.PlayerType == VideoPlayerType.UnityVideoPlayer || !CheckPermission()) return;
+            if (_controller.PlayerType == VideoPlayerType.UnityVideoPlayer || !IsPermissionGranted()) return;
             if (!_modal || (_controller.Stopped && !_controller.IsLoading))
             {
                 SetUnityPlayerEvent();
                 return;
             }
-            _modal.Title = i18n.GetValue("confirmChangePlayer");
-            _modal.Message = i18n.GetValue("confirmChangePlayerMessage");
-            _modal.CancelText = i18n.GetValue("cancel");
-            _modal.ExecuteText = i18n.GetValue("continue");
+            _modal.Title = I18n.GetValue("confirmChangePlayer");
+            _modal.Message = I18n.GetValue("confirmChangePlayerMessage");
+            _modal.CancelText = I18n.GetValue("cancel");
+            _modal.ExecuteText = I18n.GetValue("continue");
             _modal.CloseEvent = UdonEvent.Empty();
             _modal.ExecuteEvent = UdonEvent.New(this, nameof(SetUnityPlayerEvent));
             _modal.Open(1);
@@ -292,16 +186,16 @@ namespace Yamadev.YamaStream.UI
         public void SetAVProPlayer()
         {
             UpdateUI();
-            if (_controller.PlayerType == VideoPlayerType.AVProVideoPlayer || !CheckPermission()) return;
+            if (_controller.PlayerType == VideoPlayerType.AVProVideoPlayer || !IsPermissionGranted()) return;
             if (!_modal || (_controller.Stopped && !_controller.IsLoading))
             {
                 SetAVProPlayerEvent();
                 return;
             }
-            _modal.Title = i18n.GetValue("confirmChangePlayer");
-            _modal.Message = i18n.GetValue("confirmChangePlayerMessage");
-            _modal.CancelText = i18n.GetValue("cancel");
-            _modal.ExecuteText = i18n.GetValue("continue");
+            _modal.Title = I18n.GetValue("confirmChangePlayer");
+            _modal.Message = I18n.GetValue("confirmChangePlayerMessage");
+            _modal.CancelText = I18n.GetValue("cancel");
+            _modal.ExecuteText = I18n.GetValue("continue");
             _modal.CloseEvent = UdonEvent.Empty();
             _modal.ExecuteEvent = UdonEvent.New(this, nameof(SetAVProPlayerEvent));
             _modal.Open(1);
@@ -316,16 +210,16 @@ namespace Yamadev.YamaStream.UI
         public void SetImageViewer()
         {
             UpdateUI();
-            if (_controller.PlayerType == VideoPlayerType.ImageViewer || !CheckPermission()) return;
+            if (_controller.PlayerType == VideoPlayerType.ImageViewer || !IsPermissionGranted()) return;
             if (!_modal || (_controller.Stopped && !_controller.IsLoading))
             {
                 SetImageViewerEvent();
                 return;
             }
-            _modal.Title = i18n.GetValue("confirmChangePlayer");
-            _modal.Message = i18n.GetValue("confirmChangePlayerMessage");
-            _modal.CancelText = i18n.GetValue("cancel");
-            _modal.ExecuteText = i18n.GetValue("continue");
+            _modal.Title = I18n.GetValue("confirmChangePlayer");
+            _modal.Message = I18n.GetValue("confirmChangePlayerMessage");
+            _modal.CancelText = I18n.GetValue("cancel");
+            _modal.ExecuteText = I18n.GetValue("continue");
             _modal.CloseEvent = UdonEvent.Empty();
             _modal.ExecuteEvent = UdonEvent.New(this, nameof(SetImageViewerEvent));
             _modal.Open(1);
@@ -341,26 +235,26 @@ namespace Yamadev.YamaStream.UI
         public void PlayUrlTop() => PlayUrlBase(_urlInputFieldTop);
         public void PlayUrlBase(VRCUrlInputField urlInputField)
         {
-            if (!urlInputField || !urlInputField.GetUrl().Get().IsValidUrl() || !CheckPermission()) 
-            { 
-                urlInputField.SetUrl(VRCUrl.Empty); 
-                return; 
+            if (!urlInputField || !urlInputField.GetUrl().Get().IsValidUrl() || !IsPermissionGranted())
+            {
+                urlInputField.SetUrl(VRCUrl.Empty);
+                return;
             }
-            if (_controller.Stopped && !_controller.IsLoading || !_modal) 
+            if (_controller.Stopped && !_controller.IsLoading || !_modal)
             {
                 _controller.TakeOwnership();
                 _controller.ClearPlaylistIndexes();
                 _controller.PlayTrack(Track.New(_controller.PlayerType, "", urlInputField.GetUrl()));
                 urlInputField.SetUrl(VRCUrl.Empty);
-                return; 
+                return;
             }
             if (Utilities.IsValid(_modal))
             {
-                _modal.Title = i18n.GetValue("playUrl");
-                _modal.Message = i18n.GetValue("confirmPlayUrlMessage");
-                _modal.CancelText = i18n.GetValue("cancel");
-                _modal.ExecuteText = i18n.GetValue("confirmAddQueue");
-                _modal.Execute2Text = i18n.GetValue("confirmPlayUrl");
+                _modal.Title = I18n.GetValue("playUrl");
+                _modal.Message = I18n.GetValue("confirmPlayUrlMessage");
+                _modal.CancelText = I18n.GetValue("cancel");
+                _modal.ExecuteText = I18n.GetValue("confirmAddQueue");
+                _modal.Execute2Text = I18n.GetValue("confirmPlayUrl");
                 _modal.CloseEvent = UdonEvent.New(this, nameof(HideVideoPlayerSelector));
                 if (urlInputField == _urlInputField) _modal.ExecuteEvent = UdonEvent.New(this, nameof(AddUrlToQueueEvent));
                 else if (urlInputField == _urlInputFieldTop) _modal.ExecuteEvent = UdonEvent.New(this, nameof(AddUrlTopToQueueEvent));
@@ -422,21 +316,21 @@ namespace Yamadev.YamaStream.UI
 
         public void Play()
         {
-            if (!CheckPermission()) return;
+            if (!IsPermissionGranted()) return;
             _controller.TakeOwnership();
             _controller.Play();
         }
 
         public void Pause()
         {
-            if (!CheckPermission()) return;
+            if (!IsPermissionGranted()) return;
             _controller.TakeOwnership();
             _controller.Pause();
         }
 
         public void Stop()
         {
-            if (!CheckPermission()) return;
+            if (!IsPermissionGranted()) return;
             _controller.TakeOwnership();
             _controller.ClearPlaylistIndexes();
             _controller.Stop();
@@ -447,36 +341,36 @@ namespace Yamadev.YamaStream.UI
         public void SetTime()
         {
             _progressDrag = false;
-            if (!_progress || !CheckPermission() || _controller.Stopped) return;
+            if (!_progress || !IsPermissionGranted() || _controller.Stopped) return;
             _controller.TakeOwnership();
-            if (_controller.SlideMode) _controller.SetPage((int)_progress.value);
+            if (_controller.SlideMode) _controller.SetSlidePage((int)_progress.value);
             else _controller.SetTime(_controller.Duration * _progress.value);
         }
 
         public void SetTimeByHelper()
         {
-            if (!_progressHelper || !CheckPermission()) return;
+            if (!_progressHelper || !IsPermissionGranted()) return;
             _controller.TakeOwnership();
             _controller.SetTime(_controller.Duration * _progressHelper.Percent);
         }
 
         public void SlideOff()
         {
-            if (!CheckPermission()) return;
+            if (!IsPermissionGranted()) return;
             _controller.TakeOwnership();
             _controller.SlideMode = false;
         }
 
         public void SlideOn()
         {
-            if (!CheckPermission()) return;
+            if (!IsPermissionGranted()) return;
             _controller.TakeOwnership();
             _controller.SlideMode = true;
         }
 
         public void SetSlideSeconds(int seconds)
         {
-            if (!CheckPermission()) return;
+            if (!IsPermissionGranted()) return;
             _controller.TakeOwnership();
             _controller.SlideSeconds = seconds;
         }
@@ -487,14 +381,14 @@ namespace Yamadev.YamaStream.UI
 
         public void Loop()
         {
-            if (!CheckPermission()) return;
+            if (!IsPermissionGranted()) return;
             _controller.TakeOwnership();
             _controller.Loop = true;
         }
 
         public void LoopOff()
         {
-            if (!CheckPermission()) return;
+            if (!IsPermissionGranted()) return;
             _controller.TakeOwnership();
             _controller.Loop = false;
         }
@@ -507,9 +401,9 @@ namespace Yamadev.YamaStream.UI
 
         public void SetRepeat(bool on)
         {
-            if (!CheckPermission()) return;
+            if (!IsPermissionGranted()) return;
             RepeatStatus status = _controller.RepeatStatus;
-            if (on) status.TurnOn(); 
+            if (on) status.TurnOn();
             else status.TurnOff();
             _controller.TakeOwnership();
             _controller.RepeatStatus = status;
@@ -517,7 +411,7 @@ namespace Yamadev.YamaStream.UI
 
         public void SetRepeatStart()
         {
-            if (!_repeatSlider || _controller.Stopped || !CheckPermission()) return;
+            if (!_repeatSlider || _controller.Stopped || !IsPermissionGranted()) return;
             RepeatStatus status = _controller.RepeatStatus;
             if (!status.IsOn())
             {
@@ -530,7 +424,7 @@ namespace Yamadev.YamaStream.UI
 
         public void SetRepeatEnd()
         {
-            if (!_repeatSlider || _controller.Stopped || !CheckPermission()) return;
+            if (!_repeatSlider || _controller.Stopped || !IsPermissionGranted()) return;
             RepeatStatus status = _controller.RepeatStatus;
             if (!status.IsOn())
             {
@@ -543,37 +437,37 @@ namespace Yamadev.YamaStream.UI
 
         public void SetShuffle()
         {
-            if (!CheckPermission()) return;
+            if (!IsPermissionGranted()) return;
             _controller.TakeOwnership();
             _controller.ShufflePlay = true;
         }
 
         public void SetShuffleOff()
         {
-            if (!CheckPermission()) return;
+            if (!IsPermissionGranted()) return;
             _controller.TakeOwnership();
             _controller.ShufflePlay = false;
         }
 
         public void Backward()
         {
-            if (!CheckPermission()) return;
+            if (!IsPermissionGranted()) return;
             _controller.TakeOwnership();
-            if (_controller.SlideMode) _controller.SetPage(_controller.SlidePage - 1);
+            if (_controller.SlideMode) _controller.SetSlidePage(_controller.SlidePage - 1);
             else _controller.Backward();
         }
 
         public void Forward()
         {
-            if (!CheckPermission()) return;
+            if (!IsPermissionGranted()) return;
             _controller.TakeOwnership();
-            if (_controller.SlideMode) _controller.SetPage(_controller.SlidePage + 1);
+            if (_controller.SlideMode) _controller.SetSlidePage(_controller.SlidePage + 1);
             else _controller.Forward();
         }
 
         public void SetSpeed()
         {
-            if (!CheckPermission()) return;
+            if (!IsPermissionGranted()) return;
             _controller.TakeOwnership();
             if (Utilities.IsValid(_speedSlider)) _controller.Speed = _speedSlider.value / 20f;
         }
@@ -581,12 +475,12 @@ namespace Yamadev.YamaStream.UI
         public void SetAudioLinkOn()
         {
             if (!_audioLinkOn || !_audioLinkOn.isOn) return;
-            _controller.UseAudioLink = true;
+            _controller.AudioLinkEnabled = true;
         }
         public void SetAudioLinkOff()
         {
             if (!_audioLinkOff || !_audioLinkOff.isOn) return;
-            _controller.UseAudioLink = false;
+            _controller.AudioLinkEnabled = false;
         }
 
         public void Mute() => _controller.Mute = true;
@@ -608,20 +502,15 @@ namespace Yamadev.YamaStream.UI
             if (Utilities.IsValid(_emissionSlider)) _controller.Emission = _emissionSlider.value;
         }
 
-        public void SetPitch()
-        {
-            // if (_pitchSlider != null) _controller.Pitch = _pitchSlider.value;
-        }
-
         public void SetMirrorInverse()
         {
             if (!_mirrorInversion || !_mirrorInversion.isOn) return;
-            _controller.MirrorInverse = true;
+            _controller.MirrorFlip = true;
         }
         public void SetMirrorInverseOff()
         {
             if (!_mirrorInversionOff || !_mirrorInversionOff.isOn) return;
-            _controller.MirrorInverse = false;
+            _controller.MirrorFlip = false;
         }
 
         public void SetMaxResolution144() => _controller.MaxResolution = 144;
@@ -633,38 +522,23 @@ namespace Yamadev.YamaStream.UI
         public void SetMaxResolution2160() => _controller.MaxResolution = 2160;
         public void SetMaxResolution4320() => _controller.MaxResolution = 4320;
 
-        public void SetLanguageAuto() => SetLanguage(null);
-        public void SetLanguageJapanese() => SetLanguage("ja");
-        public void SetLanguageChineseChina() => SetLanguage("zh-CN");
-        public void SetLanguageChineseTaiwan() => SetLanguage("zh-TW");
-        public void SetLanguageKorean() => SetLanguage("ko");
-        public void SetLanguageEnglish() =>SetLanguage("en");
-
-        public void SetLanguage(string language)
-        {
-            i18n.SetLanguage(language);
-            UpdateUI();
-            UpdateTranslation();
-            GeneratePlaylistView();
-        }
-
         public void SetKaraokeModeOff()
         {
-            if (!CheckPermission()) return;
+            if (!IsPermissionGranted()) return;
             _controller.TakeOwnership();
             _controller.KaraokeMode = KaraokeMode.None;
         }
 
         public void SetKaraokeModeKaraoke()
         {
-            if (!CheckPermission()) return;
+            if (!IsPermissionGranted()) return;
             _controller.TakeOwnership();
             _controller.KaraokeMode = KaraokeMode.Karaoke;
         }
 
         public void SetKaraokeModeDance()
         {
-            if (!CheckPermission()) return;
+            if (!IsPermissionGranted()) return;
             _controller.TakeOwnership();
             _controller.KaraokeMode = KaraokeMode.Dance;
         }
@@ -689,8 +563,8 @@ namespace Yamadev.YamaStream.UI
         {
             if (!_modal || _controller.KaraokeMode == KaraokeMode.None) return;
             UdonEvent callback = _controller.IsKaraokeMember ? UdonEvent.New(this, nameof(LeaveKaraokeMembers)) : UdonEvent.New(this, nameof(JoinKaraokeMembers));
-            string executeText = _controller.IsKaraokeMember ? i18n.GetValue("leaveMember") : i18n.GetValue("joinMember");
-            _modal.Show(i18n.GetValue("karaokeMember"), string.Join("\n", _controller.KaraokeMembers), callback, i18n.GetValue("close"), executeText);
+            string executeText = _controller.IsKaraokeMember ? I18n.GetValue("leaveMember") : I18n.GetValue("joinMember");
+            _modal.Show(I18n.GetValue("karaokeMember"), string.Join("\n", _controller.KaraokeMembers), callback, I18n.GetValue("close"), executeText);
         }
 
         public void SetPermission()
@@ -698,7 +572,7 @@ namespace Yamadev.YamaStream.UI
             if (!_controller.Permission || !_permission || _permissionIndex < 0) return;
             int index = Array.IndexOf(_permission.Indexes, _permissionIndex);
             if (index >= 0 &&
-                _permission.GetComponent<ScrollRect>().content.GetChild(index).TryFind("Dropdown", out var dr) && 
+                _permission.GetComponent<ScrollRect>().content.GetChild(index).TryFind("Dropdown", out var dr) &&
                 dr.TryGetComponentLocal(out Dropdown dropdown))
             {
                 PlayerPermission playerPermission = PlayerPermission.Viewer;
@@ -707,158 +581,6 @@ namespace Yamadev.YamaStream.UI
                 _controller.Permission.TakeOwnership();
                 _controller.Permission.SetPermission(_permissionIndex, playerPermission);
             }
-        }
-    
-        public void GeneratePlaylistView()
-        {
-            if (!_playlists) return;
-            _playlists.CallbackEvent = UdonEvent.New(this, nameof(UpdatePlaylistsContent));
-            _playlists.Length = _controller.Playlists.Length;
-        }
-
-        public void UpdatePlaylistsContent()
-        {
-            for (int i = 0; i < _playlists.LineCount; i++)
-            {
-                if (_playlists.Indexes[i] == _playlists.LastIndexes[i] || _playlists.Indexes[i] == -1) continue;
-                Transform cell = _playlists.GetComponent<ScrollRect>().content.GetChild(i);
-                Playlist playlist = _controller.Playlists[_playlists.Indexes[i]];
-                if (cell.TryFind("FolderMark", out var folderMark)) folderMark.gameObject.SetActive(!playlist.IsLoading);
-                if (cell.TryFind("Loading", out var loading)) loading.gameObject.SetActive(playlist.IsLoading);
-                if (cell.TryFind("Text", out var n) && n.TryGetComponentLocal(out Text name))
-                    name.text = _controller.Playlists[_playlists.Indexes[i]].PlaylistName;
-                if (cell.TryFind("TrackCount", out var tr) && tr.TryGetComponentLocal(out Text trackCount))
-                    trackCount.text = playlist.Length > 0 ? $"{i18n.GetValue("total")} {playlist.Length} {i18n.GetValue("tracks")}" : string.Empty;
-                if (cell.TryGetComponentLocal<IndexTrigger>(out var trigger)) trigger.SetProgramVariable("_varibaleObject", _playlists.Indexes[i]);
-            }
-        }
-
-        bool _isQueuePage
-        {
-            get
-            {
-                if (!_playlistSelector) return false;
-                Toggle[] toggles = _playlistSelector.GetComponentsInChildren<Toggle>();
-                return toggles[0].isOn;
-            }
-        }
-        bool _isHistoryPage
-        {
-            get
-            {
-                if (!_playlistSelector) return false;
-                Toggle[] toggles = _playlistSelector.GetComponentsInChildren<Toggle>();
-                return toggles[1].isOn;
-            }
-        }
-
-        public void GeneratePlaylistTracks()
-        {
-            if (!_playlists || !_playlistTracks) return;
-            if (!_isQueuePage && !_isHistoryPage && _playlistIndex < 0) return;
-
-            Playlist playlist = _isQueuePage ? _controller.Queue : _isHistoryPage ? _controller.History : _controller.Playlists[_playlistIndex];
-            if (Utilities.IsValid(_playlistName)) _playlistName.text = playlist.PlaylistName;
-
-            _playlistTracks.CallbackEvent = UdonEvent.New(this, nameof(UpdatePlaylistTracksContent));
-            _playlistTracks.Length = playlist.Length;
-        }
-
-        public void UpdatePlaylistTracksContent()
-        {
-            for (int i = 0; i < _playlistTracks.LineCount; i++)
-            {
-                if (_playlistTracks.Indexes[i] == _playlistTracks.LastIndexes[i] || _playlistTracks.Indexes[i] == -1) continue;
-                Transform cell = _playlistTracks.GetComponent<ScrollRect>().content.GetChild(i);
-
-                Playlist playlist = _isQueuePage ? _controller.Queue : _isHistoryPage ? _controller.History : _controller.Playlists[_playlistIndex];
-                Track track = playlist.GetTrack(_playlistTracks.Indexes[i]);
-                bool isPlaying = playlist == _controller.ActivePlaylist && _controller.PlayingTrackIndex == _playlistTracks.Indexes[i];
-
-                if (cell.TryFind("Info", out var info))
-                {
-                    if (info.TryFind("Title", out var ti) && ti.TryGetComponentLocal(out Text title))
-                    {
-                        title.text = track.HasTitle() ? track.GetTitle() : track.GetUrl();
-                        title.color = isPlaying ? _primaryColor : Color.white;
-                    }
-                    if (info.TryFind("Url", out var u) && u.TryGetComponentLocal(out Text url))
-                        url.text = track.HasTitle() ? track.GetUrl() : string.Empty;
-                    if (info.TryFind("No", out var no) && no.TryGetComponentLocal(out Text numberText))
-                    {
-                        numberText.text = $"{_playlistTracks.Indexes[i] + 1}";
-                        numberText.gameObject.SetActive(!isPlaying);
-                    }
-                    if (info.TryFind("PlayingMark", out var playingMark)) playingMark.gameObject.SetActive(isPlaying);
-                }
-                if (cell.TryFind("Actions", out var actions))
-                {
-                    if (actions.TryFind("Up", out var upMark)) upMark.gameObject.SetActive(_isQueuePage);
-                    if (actions.TryFind("Down", out var downMark)) downMark.gameObject.SetActive(_isQueuePage);
-                    if (actions.TryFind("Remove", out var removeMark)) removeMark.gameObject.SetActive(_isQueuePage);
-                    if (actions.TryFind("Copy", out var copyUrl) && copyUrl.TryFind("URL", out var trackUrl) && trackUrl.TryGetComponentLocal<InputField>(out var trackUrlText))
-                    {
-                        copyUrl.gameObject.SetActive(!_isQueuePage);
-                        trackUrlText.text = track.GetUrl();
-                    }
-                    if (actions.TryFind("Add", out var addMark)) addMark.gameObject.SetActive(!_isQueuePage);
-                    if (actions.TryFind("Play", out var PlayMark)) PlayMark.gameObject.SetActive(!_isQueuePage);
-                }
-                if (cell.TryGetComponentLocal<Animator>(out var ani)) ani.SetTrigger("Reset");
-                if (cell.TryGetComponentLocal<IndexTrigger>(out var trigger)) trigger.SetProgramVariable("_varibaleObject", _playlistTracks.Indexes[i]);
-            }
-        }
-
-        public void RemoveFromQueue()
-        {
-            if (!CheckPermission()) return;
-            if (!_playlistTracks || _playlistTrackIndex < 0) return;
-
-            _controller.Queue.TakeOwnership();
-            if (_playlistTrackIndex < _controller.Queue.Length) _controller.Queue.RemoveTrack(_playlistTrackIndex);
-        }
-
-        public void AddPlaylistTrackToQueue()
-        {
-            if (!CheckPermission()) return;
-            if (!_playlistTracks || _playlistTrackIndex < 0) return;
-
-            Playlist playlist = _isHistoryPage ? _controller.History :
-                _playlistIndex >= 0 && _playlistIndex < _controller.Playlists.Length ? _controller.Playlists[_playlistIndex] : null;
-            _controller.Queue.TakeOwnership();
-            _controller.Queue.AddTrack(playlist.GetTrack(_playlistTrackIndex));
-        }
-
-        public void MoveUp()
-        {
-            if (!CheckPermission()) return;
-            _controller.Queue.TakeOwnership();
-            _controller.Queue.MoveUp(_playlistTrackIndex);
-        }
-
-        public void MoveDown()
-        {
-            if (!CheckPermission()) return;
-            _controller.Queue.TakeOwnership();
-            _controller.Queue.MoveDown(_playlistTrackIndex);
-        }
-        public void PlayPlaylistTrack()
-        {
-            if (!CheckPermission()) return;
-            if (!_playlistTracks || _playlistTrackIndex < 0) return;
-
-            Playlist playlist = _isHistoryPage ? _controller.History : 
-                _playlistIndex >= 0 && _playlistIndex < _controller.Playlists.Length ? _controller.Playlists[_playlistIndex] : null;
-            _controller.TakeOwnership();
-            if (Utilities.IsValid(playlist)) _controller.PlayTrack(playlist, _playlistTrackIndex);
-        }
-
-        public void AddDynamicPlaylist()
-        {
-            if (!_dynamicPlaylistUrlInput || !_dynamicPlaylistUrlInput.GetUrl().IsValid()) return;
-            _controller.TakeOwnership();
-            _controller.AddDynamicPlaylist(_dynamicPlaylistUrlInput.GetUrl());
-            _dynamicPlaylistUrlInput.SetUrl(VRCUrl.Empty);
         }
 
         public void UpdateUI()
@@ -923,13 +645,13 @@ namespace Yamadev.YamaStream.UI
             if (Utilities.IsValid(_repeat)) _repeat.SetIsOnWithoutNotify(repeatStatus.IsOn());
             if (Utilities.IsValid(_repeatSlider) && Utilities.IsValid(_repeatStartTime) && Utilities.IsValid(_repeatEndTime))
             {
-                string notSetText = i18n.GetValue("notSet");
+                string notSetText = I18n.GetValue("notSet");
                 string startText = repeatStatus.GetStartTime() == 0 ? notSetText : TimeSpan.FromSeconds(repeatStatus.GetStartTime()).ToString(_timeFormat);
                 string endText = repeatStatus.GetEndTime() >= _controller.Duration || _controller.IsLive ? notSetText : TimeSpan.FromSeconds(repeatStatus.GetEndTime()).ToString(_timeFormat);
                 _repeatSlider.SliderLeft.SetValueWithoutNotify(_controller.IsLive || !_controller.IsPlaying ? 0f : Mathf.Clamp(repeatStatus.GetStartTime() / _controller.Duration, 0f, 1f));
                 _repeatSlider.SliderRight.SetValueWithoutNotify(_controller.IsLive || !_controller.IsPlaying ? 1f : Mathf.Clamp(repeatStatus.GetEndTime() / _controller.Duration, 0f, 1f));
-                _repeatStartTime.text = $"{i18n.GetValue("start")}(A): {startText}";
-                _repeatEndTime.text = $"{i18n.GetValue("end")}(B): {endText}";
+                _repeatStartTime.text = $"{I18n.GetValue("start")}(A): {startText}";
+                _repeatEndTime.text = $"{I18n.GetValue("end")}(B): {endText}";
             }
             if (Utilities.IsValid(_localDelayText)) _localDelayText.text = (Mathf.Round(_controller.LocalDelay * 100) / 100).ToString();
             if (Utilities.IsValid(_inorderPlay)) _inorderPlay.gameObject.SetActive(!_controller.ShufflePlay);
@@ -948,15 +670,18 @@ namespace Yamadev.YamaStream.UI
             if (Utilities.IsValid(_mute)) _mute.gameObject.SetActive(!_controller.Mute);
             if (Utilities.IsValid(_muteOff)) _muteOff.gameObject.SetActive(_controller.Mute);
             if (Utilities.IsValid(_volume)) _volume.SetValueWithoutNotify(_controller.Volume);
-            if (Utilities.IsValid(_audioLinkSettings)) _audioLinkSettings.gameObject.SetActive(Utilities.IsValid(_controller.AudioLink));
-            if (Utilities.IsValid(_audioLinkOn)) _audioLinkOn.SetIsOnWithoutNotify(_controller.UseAudioLink);
-            if (Utilities.IsValid(_audioLinkOff)) _audioLinkOff.SetIsOnWithoutNotify(!_controller.UseAudioLink);
+            if (Utilities.IsValid(_audioLinkSettings))
+            {
+                _audioLinkSettings.gameObject.SetActive(Utilities.IsValid(_controller.AudioLinkAssigned));
+            }
+            if (Utilities.IsValid(_audioLinkOn)) _audioLinkOn.SetIsOnWithoutNotify(_controller.AudioLinkEnabled);
+            if (Utilities.IsValid(_audioLinkOff)) _audioLinkOff.SetIsOnWithoutNotify(!_controller.AudioLinkEnabled);
         }
 
         private void UpdateScreenView()
         {
-            if (Utilities.IsValid(_mirrorInversion)) _mirrorInversion.SetIsOnWithoutNotify(_controller.MirrorInverse);
-            if (Utilities.IsValid(_mirrorInversionOff)) _mirrorInversionOff.SetIsOnWithoutNotify(!_controller.MirrorInverse);
+            if (Utilities.IsValid(_mirrorInversion)) _mirrorInversion.SetIsOnWithoutNotify(_controller.MirrorFlip);
+            if (Utilities.IsValid(_mirrorInversionOff)) _mirrorInversionOff.SetIsOnWithoutNotify(!_controller.MirrorFlip);
             if (Utilities.IsValid(_maxResolution144)) _maxResolution144.SetIsOnWithoutNotify(_controller.MaxResolution == 144);
             if (Utilities.IsValid(_maxResolution240)) _maxResolution240.SetIsOnWithoutNotify(_controller.MaxResolution == 240);
             if (Utilities.IsValid(_maxResolution360)) _maxResolution360.SetIsOnWithoutNotify(_controller.MaxResolution == 360);
@@ -986,19 +711,19 @@ namespace Yamadev.YamaStream.UI
             switch (videoError)
             {
                 case VideoError.Unknown:
-                    _message.text = i18n.GetValue("unknownErrorMessage");
+                    _message.text = I18n.GetValue("unknownErrorMessage");
                     break;
                 case VideoError.InvalidURL:
-                    _message.text = i18n.GetValue("invalidUrlMessage");
+                    _message.text = I18n.GetValue("invalidUrlMessage");
                     break;
                 case VideoError.AccessDenied:
-                    _message.text = i18n.GetValue("accessDeniedMessage");
+                    _message.text = I18n.GetValue("accessDeniedMessage");
                     break;
                 case VideoError.RateLimited:
-                    _message.text = i18n.GetValue("rateLimitedMessage");
+                    _message.text = I18n.GetValue("rateLimitedMessage");
                     break;
                 case VideoError.PlayerError:
-                    _message.text = i18n.GetValue("playerErrorMessage");
+                    _message.text = I18n.GetValue("playerErrorMessage");
                     break;
                 default:
                     break;
@@ -1009,7 +734,7 @@ namespace Yamadev.YamaStream.UI
         {
             if (Utilities.IsValid(_loading)) _loading.SetActive(_controller.IsLoading);
             if (Utilities.IsValid(_animator)) _animator.SetBool("Loading", _controller.IsLoading);
-            if (Utilities.IsValid(_message)) _message.text = i18n.GetValue("videoLoadingMessage");
+            if (Utilities.IsValid(_message)) _message.text = I18n.GetValue("videoLoadingMessage");
         }
 
         public void GeneratePermissionView()
@@ -1066,93 +791,6 @@ namespace Yamadev.YamaStream.UI
 
                 if (cell.TryGetComponentLocal<IndexTrigger>(out var trigger)) trigger.SetProgramVariable("_varibaleObject", _permission.Indexes[i]);
                 cell.gameObject.SetActive(true);
-            }
-        }
-
-        public void UpdateTranslation()
-        {
-            if (Utilities.IsValid(_returnToMain)) _returnToMain.text = i18n.GetValue("returnToMain");
-            if (Utilities.IsValid(_inputUrl)) _inputUrl.text = i18n.GetValue("inputUrl");
-            if (Utilities.IsValid(_loopPlayText)) _loopPlayText.text = i18n.GetValue("loop");
-            if (Utilities.IsValid(_loopPlayText2)) _loopPlayText2.text = i18n.GetValue("loop");
-            if (Utilities.IsValid(_shufflePlayText)) _shufflePlayText.text = i18n.GetValue("shuffle");
-            if (Utilities.IsValid(_shufflePlayText2)) _shufflePlayText2.text = i18n.GetValue("shuffle");
-            if (Utilities.IsValid(_options)) _options.text = i18n.GetValue("options");
-            if (Utilities.IsValid(_settings)) _settings.text = i18n.GetValue("settings");
-            if (Utilities.IsValid(_karaokeMember)) _karaokeMember.text = i18n.GetValue("karaokeMember");
-            if (Utilities.IsValid(_imageViewerModalText)) _imageViewerModalText.text = i18n.GetValue("imageViewer");
-            if (Utilities.IsValid(_playlist)) _playlist.text = i18n.GetValue("playlist");
-            if (Utilities.IsValid(_videoSearch)) _videoSearch.text = i18n.GetValue("videoSearch");
-            if (Utilities.IsValid(_version)) _version.text = i18n.GetValue("version");
-            if (Utilities.IsValid(_settingsTitle)) _settingsTitle.text = i18n.GetValue("settingsTitle");
-            if (Utilities.IsValid(_playback)) _playback.text = i18n.GetValue("playback");
-            if (Utilities.IsValid(_videoAndAudio)) _videoAndAudio.text = i18n.GetValue("videoAndAudio");
-            if (Utilities.IsValid(_other)) _other.text = i18n.GetValue("other");
-            if (Utilities.IsValid(_videoPlayer)) _videoPlayer.text = $"{i18n.GetValue("videoPlayer")}<size=100>(Global)</size>";
-            if (Utilities.IsValid(_videoPlayerDesc)) _videoPlayerDesc.text = i18n.GetValue("videoPlayerDesc");
-            if (Utilities.IsValid(_imageViewerText)) _imageViewerText.text = i18n.GetValue("imageViewer");
-            if (Utilities.IsValid(_playbackSpeed)) _playbackSpeed.text = $"{i18n.GetValue("playbackSpeed")}<size=100>(Global)</size>";
-            if (Utilities.IsValid(_playbackSpeedDesc)) _playbackSpeedDesc.text = i18n.GetValue("playbackSpeedDesc");
-            if (Utilities.IsValid(_slower)) _slower.text = i18n.GetValue("slower");
-            if (Utilities.IsValid(_faster)) _faster.text = i18n.GetValue("faster");
-            if (Utilities.IsValid(_repeatPlay)) _repeatPlay.text = $"{i18n.GetValue("repeatPlay")}<size=100>(Global)</size>";
-            if (Utilities.IsValid(_repeatPlayDesc)) _repeatPlayDesc.text = i18n.GetValue("repeatPlayDesc");
-            if (Utilities.IsValid(_repeatOnText)) _repeatOnText.text = i18n.GetValue("repeatOn");
-            if (Utilities.IsValid(_repeatOffText)) _repeatOffText.text = i18n.GetValue("repeatOff");
-            if (Utilities.IsValid(_maxResolution)) _maxResolution.text = i18n.GetValue("maxResolution");
-            if (Utilities.IsValid(_maxResolutionDesc)) _maxResolutionDesc.text = i18n.GetValue("maxResolutionDesc");
-            if (Utilities.IsValid(_mirrorInversionTitle)) _mirrorInversionTitle.text = i18n.GetValue("mirrorInversion");
-            if (Utilities.IsValid(_mirrorInversionDesc)) _mirrorInversionDesc.text = i18n.GetValue("mirrorInversionDesc");
-            if (Utilities.IsValid(_mirrorInversionOnText)) _mirrorInversionOnText.text = i18n.GetValue("mirrorInversionOn");
-            if (Utilities.IsValid(_mirrorInversionOffText)) _mirrorInversionOffText.text = i18n.GetValue("mirrorInversionOff");
-            if (Utilities.IsValid(_brightness)) _brightness.text = i18n.GetValue("brightness");
-            if (Utilities.IsValid(_brightnessDesc)) _brightnessDesc.text = i18n.GetValue("brightnessDesc");
-            if (Utilities.IsValid(_audioLinkDesc)) _audioLinkDesc.text = i18n.GetValue("audioLinkDesc");
-            if (Utilities.IsValid(_audioLinkOnText)) _audioLinkOnText.text = i18n.GetValue("audioLinkOn");
-            if (Utilities.IsValid(_audioLinkOffText)) _audioLinkOffText.text = i18n.GetValue("audioLinkOff");
-            if (Utilities.IsValid(_karaokeModeText)) _karaokeModeText.text = $"{i18n.GetValue("karaokeMode")}<size=100>(Global)</size>";
-            if (Utilities.IsValid(_karaokeModeDesc)) _karaokeModeDesc.text = i18n.GetValue("karaokeModeDesc");
-            if (Utilities.IsValid(_karaokeModeOnText)) _karaokeModeOnText.text = i18n.GetValue("karaokeModeOn");
-            if (Utilities.IsValid(_danceModeOnText)) _danceModeOnText.text = i18n.GetValue("danceModeOn");
-            if (Utilities.IsValid(_karaokeModeOffText)) _karaokeModeOffText.text = i18n.GetValue("karaokeModeOff");
-            if (Utilities.IsValid(_localDelay)) _localDelay.text = i18n.GetValue("localOffset");
-            if (Utilities.IsValid(_localDelayDesc)) _localDelayDesc.text = i18n.GetValue("localOffsetDesc");
-            if (Utilities.IsValid(_languageSelect)) _languageSelect.text = i18n.GetValue("languageSelect");
-            if (Utilities.IsValid(_slideMode)) _slideMode.text = $"{i18n.GetValue("slideMode")}<size=100>(Global)</size>";
-            if (Utilities.IsValid(_slideModeDesc)) _slideModeDesc.text = i18n.GetValue("slideModeDesc");
-            if (Utilities.IsValid(_slideOnText)) _slideOnText.text = i18n.GetValue("slideOn");
-            if (Utilities.IsValid(_slideOffText)) _slideOffText.text = i18n.GetValue("slideOff");
-            if (Utilities.IsValid(_slideSeconds)) _slideSeconds.text = $"{i18n.GetValue("slideSeconds")}<size=100>(Global)</size>";
-            if (Utilities.IsValid(_slideSecondsDesc)) _slideSecondsDesc.text = i18n.GetValue("slideSecondsDesc");
-            if (Utilities.IsValid(_slide1sText)) _slide1sText.text = i18n.GetValue("slide1s");
-            if (Utilities.IsValid(_slide2sText)) _slide2sText.text = i18n.GetValue("slide2s");
-            if (Utilities.IsValid(_slide3sText)) _slide3sText.text = i18n.GetValue("slide3s");
-
-            if (Utilities.IsValid(_playlistTitle)) _playlistTitle.text = i18n.GetValue("playlistTitle");
-            if (Utilities.IsValid(_playQueue)) _playQueue.text = i18n.GetValue("playQueue");
-            if (Utilities.IsValid(_playHistory)) _playHistory.text = i18n.GetValue("playHistory");
-            if (Utilities.IsValid(_addVideoLink)) _addVideoLink.text = i18n.GetValue("addVideoLink");
-            if (Utilities.IsValid(_addLiveLink)) _addLiveLink.text = i18n.GetValue("addLiveLink");
-            if (Utilities.IsValid(_permissionTitle)) _permissionTitle.text = i18n.GetValue("permission");
-            if (Utilities.IsValid(_permissionDesc)) _permissionDesc.text = $"<color=#64B5F6>Owner</color>\t\t\t{i18n.GetValue("ownerPermission")}\r\n<color=#BA68C8>Admin</color>\t\t\t{i18n.GetValue("adminPermission")}\r\n<color=#81C784>Editor</color>\t\t\t{i18n.GetValue("editorPermission")}\r\n<color=#FFB74D>Viewer</color>\t\t\t{i18n.GetValue("viewerPermission")}";
-
-            if (Utilities.IsValid(_playlistTracks))
-            {
-                RectTransform scrollRectTransform = _playlistTracks.GetComponent<ScrollRect>().content;
-                for (int i = 0; i < scrollRectTransform.childCount; i++)
-                {
-                    Transform cell = scrollRectTransform.GetChild(i);
-                    if (cell.transform.TryFind("Actions", out var actions))
-                    {
-                        if (actions.TryFind("Return/Text", out var back) && back.TryGetComponentLocal<Text>(out var backText)) backText.text = i18n.GetValue("back");
-                        if (actions.TryFind("Up/Text", out var up) && up.TryGetComponentLocal<Text>(out var upText)) upText.text = i18n.GetValue("moveUp");
-                        if (actions.TryFind("Down/Text", out var down) && down.TryGetComponentLocal<Text>(out var downText)) downText.text = i18n.GetValue("moveDown");
-                        if (actions.TryFind("Remove/Text", out var remove) && remove.TryGetComponentLocal<Text>(out var removeText)) removeText.text = i18n.GetValue("remove");
-                        if (actions.TryFind("Copy/Text", out var copyUrl) && copyUrl.TryGetComponentLocal<Text>(out var copyUrlText)) copyUrlText.text = i18n.GetValue("copyUrl");
-                        if (actions.TryFind("Add/Text", out var addQueue) && addQueue.TryGetComponentLocal<Text>(out var addQueueText)) addQueueText.text = i18n.GetValue("addQueue");
-                        if (actions.TryFind("Play/Text", out var play) && play.TryGetComponentLocal<Text>(out var playText)) playText.text = i18n.GetValue("playVideo");
-                    }
-                }
             }
         }
 

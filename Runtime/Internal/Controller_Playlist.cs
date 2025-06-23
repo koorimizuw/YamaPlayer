@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -41,7 +40,12 @@ namespace Yamadev.YamaStream
 
         public VRCUrl[] DynamicUrls
         {
-            set => GenerateDynamicPlaylists();
+            get => _dynamicUrls;
+            set
+            {
+                _dynamicUrls = value;
+                GenerateDynamicPlaylists();
+            }
         }
 
         public int PlayingTrackIndex => _playingTrackIndex;
@@ -68,18 +72,65 @@ namespace Yamadev.YamaStream
             if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
         }
 
-        public void GenerateDynamicPlaylists()
+        private void GenerateDynamicPlaylists()
         {
-            if (_dynamicPlaylists.Length >= _dynamicUrls.Length) return;
-            for (int i = _dynamicPlaylists.Length; i < _dynamicUrls.Length; i++)
+            Playlist[] newDynamicPlaylists = new Playlist[_dynamicUrls.Length];
+            for (int i = 0; i < _dynamicUrls.Length; i++)
             {
-                GameObject go = Instantiate(_playlistTemplate.gameObject, _playlistTemplate.transform.parent);
-                go.SetActive(true);
-                Playlist newPlaylist = go.GetComponent<Playlist>();
-                _dynamicPlaylists = _dynamicPlaylists.Add(newPlaylist);
-                newPlaylist.LoadPlaylist(_dynamicUrls[i]);
+                newDynamicPlaylists[i] = FindMatchingPlaylist(_dynamicUrls[i]);
+                if (!Utilities.IsValid(newDynamicPlaylists[i]))
+                {
+                    newDynamicPlaylists[i] = CreateNewDynamicPlaylist(i);
+                }
             }
+
+            DestroyUnusedPlaylists(newDynamicPlaylists);
+
+            _dynamicPlaylists = newDynamicPlaylists;
             SendCustomVideoEvent(nameof(Listener.OnPlaylistsUpdated));
+        }
+
+        private Playlist CreateNewDynamicPlaylist(int index)
+        {
+            GameObject go = Instantiate(_playlistTemplate.gameObject, _playlistTemplate.transform.parent);
+            go.SetActive(true);
+
+            Playlist newPlaylist = go.GetComponent<Playlist>();
+            newPlaylist.LoadPlaylist(_dynamicUrls[index]);
+
+            return newPlaylist;
+        }
+
+        private Playlist FindMatchingPlaylist(VRCUrl targetUrl)
+        {
+            string targetUrlString = targetUrl.Get();
+            foreach (Playlist existing in _dynamicPlaylists)
+            {
+                if (!Utilities.IsValid(existing)) continue;
+                if (existing.PlaylistUrl.Contains(targetUrlString)) return existing;
+            }
+
+            return null;
+        }
+
+        private void DestroyUnusedPlaylists(Playlist[] newPlaylists)
+        {
+            foreach (Playlist old in _dynamicPlaylists)
+            {
+                if (!Utilities.IsValid(old)) continue;
+
+                bool isUsed = false;
+                foreach (Playlist newPl in newPlaylists)
+                {
+                    if (old == newPl)
+                    {
+                        isUsed = true;
+                        break;
+                    }
+                }
+
+                if (!isUsed) DestroyImmediate(old.gameObject);
+            }
         }
 
         public void ClearPlaylistIndexes()
@@ -90,29 +141,51 @@ namespace Yamadev.YamaStream
 
         public void PlayTrack(Playlist playlist, int index)
         {
+            if (!Utilities.IsValid(playlist))
+            {
+                PrintError("Cannot play track: playlist is null");
+                return;
+            }
+
+            if (index < 0 || index >= playlist.Length)
+            {
+                PrintError($"Cannot play track: invalid index {index} for playlist with {playlist.Length} tracks");
+                return;
+            }
+
+            Track track = playlist.GetTrack(index);
+            if (!Utilities.IsValid(track))
+            {
+                PrintError($"Cannot play track: failed to get track at index {index}");
+                return;
+            }
+
             bool isQueueOrHistory = playlist == _queue || playlist == _history;
             _activePlaylistIndex = isQueueOrHistory ? -1 : Array.IndexOf(Playlists, playlist);
             _playingTrackIndex = isQueueOrHistory ? -1 : index;
-            Track track = playlist.GetTrack(index);
+
             PlayTrack(track);
         }
 
         public void Backward()
         {
-            if (ActivePlaylist == null || _playingTrackIndex < 0 || ActivePlaylist.Length == 0) return;
+            if (!Utilities.IsValid(ActivePlaylist) || _playingTrackIndex < 0 || ActivePlaylist.Length == 0) return;
             int next = _playingTrackIndex - 1 < 0 ? ActivePlaylist.Length - 1 : _playingTrackIndex - 1;
             PlayTrack(ActivePlaylist, next);
         }
 
         public void PlayRandomTrack(Playlist playlist, int exclude = -1)
         {
-            if (playlist == null || playlist.Length == 0) return;
-            if (playlist.Length == 1) PlayTrack(playlist, 0);
+            if (!Utilities.IsValid(playlist) || playlist.Length == 0) return;
+            if (playlist.Length == 1)
+            {
+                PlayTrack(playlist, 0);
+                return;
+            }
 
             var r = new System.Random();
             bool hasExclude = exclude != -1;
             int next = r.Next(0, hasExclude ? playlist.Length - 1 : playlist.Length);
-            int max = hasExclude ? playlist.Length : playlist.Length - 1;
             if (hasExclude)
             {
                 PlayTrack(playlist, next < exclude ? next : next + 1);
@@ -123,15 +196,24 @@ namespace Yamadev.YamaStream
 
         public void Forward()
         {
-            if (_queue.Length > 0)
+            if (Utilities.IsValid(_queue) && _queue.Length > 0)
             {
                 PlayTrack(_queue, 0);
                 _queue.RemoveTrack(0);
                 return;
             }
-            if (ActivePlaylist == null || _playingTrackIndex < 0 || ActivePlaylist.Length == 0) return;
-            if (_shuffle) PlayRandomTrack(ActivePlaylist, _playingTrackIndex);
-            else PlayTrack(ActivePlaylist, _playingTrackIndex + 1 < ActivePlaylist.Length ? _playingTrackIndex + 1 : 0);
+
+            if (!Utilities.IsValid(ActivePlaylist) || _playingTrackIndex < 0 || ActivePlaylist.Length == 0) return;
+
+            if (_shuffle)
+            {
+                PlayRandomTrack(ActivePlaylist, _playingTrackIndex);
+            }
+            else
+            {
+                int next = _playingTrackIndex + 1 < ActivePlaylist.Length ? _playingTrackIndex + 1 : 0;
+                PlayTrack(ActivePlaylist, next);
+            }
         }
     }
 }

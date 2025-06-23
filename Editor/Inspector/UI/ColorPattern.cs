@@ -40,28 +40,23 @@ namespace Yamadev.YamaStream.Editor
     {
         private static readonly ColorPattern[] _presetPatterns = new ColorPattern[]
         {
-            new ColorPattern(
-                Localization.Get("pinkColor"),
+            new ColorPattern("pinkColor",
                 new Color(0.9372549f, 0.3843137f, 0.5686275f),
                 new Color(0.9686275f, 0.7294118f, 0.8117647f, 0.1215686f)
             ),
-            new ColorPattern(
-                Localization.Get("blueColor"),
+            new ColorPattern("blueColor",
                 new Color(0.01176471f, 0.6627451f, 0.9568627f),
                 new Color(0.5058824f, 0.8313726f, 0.9803922f, 0.1215686f)
             ),
-            new ColorPattern(
-                Localization.Get("greenColor"),
+            new ColorPattern("greenColor",
                 new Color(0.2980392f, 0.6862745f, 0.3137255f),
                 new Color(0.6470588f, 0.8392157f, 0.654902f, 0.1215686f)
             ),
-            new ColorPattern(
-                Localization.Get("orangeColor"),
+            new ColorPattern("orangeColor",
                 new Color(1f, 0.5960785f, 0f),
                 new Color(1f, 0.8f, 0.5019608f, 0.1215686f)
             ),
-            new ColorPattern(
-                Localization.Get("purpleColor"),
+            new ColorPattern("purpleColor",
                 new Color(0.6117647f, 0.1529412f, 0.6901961f),
                 new Color(0.8078431f, 0.5764706f, 0.8470588f, 0.1215686f)
             )
@@ -81,8 +76,7 @@ namespace Yamadev.YamaStream.Editor
 
         public static ColorPattern CreateCustomPattern()
         {
-            return new ColorPattern(
-                Localization.Get("customColor"),
+            return new ColorPattern("customColor",
                 Color.white,
                 new Color(1f, 1f, 1f, 0.1215686f)
             );

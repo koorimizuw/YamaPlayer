@@ -13,8 +13,26 @@ namespace Yamadev.YamaStream
         private bool _isPlaying;
         private bool _loop;
         private bool _playImmediately;
+        private VRCImageDownloader _imageDownloader;
+
+        private void Start()
+        {
+            _imageDownloader = new VRCImageDownloader();
+        }
 
         public override bool IsPlaying => _isPlaying;
+
+        public VRCImageDownloader ImageDownloader
+        {
+            get
+            {
+                if (!Utilities.IsValid(_imageDownloader))
+                {
+                    _imageDownloader = new VRCImageDownloader();
+                }
+                return _imageDownloader;
+            }
+        }
 
         public override bool Loop
         {
@@ -46,7 +64,7 @@ namespace Yamadev.YamaStream
 
         public override void PlayUrl(VRCUrl url)
         {
-            new VRCImageDownloader().DownloadImage(url, null, (IUdonEventReceiver)this);
+            ImageDownloader.DownloadImage(url, null, (IUdonEventReceiver)this);
             _loadedUrl = url;
             _playImmediately = true;
             _loading = true;
@@ -54,7 +72,7 @@ namespace Yamadev.YamaStream
 
         public override void LoadUrl(VRCUrl url)
         {
-            new VRCImageDownloader().DownloadImage(url, null, (IUdonEventReceiver)this);
+            ImageDownloader.DownloadImage(url, null, (IUdonEventReceiver)this);
             _loadedUrl = url;
             _playImmediately = false;
             _loading = true;
@@ -77,6 +95,10 @@ namespace Yamadev.YamaStream
             _loading = false;
             _isPlaying = false;
             _texture = null;
+            if (Utilities.IsValid(_imageDownloader))
+            {
+                _imageDownloader.Dispose();
+            }
             if (Utilities.IsValid(_listener)) _listener.OnTextureUpdated(null);
         }
 

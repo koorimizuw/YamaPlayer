@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: InputController
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 53f46da23004ebe41912728661ea5397, type: 2}
+  serializedUdonProgramAsset: {fileID: 11400000, guid: d0376df01b3d340499bb49e0176c6429, type: 2}
   udonAssembly: 
   assemblyError: 
   sourceCsScript: {fileID: 11500000, guid: 7e2ecb530e1de304db8ff0957d429ba5, type: 3}

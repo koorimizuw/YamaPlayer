@@ -126,6 +126,8 @@
     "localMode": "ローカルモード",
     "useVRCLV": "Light Volume TVGIを使用",
     "vrclvNotImported": "Light Volumeが導入されていません。",
+    "videoPlayerSettings": "動画プレイヤー設定",
+    "screenSettings": "スクリーン設定",
     "updateYtdlp": "yt-dlpを更新する",
     "downloadYtdlp": "yt-dlpをダウンロードする",
     "updateYtdlpMessage": "最新のyt-dlpをダウンロードしますか？",
@@ -145,7 +147,10 @@
     "failedToStartYtdlpProcess": "yt-dlpのプロセスを開始できませんでした。",
     "exceptionOccurredWhileExtractingPlaylist": "プレイリストの取得中に例外が発生しました。",
     "extractingPlaylistFrom": "プレイリストを取得中",
-    "ytDlpReturnedEmptyOutput": "yt-dlpの出力は空です。"
+    "ytDlpReturnedEmptyOutput": "yt-dlpの出力は空です。",
+    "color": "カラー",
+    "useLightVolumes": "Light Volumeを使用",
+    "playerSettings": "動画プレイヤー設定"
   },
   "en-US": {
     "ui": "UI",
@@ -274,6 +279,8 @@
     "localMode": "Local Mode",
     "useVRCLV": "Use Light Volume TVGI",
     "vrclvNotImported": "Light Volume is not imported.",
+    "videoPlayerSettings": "Video Player Settings",
+    "screenSettings": "Screen Settings",
     "updateYtdlp": "Update yt-dlp",
     "downloadYtdlp": "Download yt-dlp",
     "updateYtdlpMessage": "Do you want to update to the latest version of yt-dlp?",
@@ -293,7 +300,10 @@
     "failedToStartYtdlpProcess": "Failed to start yt-dlp process.",
     "exceptionOccurredWhileExtractingPlaylist": "An exception occurred while extracting playlist.",
     "extractingPlaylistFrom": "Extracting playlist from",
-    "ytDlpReturnedEmptyOutput": "yt-dlp returned empty output."
+    "ytDlpReturnedEmptyOutput": "yt-dlp returned empty output.",
+    "color": "Color",
+    "useLightVolumes": "Use Light Volume",
+    "playerSettings": "Player Settings"
   },
   "zh-CN": {
     "ui": "UI",
@@ -420,6 +430,8 @@
     "setUpAudioLinkFailed": "Audio Link自动设置失败，请检查Audio Link包是否损坏。",
     "syncSettings": "同步设置",
     "localMode": "本地模式",
+    "videoPlayerSettings": "视频播放器设置",
+    "screenSettings": "屏幕设置",
     "useVRCLV": "使用Light Volume TVGI",
     "vrclvNotImported": "Light Volume未导入。",
     "updateYtdlp": "更新yt-dlp",
@@ -441,7 +453,10 @@
     "failedToStartYtdlpProcess": "启动yt-dlp进程失败。",
     "exceptionOccurredWhileExtractingPlaylist": "提取播放列表时发生异常。",
     "extractingPlaylistFrom": "提取播放列表",
-    "ytDlpReturnedEmptyOutput": "yt-dlp返回空输出。"
+    "ytDlpReturnedEmptyOutput": "yt-dlp返回空输出。",
+    "color": "颜色",
+    "useLightVolumes": "使用Light Volume",
+    "playerSettings": "播放器设置"
   },
   "zh-TW": {
     "ui": "UI",
@@ -570,6 +585,8 @@
     "localMode": "本地模式",
     "useVRCLV": "使用Light Volume TVGI",
     "vrclvNotImported": "Light Volume未導入。",
+    "videoPlayerSettings": "影片播放器設定",
+    "screenSettings": "螢幕設定",
     "updateYtdlp": "更新yt-dlp",
     "downloadYtdlp": "下載yt-dlp",
     "updateYtdlpMessage": "要更新到最新版本的yt-dlp嗎？",
@@ -589,7 +606,10 @@
     "failedToStartYtdlpProcess": "啟動yt-dlp進程失敗。",
     "exceptionOccurredWhileExtractingPlaylist": "提取播放列表時發生異常。",
     "extractingPlaylistFrom": "提取播放列表",
-    "ytDlpReturnedEmptyOutput": "yt-dlp返回空輸出。"
+    "ytDlpReturnedEmptyOutput": "yt-dlp返回空輸出。",
+    "color": "顏色",
+    "useLightVolumes": "使用Light Volume",
+    "playerSettings": "播放器設定"
   },
   "ko-KR": {
     "ui": "UI",
@@ -718,6 +738,8 @@
     "localMode": "로컬 모드",
     "useVRCLV": "Light Volume TVGI 사용",
     "vrclvNotImported": "Light Volume가 도입되지 않았습니다.",
+    "videoPlayerSettings": "비디오 플레이어 설정",
+    "screenSettings": "스크린 설정",
     "updateYtdlp": "yt-dlp 업데이트",
     "downloadYtdlp": "yt-dlp 다운로드",
     "updateYtdlpMessage": "최신 버전의 yt-dlp로 업데이트하시겠습니까?",
@@ -737,6 +759,9 @@
     "failedToStartYtdlpProcess": "yt-dlp 프로세스 시작 실패.",
     "exceptionOccurredWhileExtractingPlaylist": "재생 목록 추출 중 예외 발생.",
     "extractingPlaylistFrom": "재생 목록 추출",
-    "ytDlpReturnedEmptyOutput": "yt-dlp가 빈 출력을 반환했습니다."
+    "ytDlpReturnedEmptyOutput": "yt-dlp가 빈 출력을 반환했습니다.",
+    "color": "색상",
+    "useLightVolumes": "Light Volume 사용",
+    "playerSettings": "플레이어 설정"
   }
 }

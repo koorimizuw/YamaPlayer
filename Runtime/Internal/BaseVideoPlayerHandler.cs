@@ -86,7 +86,7 @@ namespace Yamadev.YamaStream
             get => _speed;
             set
             {
-                if (_animator == null) return;
+                if (!Utilities.IsValid(_animator)) return;
                 _speed = value;
                 _animator.SetFloat("Speed", _speed);
                 _animator.Update(0f);
@@ -97,7 +97,7 @@ namespace Yamadev.YamaStream
         {
             get
             {
-                if (!_baseVideoPlayer) return false;
+                if (!Utilities.IsValid(_baseVideoPlayer)) return false;
                 return _baseVideoPlayer.IsReady;
             }
         }
@@ -106,7 +106,7 @@ namespace Yamadev.YamaStream
         {
             get
             {
-                if (!_baseVideoPlayer) return 0;
+                if (!Utilities.IsValid(_baseVideoPlayer)) return 0;
                 return _baseVideoPlayer.VideoWidth;
             }
         }
@@ -115,7 +115,7 @@ namespace Yamadev.YamaStream
         {
             get
             {
-                if (!_baseVideoPlayer) return 0;
+                if (!Utilities.IsValid(_baseVideoPlayer)) return 0;
                 return _baseVideoPlayer.VideoHeight;
             }
         }
@@ -124,7 +124,7 @@ namespace Yamadev.YamaStream
         {
             set
             {
-                if (!_animator) return;
+                if (!Utilities.IsValid(_animator)) return;
                 _animator.SetFloat("Resolution", value / 4320f);
                 _animator.Update(0f);
             }
@@ -134,12 +134,12 @@ namespace Yamadev.YamaStream
         {
             get
             {
-                if (!_baseVideoPlayer) return 0;
+                if (!Utilities.IsValid(_baseVideoPlayer)) return 0;
                 return _baseVideoPlayer.GetTime();
             }
             set
             {
-                if (!_baseVideoPlayer) return;
+                if (!Utilities.IsValid(_baseVideoPlayer)) return;
                 _baseVideoPlayer.SetTime(value);
             }
         }
@@ -148,7 +148,7 @@ namespace Yamadev.YamaStream
         {
             get
             {
-                if (!_baseVideoPlayer) return 0;
+                if (!Utilities.IsValid(_baseVideoPlayer)) return 0;
                 return _baseVideoPlayer.GetDuration();
             }
         }
@@ -157,7 +157,7 @@ namespace Yamadev.YamaStream
 
         public override void PlayUrl(VRCUrl url)
         {
-            if (!_baseVideoPlayer) return;
+            if (!Utilities.IsValid(_baseVideoPlayer)) return;
             _baseVideoPlayer.PlayURL(url);
             _loadedUrl = url;
             _loading = true;
@@ -166,7 +166,7 @@ namespace Yamadev.YamaStream
 
         public override void LoadUrl(VRCUrl url)
         {
-            if (!_baseVideoPlayer) return;
+            if (!Utilities.IsValid(_baseVideoPlayer)) return;
             _baseVideoPlayer.LoadURL(url);
             _loadedUrl = url;
             _loading = true;
@@ -175,19 +175,19 @@ namespace Yamadev.YamaStream
 
         public override void Play()
         {
-            if (IsPlaying || !_baseVideoPlayer) return;
+            if (IsPlaying || !Utilities.IsValid(_baseVideoPlayer)) return;
             _baseVideoPlayer.Play();
         }
 
         public override void Pause()
         {
-            if (!IsPlaying || !_baseVideoPlayer) return;
+            if (!IsPlaying || !Utilities.IsValid(_baseVideoPlayer)) return;
             _baseVideoPlayer.Pause();
         }
 
         public override void Stop()
         {
-            if (!_baseVideoPlayer) return;
+            if (!Utilities.IsValid(_baseVideoPlayer)) return;
             _baseVideoPlayer.Stop();
             _loadedUrl = VRCUrl.Empty;
             _loading = false;
@@ -205,7 +205,7 @@ namespace Yamadev.YamaStream
 
         public void BlitLastUpdate()
         {
-            if (!_videoTexture)
+            if (!Utilities.IsValid(_videoTexture))
             {
                 if (Utilities.IsValid(_listener)) _listener.OnTextureUpdated(null);
                 return;
@@ -213,7 +213,7 @@ namespace Yamadev.YamaStream
 
             var width = _videoTexture.width;
             var height = _videoTexture.height;
-            if (!_blitTexture || _blitTexture.width != width || _blitTexture.height != height)
+            if (!Utilities.IsValid(_blitTexture) || _blitTexture.width != width || _blitTexture.height != height)
             {
                 _blitTexture = VRCRenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB64, RenderTextureReadWrite.sRGB, 1);
                 _blitTexture.filterMode = FilterMode.Bilinear;

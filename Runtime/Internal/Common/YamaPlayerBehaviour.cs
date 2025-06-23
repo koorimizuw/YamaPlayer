@@ -42,6 +42,8 @@ namespace Yamadev.YamaStream
 
         public void PrintLog(object message) => Debug.Log($"{_debugPrefix} {message}");
 
+        public void PrintWarning(object message) => Debug.LogWarning($"{_debugPrefix} {message}");
+
         public void PrintError(object message) => Debug.LogError($"{_debugPrefix} {message}");
     }
 }

@@ -22,17 +22,40 @@ namespace Yamadev.YamaStream
         [SerializeField, UdonSynced] string[] _originalUrls = new string[] { };
         [SerializeField] PlayableDirector[] _timelines = new PlayableDirector[] { };
         DataList<Track> _tracks;
+        string _playlistUrl;
+        bool _initialized;
         bool _isLoading;
         bool _loaded;
 
-        private void Start() => GenerateTracks();
-
-        void GenerateTracks()
+        private void Start()
         {
-            _tracks = DataList<Track>.New();
-            for (int i = 0; i < _urls.Length; i++)
+            if (!_initialized)
             {
-                var timeline = i < _timelines.Length ? _timelines[i] : null;
+                GenerateTracks();
+                _initialized = true;
+            }
+        }
+
+        private PlayableDirector GetTimelineAtIndex(int index)
+        {
+            return (index < _timelines.Length) ? _timelines[index] : null;
+        }
+
+        private void GenerateTracks()
+        {
+            if (!Utilities.IsValid(_tracks))
+            {
+                _tracks = DataList<Track>.New();
+            }
+            else
+            {
+                _tracks.Clear();
+            }
+
+            int trackCount = _urls.Length;
+            for (int i = 0; i < trackCount; i++)
+            {
+                var timeline = GetTimelineAtIndex(i);
                 Track track = Track.New(_videoPlayerTypes[i], _titles[i], _urls[i], _originalUrls[i], timeline);
                 _tracks.Add(track);
             }
@@ -42,7 +65,11 @@ namespace Yamadev.YamaStream
         {
             get
             {
-                if (!Utilities.IsValid(_tracks)) GenerateTracks();
+                if (!_initialized)
+                {
+                    GenerateTracks();
+                    _initialized = true;
+                }
                 return _tracks;
             }
         }
@@ -55,31 +82,38 @@ namespace Yamadev.YamaStream
 
         public bool Loaded => _loaded;
 
+        private bool IsValidIndex(int index)
+        {
+            return index >= 0 && index < Length;
+        }
+
         public Track GetTrack(int index)
         {
-            if (index >= Tracks.Count()) return Track.Empty();
+            if (!IsValidIndex(index)) return Track.Empty();
             return Tracks.GetValue(index);
         }
 
         public void AddTrack(Track track)
         {
-            string title = track.GetTitle();
-            if (string.IsNullOrEmpty(title) && _videoInfo != null) 
+            if (!Utilities.IsValid(track)) return;
+            if (string.IsNullOrEmpty(track.GetTitle()) && Utilities.IsValid(_videoInfo))
+            {
                 _videoInfo.GetVideoInfo(track.GetVRCUrl());
+            }
             Tracks.Add(track);
             SendEvent();
         }
 
         public void RemoveTrack(int index)
         {
-            if (index < 0 || index > Length - 1) return;
+            if (!IsValidIndex(index)) return;
             Tracks.RemoveAt(index);
             SendEvent();
         }
 
         public void MoveUp(int index)
         {
-            if (index < 1 || index > Length - 1) return;
+            if (!IsValidIndex(index) || index == 0) return;
             Track track = Tracks.GetValue(index);
             Tracks.RemoveAt(index);
             Tracks.Insert(index - 1, track);
@@ -88,16 +122,19 @@ namespace Yamadev.YamaStream
 
         public void MoveDown(int index)
         {
-            if (index < 0 || index > Length - 2) return;
+            if (!IsValidIndex(index) || index >= Length - 1) return;
             Track track = Tracks.GetValue(index);
             Tracks.RemoveAt(index);
             Tracks.Insert(index + 1, track);
             SendEvent();
         }
 
+        public string PlaylistUrl => _playlistUrl;
+
         public void LoadPlaylist(VRCUrl url)
         {
             _isLoading = true;
+            _playlistUrl = url.Get();
             VRCStringDownloader.LoadUrl(url, (IUdonEventReceiver)this);
             _controller.SendCustomVideoEvent(nameof(Listener.OnPlaylistsUpdated));
         }
@@ -105,9 +142,25 @@ namespace Yamadev.YamaStream
         public override void OnStringLoadSuccess(IVRCStringDownload result)
         {
             _isLoading = false;
+
+            if (string.IsNullOrEmpty(result.Result))
+            {
+                Debug.LogError($"Playlist {result.Url.Get()} load failed: {result.Result}");
+                OnPlaylistLoadFailed();
+                return;
+            }
+
             YouTubePlaylist pl = YouTube.GetPlaylistFromHtml(result.Result);
+            if (!Utilities.IsValid(pl) || !Utilities.IsValid(pl.GetTracks()))
+            {
+                Debug.LogError($"Failed to parse playlist {result.Url.Get()}");
+                OnPlaylistLoadFailed();
+                return;
+            }
+
             _playlistName = pl.GetName();
             _tracks = pl.GetTracks();
+            _initialized = true;
             _loaded = true;
             _controller.SendCustomVideoEvent(nameof(Listener.OnPlaylistsUpdated));
         }
@@ -115,17 +168,24 @@ namespace Yamadev.YamaStream
         public override void OnStringLoadError(IVRCStringDownload result)
         {
             _isLoading = false;
+            OnPlaylistLoadFailed();
+        }
+
+        private void OnPlaylistLoadFailed()
+        {
+            _loaded = false;
             _controller.SendCustomVideoEvent(nameof(Listener.OnPlaylistsUpdated));
         }
 
         public override void OnPreSerialization()
         {
-            base.OnPreSerialization();
             var videoPlayerTypes = DataList<int>.New();
             var titles = DataList<string>.New();
             var urls = DataList<VRCUrl>.New();
             var originalUrls = DataList<string>.New();
-            for (int i = 0; i < Tracks.Count(); i++)
+
+            int trackCount = Tracks.Count();
+            for (int i = 0; i < trackCount; i++)
             {
                 Track track = Tracks.GetValue(i);
                 videoPlayerTypes.Add((int)track.GetPlayerType());
@@ -133,6 +193,7 @@ namespace Yamadev.YamaStream
                 urls.Add(track.GetVRCUrl());
                 originalUrls.Add(track.GetOriginalUrl());
             }
+
             // It throws error when we convert a enum list to array.
             _videoPlayerTypes = (VideoPlayerType[])(object)videoPlayerTypes.ToArray();
             _titles = titles.ToArray();
@@ -142,12 +203,11 @@ namespace Yamadev.YamaStream
 
         public override void OnDeserialization()
         {
-            base.OnPreSerialization();
             GenerateTracks();
             SendEvent();
         }
 
-        public void SendEvent()
+        private void SendEvent()
         {
             if (_isObjectOwner && !_controller.IsLocal) SyncVariables();
             if (_isQueue) _controller.SendCustomVideoEvent(nameof(Listener.OnQueueUpdated));

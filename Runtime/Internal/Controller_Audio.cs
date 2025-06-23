@@ -1,73 +1,63 @@
 ﻿using System;
 using UnityEngine;
 using UdonSharp;
+using VRC.SDKBase;
 
 namespace Yamadev.YamaStream
 {
     public partial class Controller
     {
-        [SerializeField] UdonSharpBehaviour _audioLink;
-        [SerializeField] bool _useAudioLink;
-        [SerializeField] bool _mute;
-        [SerializeField, Range(0f, 1f)] float _volume;
-        [SerializeField] AudioSource[] _audioSources = new AudioSource[] { };
+        [SerializeField] private UdonSharpBehaviour _audioLink;
+        [SerializeField] private bool _useAudioLink;
+        [SerializeField] private bool _mute;
+        [SerializeField, Range(0f, 1f)] private float _volume;
+        [SerializeField] private AudioSource[] _audioSources;
+        private Material _audioLinkMaterial;
 
-        public void AddAudioSource(AudioSource audioSource)
-        {
-            if (Array.IndexOf(_audioSources, audioSource) >= 0) return;
-            _audioSources = _audioSources.Add(audioSource);
-            UpdateAudio();
-            UpdateAudioLink();
-        }
-
-        public AudioSource MainAudioSource => _audioSources.Length > 0 ? _audioSources[0] : null;
-
-        public void UpdateAudio()
-        {
-            foreach (AudioSource audioSource in _audioSources)
-            {
-                if (audioSource == null) continue;
-                audioSource.volume = _volume;
-                audioSource.mute = _mute;
-            }
-        }
-
-        public void UpdateAudioLink()
-        {
-            if (_audioLink == null) return;
-            if (_useAudioLink)
-            {
-                _audioLink.SetProgramVariable("audioSource", MainAudioSource); // _audioLink.audioSource = MainAudioSource;
-                _audioLink.SendCustomEvent("EnableAudioLink"); // _audioLink.EnableAudioLink();
-                ((Material)_audioLink.GetProgramVariable("audioMaterial")).SetFloat("_MediaVolume", _mute ? 0 : _volume); // _audioLink.SetMediaVolume(_mute ? 0 : _volume);
-                return;
-            }
-            if (AudioLinked)
-            {
-                _audioLink.SetProgramVariable("audioSource", null); // _audioLink.audioSource = null;
-                _audioLink.SendCustomEvent("DisableAudioLink"); // _audioLink.DisableAudioLink();
-            }
-        }
-
-        public UdonSharpBehaviour AudioLink => _audioLink;
-
-        public bool UseAudioLink
-        {
-            get => _useAudioLink;
-            set
-            {
-                _useAudioLink = value;
-                UpdateAudioLink();
-                foreach (Listener listener in _listeners) listener.OnUseAudioLinkChanged();
-            }
-        }
-
-        public bool AudioLinked
+        private AudioSource[] AudioSources
         {
             get
             {
-                if (_audioLink == null) return false;
-                return (bool)_audioLink.GetProgramVariable("_audioLinkEnabled") && (AudioSource)_audioLink.GetProgramVariable("audioSource") == MainAudioSource;
+                if (!Utilities.IsValid(_audioSources)) _audioSources = new AudioSource[0];
+                return _audioSources;
+            }
+            set => _audioSources = value;
+        }
+
+        private AudioSource MainAudioSource => AudioSources.Length > 0 ? AudioSources[0] : null;
+
+        public void AddAudioSource(AudioSource audioSource)
+        {
+            if (Array.IndexOf(AudioSources, audioSource) >= 0)
+            {
+                PrintWarning($"Audio source {audioSource.name} already added.");
+                return;
+            }
+
+            AudioSources = AudioSources.Add(audioSource);
+            UpdateAudioVolume();
+            UpdateAudioPitch();
+        }
+
+        private void UpdateAudioVolume()
+        {
+            foreach (AudioSource audioSource in AudioSources)
+            {
+                if (!Utilities.IsValid(audioSource)) continue;
+
+                audioSource.volume = _volume;
+                audioSource.mute = _mute;
+
+                UpdateAudioLinkMaterial("_MediaVolume", _mute ? 0 : _volume);
+            }
+        }
+
+        private void UpdateAudioPitch()
+        {
+            foreach (AudioSource audioSource in AudioSources)
+            {
+                if (!Utilities.IsValid(audioSource)) continue;
+                audioSource.pitch = IsLive ? 1 : _speed;
             }
         }
 
@@ -77,10 +67,9 @@ namespace Yamadev.YamaStream
             set
             {
                 _volume = Mathf.Clamp01(value);
-                UpdateAudio();
-                UpdateAudioLink();
-                foreach (Listener listener in _listeners) listener.OnVolumeChanged();
-                PrintLog($"Volume changed {_volume * 100}%.");
+                UpdateAudioVolume();
+                PrintLog($"Volume changed to {_volume * 100}%.");
+                foreach (Listener listener in EventListeners) listener.OnVolumeChanged();
             }
         }
 
@@ -90,12 +79,61 @@ namespace Yamadev.YamaStream
             set
             {
                 _mute = value;
-                UpdateAudio();
-                UpdateAudioLink();
-                foreach (Listener listener in _listeners) listener.OnMuteChanged();
-                if (_mute) PrintLog($"Muted.");
-                else PrintLog($"Mute off.");
+                UpdateAudioVolume();
+                PrintLog($"Mute changed to {_mute}.");
+                foreach (Listener listener in EventListeners) listener.OnMuteChanged();
             }
         }
+
+        #region Audio Link
+        public bool AudioLinkAssigned => Utilities.IsValid(_audioLink);
+
+        public bool AudioLinkEnabled
+        {
+            get
+            {
+                if (!AudioLinkAssigned) return false;
+
+                object audioLinkEnabled = _audioLink.GetProgramVariable("_audioLinkEnabled");
+                object audioSource = _audioLink.GetProgramVariable("audioSource");
+                if (!Utilities.IsValid(audioLinkEnabled) || !Utilities.IsValid(audioSource)) return false;
+
+                return (bool)audioLinkEnabled && (AudioSource)audioSource == MainAudioSource;
+            }
+            set
+            {
+                if (!AudioLinkAssigned) return;
+
+                if (value)
+                {
+                    _audioLink.SetProgramVariable("audioSource", MainAudioSource);
+                    _audioLink.SendCustomEvent("EnableAudioLink");
+                }
+                else
+                {
+                    _audioLink.SetProgramVariable("audioSource", null);
+                    _audioLink.SendCustomEvent("DisableAudioLink");
+                }
+            }
+        }
+
+        private void UpdateAudioLinkMaterial(string property, float value)
+        {
+            if (!AudioLinkEnabled) return;
+
+            if (!Utilities.IsValid(_audioLinkMaterial))
+            {
+                _audioLinkMaterial = (Material)_audioLink.GetProgramVariable("audioMaterial");
+            }
+
+            _audioLinkMaterial.SetFloat(property, value);
+        }
+
+        [Obsolete("Use AudioLinkAssigned instead.")]
+        public bool UseAudioLink => AudioLinkAssigned;
+
+        [Obsolete("Use AudioLinkEnabled instead.")]
+        public bool AudioLinked => AudioLinkEnabled;
+        #endregion
     }
 }

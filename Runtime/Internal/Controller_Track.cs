@@ -23,7 +23,7 @@ namespace Yamadev.YamaStream
             set
             {
                 _track = value;
-                foreach (Listener listener in _listeners) listener.OnTrackUpdated();
+                foreach (Listener listener in EventListeners) listener.OnTrackUpdated();
             }
         }
 
@@ -31,7 +31,7 @@ namespace Yamadev.YamaStream
         {
             get
             {
-                if (!Utilities.IsValid(_resolveTrack)) 
+                if (!Utilities.IsValid(_resolveTrack))
                     _resolveTrack = UdonEvent.New(this, nameof(Resolve));
                 return _resolveTrack;
             }
@@ -40,22 +40,37 @@ namespace Yamadev.YamaStream
 
         public void PlayTrack(Track track)
         {
-            if (!track.GetUrl().IsValidUrl()) return;
-            if (Track.GetUrl() != string.Empty && (Networking.IsOwner(gameObject) || _isLocal))
+            if (!track.GetUrl().IsValidUrl())
+            {
+                PrintError($"URL {track.GetUrl()} is not valid");
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(Track.GetUrl()) && (Networking.IsOwner(gameObject) || _isLocal))
                 Stop();
+
             LoadTrack(track);
+
             _state = (byte)PlayerState.Playing;
         }
 
         private void LoadTrack(Track track, bool isReload = false)
         {
+            if (!Utilities.IsValid(Handler))
+            {
+                PrintError("Handler is not valid");
+                return;
+            }
+
             _reloading = isReload;
             Handler.Stop();
-            if (!isReload) ChangePlayerTyper(track.GetPlayerType());
+
+            if (!isReload) PlayerType = track.GetPlayerType();
             Track = track;
             ResolveTrack.Invoke();
+
             if (Networking.IsOwner(gameObject) && !_isLocal && !isReload) RequestSerialization();
-            foreach (Listener listener in _listeners) listener.OnUrlChanged();
+            foreach (Listener listener in EventListeners) listener.OnUrlChanged();
             PrintLog($"Load url: {track.GetUrl()}.");
         }
 

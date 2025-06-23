@@ -16,27 +16,47 @@ namespace Yamadev.YamaStream
         [SerializeField] int _playlistIndex = 0;
         [SerializeField] int _playlistTrackIndex = 0;
 
-        void Start()
+        private void Start()
         {
+            if (!Utilities.IsValid(_controller)) return;
             if (!Networking.IsMaster && !_controller.IsLocal) return;
             SendCustomEventDelayedSeconds(nameof(PlayDefaultTrack), _delay);
         }
 
         public void PlayDefaultTrack()
         {
-            if (_controller.IsPlaying) return;
-            switch(_autoPlayMode)
+            if (!Utilities.IsValid(_controller) || _controller.IsPlaying) return;
+            switch (_autoPlayMode)
             {
                 case AutoPlayMode.FromTrack:
-                    Track track = Track.New(_videoPlayerType, _title, _url);
-                    _controller.PlayTrack(track);
+                    PlayFromTrack();
                     break;
                 case AutoPlayMode.FromPlaylist:
-                    Playlist playlist = _controller.Playlists[_playlistIndex];
-                    if (_playlistTrackIndex < 0) _controller.PlayRandomTrack(playlist);
-                    else _controller.PlayTrack(playlist, _playlistTrackIndex);
+                    PlayFromPlaylist();
+                    break;
+                case AutoPlayMode.Off:
+                    break;
+                default:
                     break;
             }
+        }
+
+        private void PlayFromTrack()
+        {
+            if (string.IsNullOrEmpty(_url.Get())) return;
+            Track track = Track.New(_videoPlayerType, _title, _url);
+            _controller.PlayTrack(track);
+        }
+
+        private void PlayFromPlaylist()
+        {
+            if (_playlistIndex < 0 || _playlistIndex >= _controller.Playlists.Length) return;
+
+            Playlist playlist = _controller.Playlists[_playlistIndex];
+            if (!Utilities.IsValid(playlist)) return;
+
+            if (_playlistTrackIndex < 0) _controller.PlayRandomTrack(playlist);
+            else _controller.PlayTrack(playlist, _playlistTrackIndex);
         }
     }
 }

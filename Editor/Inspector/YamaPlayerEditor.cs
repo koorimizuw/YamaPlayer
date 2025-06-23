@@ -122,7 +122,7 @@ namespace Yamadev.YamaStream.Editor
                     PlaylistEditor.ShowPlaylistEditorWindow(_target);
             }
 
-            using (new SectionScope("Player Settings", _versionSettings.IsValid))
+            using (new SectionScope(Localization.Get("playerSettings"), _versionSettings.IsValid))
             {
                 _controllerSettings.DrawSyncSettings();
                 DrawAVProSettings();
@@ -153,27 +153,27 @@ namespace Yamadev.YamaStream.Editor
                 return;
             }
 
-            using (new SectionScope("Color"))
+            using (new SectionScope(Localization.Get("color")))
             {
                 _uiSettings.DrawColorSettings();
             }
 
-            using (new SectionScope("Font"))
+            using (new SectionScope(Localization.Get("font")))
             {
                 _uiSettings.DrawFontSettings();
             }
 
-            using (new SectionScope("Idle Image"))
+            using (new SectionScope(Localization.Get("idleImage")))
             {
                 _uiSettings.DrawIdleImageSettings();
             }
 
-            using (new SectionScope())
+            using (new SectionScope(Localization.Get("playlist")))
             {
                 _uiSettings.DrawDefaultOpenSettings();
             }
 
-            using (new SectionScope("Pickup", false))
+            using (new SectionScope(Localization.Get("pickUp"), false))
             {
                 _uiSettings.DrawPickupSettings();
             }

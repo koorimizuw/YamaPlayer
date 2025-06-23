@@ -1,25 +1,38 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
+using VRC.SDKBase;
+using Object = UnityEngine.Object;
 
 namespace Yamadev.YamaStream
 {
     public partial class Controller
     {
         [SerializeField] private int _maxResolution;
-        [SerializeField] private bool _mirrorInverse = true;
+        [SerializeField] private bool _mirrorFlip = true;
         [SerializeField, Range(0f, 1f)] private float _emission = 1f;
+#if UNITY_EDITOR && !COMPILER_UDONSHARP
         [SerializeField] private bool _useLTCGI = false;
         [SerializeField] private bool _useLightVolumes = false;
+#endif
         [SerializeField] private ScreenType[] _screenTypes;
         [SerializeField] private Object[] _screens;
         [SerializeField] private string[] _textureProperties;
         private MaterialPropertyBlock _propertyBlock;
 
-        private void InitializeScreen()
+        private void InitializePropertyBlock()
         {
-            _propertyBlock = new MaterialPropertyBlock();
-            Handler.MaxResolution = _maxResolution;
-            _propertyBlock.SetInt("_MirrorFlip", _mirrorInverse ? 1 : 0);
+            if (!Utilities.IsValid(_propertyBlock))
+            {
+                _propertyBlock = new MaterialPropertyBlock();
+            }
+        }
+
+        private void UpdateScreenMaterial()
+        {
+            InitializePropertyBlock();
+
+            _propertyBlock.SetInt("_MirrorFlip", _mirrorFlip ? 1 : 0);
             _propertyBlock.SetFloat("_Emission", _emission);
         }
 
@@ -36,18 +49,18 @@ namespace Yamadev.YamaStream
                 _maxResolution = value;
                 Handler.MaxResolution = value;
                 if (!Stopped) SendCustomEventDelayedFrames(nameof(Reload), 0);
-                foreach (Listener listener in _listeners) listener.OnMaxResolutionChanged();
+                foreach (Listener listener in EventListeners) listener.OnMaxResolutionChanged();
             }
         }
 
-        public bool MirrorInverse
+        public bool MirrorFlip
         {
-            get => _mirrorInverse;
+            get => _mirrorFlip;
             set
             {
-                _mirrorInverse = value;
-                _propertyBlock.SetInt("_MirrorFlip", value ? 1 : 0);
-                foreach (Listener listener in _listeners) listener.OnMirrorInversionChanged();
+                _mirrorFlip = value;
+                UpdateScreenMaterial();
+                foreach (Listener listener in EventListeners) listener.OnMirrorInversionChanged();
             }
         }
 
@@ -57,22 +70,27 @@ namespace Yamadev.YamaStream
             set
             {
                 _emission = value;
-                _propertyBlock.SetFloat("_Emission", value);
-                foreach (Listener listener in _listeners) listener.OnEmissionChanged();
+                UpdateScreenMaterial();
+                foreach (Listener listener in EventListeners) listener.OnEmissionChanged();
             }
         }
 
         public override void OnTextureUpdated(Texture texture)
         {
+            InitializePropertyBlock();
+
             for (int i = 0; i < _screens.Length; i++)
             {
-                if (!_screens[i]) continue;
+                if (!Utilities.IsValid(_screens[i])) continue;
 
                 string textureProperty = _textureProperties[i];
                 switch (_screenTypes[i])
                 {
                     case ScreenType.Renderer:
-                        if (!texture) ((Renderer)_screens[i]).SetPropertyBlock(new MaterialPropertyBlock(), 0);
+                        if (!Utilities.IsValid(texture))
+                        {
+                            ((Renderer)_screens[i]).SetPropertyBlock(new MaterialPropertyBlock(), 0);
+                        }
                         else
                         {
                             _propertyBlock.SetTexture(textureProperty, texture);
@@ -93,11 +111,23 @@ namespace Yamadev.YamaStream
         {
             foreach (Object obj in _screens)
             {
-                if (obj == screen) return;
+                if (obj == screen)
+                {
+                    PrintWarning($"Screen {screen.name} already exists");
+                    return;
+                }
             }
+
             _screenTypes = _screenTypes.Add(screenType);
             _screens = _screens.Add(screen);
             _textureProperties = _textureProperties.Add(textureProperty);
+        }
+
+        [Obsolete("Use MirrorFlip instead")]
+        public bool MirrorInverse
+        {
+            get => _mirrorFlip;
+            set => _mirrorFlip = value;
         }
     }
 }

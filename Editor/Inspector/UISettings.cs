@@ -88,7 +88,7 @@ namespace Yamadev.YamaStream.Editor
                 currentIndex = _colorPatterns.Count - 1;
             }
 
-            var patternNames = _colorPatterns.Select(pattern => pattern.Name).ToArray();
+            var patternNames = _colorPatterns.Select(pattern => Localization.Get(pattern.Name)).ToArray();
             var selectedIndex = EditorGUILayout.Popup(
                 label: Localization.GetLayout("colorPattern"),
                 selectedIndex: currentIndex,
