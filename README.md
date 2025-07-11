@@ -1,6 +1,6 @@
 <center>
 
-日本語 | [English](README-es.md) | [Español](README-en.md)
+日本語 | [English](README-en.md) | [Español](README-es.md)
 
 </center>
 
