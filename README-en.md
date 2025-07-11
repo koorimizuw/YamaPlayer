@@ -62,8 +62,8 @@ There are also many features friendly to world creators.
 
 ## Terms of Use
 Allowed:  
-Modification  
-Publication in VRChat as part of a world  
-Inclusion in paid or free world assets for sale  
+- Modification
+- Publication in VRChat as part of a world  
+- Inclusion in paid or free world assets for sale  
 
-Credit is optional, but it is required when including in world assets for sale.
+Credit is optional, but it is **required** when including in world assets for sale.
