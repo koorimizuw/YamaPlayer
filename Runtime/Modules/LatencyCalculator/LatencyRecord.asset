@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: LatencyRecord
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 4c808785a8ac63d47bb6bf90388e59b2, type: 2}
+  serializedUdonProgramAsset: {fileID: 11400000, guid: f982127b1d3f5bc41b3d69ed0ae73f4d, type: 2}
   udonAssembly: 
   assemblyError: 
   sourceCsScript: {fileID: 11500000, guid: d32f08c4d5751ab4e8faa0d4e5757a8b, type: 3}
