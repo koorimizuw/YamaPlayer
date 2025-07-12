@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: UIColor
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 5c34d20b8e040b841a458983c2f32d17, type: 2}
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 5981076b924de734c84c379a849c0fea, type: 2}
   udonAssembly: 
   assemblyError: 
   sourceCsScript: {fileID: 11500000, guid: a40883b1bf6bf5543bb641824e65f870, type: 3}

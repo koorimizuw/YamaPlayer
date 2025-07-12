@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: YamaPlayerScreen
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 86e27a739c036dc46ba49e9c224b25c9, type: 2}
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 1752322bddc53094e9a50d0c21cf6712, type: 2}
   udonAssembly: 
   assemblyError: 
   sourceCsScript: {fileID: 11500000, guid: 265c9f258d7fb464798c1f1207e6bd4e, type: 3}

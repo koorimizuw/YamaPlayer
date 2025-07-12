@@ -1,3 +1,11 @@
+<center>
+
+日本語 | [English](README-en.md) | [Español](README-es.md)
+
+</center>
+
+---
+
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/koorimizuw/YamaPlayer?label=release)](https://github.com/koorimizuw/YamaPlayer/releases)
 ![GitHub release (by tag)](https://img.shields.io/github/downloads/koorimizuw/YamaPlayer/latest/total)
 ![GitHub all releases](https://img.shields.io/github/downloads/koorimizuw/YamaPlayer/total?label=total%20downloads)
