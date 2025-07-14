@@ -163,9 +163,8 @@ namespace Yamadev.YamaStream.Editor
         {
             foreach (UIColor component in _uiController.GetComponentsInChildren<UIColor>(true))
             {
-                if (component.GetProgramVariable("_uiController") == null)
-                    component.SetProgramVariable("_uiController", _uiController);
-                component.Apply();
+                if (component == null) continue;
+                component.UIController = _uiController;
             }
 
             if (_font.objectReferenceValue != null)

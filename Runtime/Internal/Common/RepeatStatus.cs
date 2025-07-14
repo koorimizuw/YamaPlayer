@@ -54,7 +54,6 @@ namespace Yamadev.YamaStream
         public static void SetStartTime(this RepeatStatus status, float startTime)
         {
             ((object[])(object)status)[1] = startTime;
-            var arr = status.UnPack();
         }
 
         public static void SetEndTime(this RepeatStatus status, float endTime)

@@ -22,8 +22,8 @@ namespace Yamadev.YamaStream.Editor
         public const string VPMUrl = "https://vpm.kwxxw.net/index.json";
         public static bool HasNewVersion;
         public static string Newest = string.Empty;
-        const string _autoUpdateKey = "YamaPlayer_AutoUpdate";
-        const string _checkBetaKey = "YamaPlayer_CheckBetaUpdate";
+        private const string _autoUpdateKey = "YamaPlayer_AutoUpdate";
+        private const string _checkBetaKey = "YamaPlayer_CheckBetaUpdate";
 
         static VersionManager()
         {

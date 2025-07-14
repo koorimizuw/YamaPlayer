@@ -248,6 +248,7 @@ MonoBehaviour:
   _titles: []
   _urls: []
   _originalUrls: []
+  _timelines: []
 --- !u!114 &7722279235392064589
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -331,8 +332,8 @@ MonoBehaviour:
   _controller: {fileID: 5554431595894281846}
   _defaultPermission: 1
   _ownerList: []
-  _grantInstanceOwner: 1
-  _grantInstanceMaster: 0
+  _grantPermissionToInstanceOwner: 1
+  _grantPermissionToInstanceMaster: 1
 --- !u!114 &248334643434694213
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -545,8 +546,6 @@ MonoBehaviour:
   _version: 
   _playerType: 1
   _loop: 0
-  _slideMode: 0
-  _slideSeconds: 1
   _audioLink: {fileID: 0}
   _useAudioLink: 0
   _mute: 0
@@ -560,15 +559,15 @@ MonoBehaviour:
   _forwardInterval: 0
   _shuffle: 0
   _maxResolution: 1080
-  _mirrorInverse: 1
+  _mirrorFlip: 1
   _emission: 1
   _useLTCGI: 0
   _useLightVolumes: 0
-  _lightVolumeInstances: []
   _screenTypes: 
   _screens: []
   _textureProperties: []
-  _latencyManager: {fileID: 0}
+  _slideMode: 0
+  _slideSeconds: 1
   _syncFrequency: 5
   _syncMargin: 0.3
 --- !u!114 &8981407656220514902
@@ -660,6 +659,7 @@ MonoBehaviour:
   _titles: []
   _urls: []
   _originalUrls: []
+  _timelines: []
 --- !u!114 &2351837887736453344
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1198,6 +1198,7 @@ MonoBehaviour:
   _titles: []
   _urls: []
   _originalUrls: []
+  _timelines: []
 --- !u!114 &8305089628238822690
 MonoBehaviour:
   m_ObjectHideFlags: 0

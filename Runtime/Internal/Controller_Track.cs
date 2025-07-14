@@ -50,8 +50,6 @@ namespace Yamadev.YamaStream
                 Stop();
 
             LoadTrack(track);
-
-            _state = (byte)PlayerState.Playing;
         }
 
         private void LoadTrack(Track track, bool isReload = false)
@@ -68,6 +66,7 @@ namespace Yamadev.YamaStream
             if (!isReload) PlayerType = track.GetPlayerType();
             Track = track;
             ResolveTrack.Invoke();
+            _state = (byte)PlayerState.Playing;
 
             if (Networking.IsOwner(gameObject) && !_isLocal && !isReload) RequestSerialization();
             foreach (Listener listener in EventListeners) listener.OnUrlChanged();

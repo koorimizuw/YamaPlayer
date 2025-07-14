@@ -10,21 +10,21 @@ namespace Yamadev.YamaStream
     [DisallowMultipleComponent]
     public partial class Controller : Listener
     {
-        [SerializeField] PlayerHandler[] _videoPlayerHandlers;
-        [SerializeField] Permission _permission;
-        [SerializeField] float _retryAfterSeconds = 5.1f;
-        [SerializeField] int _maxErrorRetry = 5;
-        [SerializeField] string _timeFormat = @"hh\:mm\:ss";
-        [SerializeField] bool _isLocal;
-        [SerializeField] string _version;
-        [SerializeField, UdonSynced, FieldChangeCallback(nameof(PlayerType))] VideoPlayerType _playerType;
-        [SerializeField, UdonSynced, FieldChangeCallback(nameof(Loop))] bool _loop;
-        [UdonSynced, FieldChangeCallback(nameof(SyncedState))] byte _state;
-        [UdonSynced, FieldChangeCallback(nameof(Speed))] float _speed = 1f;
-        [UdonSynced, FieldChangeCallback(nameof(Repeat))] ulong _repeat;
+        [SerializeField] private PlayerHandler[] _videoPlayerHandlers;
+        [SerializeField] private Permission _permission;
+        [SerializeField] private float _retryAfterSeconds = 5.1f;
+        [SerializeField] private int _maxErrorRetry = 5;
+        [SerializeField] private string _timeFormat = @"hh\:mm\:ss";
+        [SerializeField] private bool _isLocal;
+        [SerializeField] private string _version;
+        [SerializeField, UdonSynced, FieldChangeCallback(nameof(PlayerType))] private VideoPlayerType _playerType;
+        [SerializeField, UdonSynced, FieldChangeCallback(nameof(Loop))] private bool _loop;
+        [UdonSynced, FieldChangeCallback(nameof(SyncedState))] private byte _state;
+        [UdonSynced, FieldChangeCallback(nameof(Speed))] private float _speed = 1f;
+        [UdonSynced, FieldChangeCallback(nameof(Repeat))] private ulong _repeat;
         private PlayerHandler _handler;
         private Listener[] _listeners;
-        private int _errorRetryCount = 0;
+        private int _errorRetryCount;
         private bool _reloading;
 
         private void Start()
@@ -167,19 +167,17 @@ namespace Yamadev.YamaStream
 
         public void Play(bool force = false)
         {
-            if (State == PlayerState.Playing && !force) return;
+            if (State == PlayerState.Idle || (State == PlayerState.Playing && !force)) return;
             Handler.Play();
             _state = (byte)PlayerState.Playing;
 
-            SendCustomEventDelayedFrames(nameof(CheckRepeat), 0);
-            if (KaraokeMode != KaraokeMode.None) SendCustomEventDelayedSeconds(nameof(EnsureVideoTime), 1f);
-
             UpdateAudioLinkMaterial("_MediaPlaying", IsLive ? 5 : 1);
             PlayTimeline(SyncedVideoTime);
+            SendCustomEventDelayedFrames(nameof(CheckRepeat), 0);
 
             if (Networking.IsOwner(gameObject) && !_isLocal && !_reloading)
             {
-                SyncedVideoTime = VideoTime - VideoStandardDelay;
+                SyncedVideoTime = VideoTime - _localDelay;
                 RequestSerialization();
             }
 
@@ -189,7 +187,7 @@ namespace Yamadev.YamaStream
 
         public void Pause()
         {
-            if (State == PlayerState.Paused) return;
+            if (State == PlayerState.Idle || State == PlayerState.Paused) return;
             Handler.Pause();
             _state = (byte)PlayerState.Paused;
 
@@ -198,7 +196,7 @@ namespace Yamadev.YamaStream
 
             if (Networking.IsOwner(gameObject) && !_isLocal)
             {
-                SyncedVideoTime = VideoTime - VideoStandardDelay;
+                SyncedVideoTime = VideoTime - _localDelay;
                 RequestSerialization();
             }
 
@@ -267,7 +265,7 @@ namespace Yamadev.YamaStream
                 UpdateSpeed();
                 if (Networking.IsOwner(gameObject) && !_isLocal)
                 {
-                    SyncedVideoTime = VideoTime - VideoStandardDelay;
+                    SyncedVideoTime = VideoTime - _localDelay;
                     RequestSerialization();
                 }
                 foreach (Listener listener in EventListeners) listener.OnSpeedChanged();
@@ -325,7 +323,7 @@ namespace Yamadev.YamaStream
             SetTimelineTime(time);
             if (Networking.IsOwner(gameObject) && !_isLocal)
             {
-                SyncedVideoTime = time - VideoStandardDelay;
+                SyncedVideoTime = time - _localDelay;
                 RequestSerialization();
             }
 

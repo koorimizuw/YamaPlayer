@@ -49,7 +49,7 @@ namespace Yamadev.YamaStream.Editor
             _controllerSettings = new ControllerSettings(_controller);
             _autoPlaySettings = new AutoPlaySettings(_autoPlay, _playlists);
             _permissionSettings = new PermissionSettings(_permission);
-            _externalSettings = new ExternalSettings(_controller);
+            _externalSettings = new ExternalSettings(_target, _controller);
             _versionSettings = new VersionSettings();
 
             _avPro = _target.GetComponentInChildren<VRCAVProVideoPlayer>();

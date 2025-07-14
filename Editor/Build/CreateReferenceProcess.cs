@@ -2,7 +2,6 @@ using System;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
-using VRC.SDKBase;
 using Yamadev.YamaStream.Script;
 using Yamadev.YamaStream.UI;
 
@@ -14,14 +13,12 @@ namespace Yamadev.YamaStream.Editor
 
         private const string TranslationFileGuid = "02e2b6ce10f26f94fb504aba7ccd2bfe";
         private const string UpdateLogFileGuid = "011c1aa791634cf45b66a6811ad47c8a";
-        private const int LatencyRecordCount = 300;
 
         public void Process()
         {
             try
             {
-                var latencyManager = CreateLatencyManager();
-                ProcessYamaPlayers(latencyManager);
+                ProcessYamaPlayers();
                 ProcessUIControllers();
             }
             catch (Exception ex)
@@ -31,41 +28,7 @@ namespace Yamadev.YamaStream.Editor
             }
         }
 
-        public LatencyManager CreateLatencyManager()
-        {
-            try
-            {
-                var gameObject = new GameObject("LatencyManager");
-                var latencyManager = gameObject.AddUdonSharpComponent<LatencyManager>(Networking.SyncType.None);
-                CreateLatencyRecords(latencyManager);
-                return latencyManager;
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"Failed to create LatencyManager: {ex.Message}");
-                throw;
-            }
-        }
-
-        private static void CreateLatencyRecords(LatencyManager latencyManager)
-        {
-            for (int i = 0; i < LatencyRecordCount; i++)
-            {
-                try
-                {
-                    var recordGameObject = new GameObject($"LatencyRecord({i})");
-                    var record = recordGameObject.AddUdonSharpComponent<LatencyRecord>(Networking.SyncType.Manual);
-
-                    record.transform.SetParent(latencyManager.transform);
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogWarning($"Failed to create LatencyRecord({i}): {ex.Message}");
-                }
-            }
-        }
-
-        private static void ProcessYamaPlayers(LatencyManager latencyManager)
+        private static void ProcessYamaPlayers()
         {
             var yamaPlayers = Utils.FindComponentsInHierarthy<YamaPlayer>();
 
@@ -75,7 +38,7 @@ namespace Yamadev.YamaStream.Editor
 
                 try
                 {
-                    ProcessYamaPlayer(player, latencyManager);
+                    ProcessYamaPlayer(player);
                 }
                 catch (Exception ex)
                 {
@@ -84,13 +47,12 @@ namespace Yamadev.YamaStream.Editor
             }
         }
 
-        private static void ProcessYamaPlayer(YamaPlayer player, LatencyManager latencyManager)
+        private static void ProcessYamaPlayer(YamaPlayer player)
         {
             var internalController = player.GetComponentInChildren<Controller>();
             if (internalController != null)
             {
                 internalController.SetProgramVariable("_version", VersionManager.Version);
-                internalController.SetProgramVariable("_latencyManager", latencyManager);
             }
             else
             {
@@ -132,7 +94,7 @@ namespace Yamadev.YamaStream.Editor
         private static void ProcessUIController(UIController uiController)
         {
             AssignTextAssets(uiController);
-            AssignUIControllerToUIColors(uiController);
+            ApplyUIColors(uiController);
             ApplyFontToTexts(uiController);
         }
 
@@ -165,48 +127,30 @@ namespace Yamadev.YamaStream.Editor
             return string.IsNullOrEmpty(assetPath) ? null : AssetDatabase.LoadAssetAtPath<T>(assetPath);
         }
 
-        private static void AssignUIControllerToUIColors(UIController uiController)
+        private static void ApplyUIColors(UIController uiController)
         {
             var uiColors = uiController.GetComponentsInChildren<UIColor>(true);
 
             foreach (var component in uiColors)
             {
                 if (component == null) continue;
-
-                try
-                {
-                    if (component.GetProgramVariable("_uiController") == null)
-                    {
-                        component.SetProgramVariable("_uiController", uiController);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogWarning($"Failed to assign UIController to UIColor {component.name}: {ex.Message}");
-                }
+                component.UIController = uiController;
             }
         }
 
         private static void ApplyFontToTexts(UIController uiController)
         {
-            try
+            var font = uiController.GetProgramVariable("_font") as Font;
+            if (font == null) return;
+
+            var texts = uiController.GetComponentsInChildren<Text>(true);
+
+            foreach (var text in texts)
             {
-                var font = uiController.GetProgramVariable("_font") as Font;
-                if (font == null) return;
-
-                var texts = uiController.GetComponentsInChildren<Text>(true);
-
-                foreach (var text in texts)
+                if (text != null)
                 {
-                    if (text != null)
-                    {
-                        text.font = font;
-                    }
+                    text.font = font;
                 }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogWarning($"Failed to apply font to texts: {ex.Message}");
             }
         }
     }

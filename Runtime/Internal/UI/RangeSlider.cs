@@ -1,8 +1,6 @@
-﻿
-using UdonSharp;
+﻿using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
-
 
 namespace Yamadev.YamaStream.UI
 {
@@ -13,10 +11,10 @@ namespace Yamadev.YamaStream.UI
         public Slider SliderRight;
         public RectTransform Fill;
 
-        bool _initialized = false;
-        float _width;
+        private bool _initialized = false;
+        private float _width;
 
-        void Start() => Initialize();
+        private void Start() => Initialize();
 
         public void Initialize()
         {

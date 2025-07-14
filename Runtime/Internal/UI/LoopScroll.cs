@@ -1,5 +1,4 @@
-﻿
-using UdonSharp;
+﻿using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,16 +8,17 @@ namespace Yamadev.YamaStream.UI
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class LoopScroll : UdonSharpBehaviour
     {
-        [SerializeField] GameObject _template;
-        ScrollRect _scrollRect;
-        bool _initialized;
-        Vector2 _position;
-        int _lineCount;
-        float _lineHeight;
-        int _length;
-        int[] _lastIndexes;
-        int[] _indexes;
-        UdonEvent _callback;
+        [SerializeField] private GameObject _template;
+        private ScrollRect _scrollRect;
+        private bool _initialized;
+        private Vector2 _position;
+        private int _lineCount;
+        private float _lineHeight;
+        private int _length;
+        private int[] _lastIndexes;
+        private int[] _indexes;
+        private UdonEvent _callback;
+
         void Start() => Initialize();
 
         public UdonEvent CallbackEvent

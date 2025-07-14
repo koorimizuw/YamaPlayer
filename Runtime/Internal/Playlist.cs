@@ -11,21 +11,21 @@ namespace Yamadev.YamaStream
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public class Playlist : Listener
     {
-        [SerializeField] Controller _controller;
-        [SerializeField] VideoInfo _videoInfo;
-        [SerializeField] bool _isQueue = false;
-        [SerializeField] bool _isHistory = false;
-        [SerializeField] string _playlistName;
-        [SerializeField, UdonSynced] VideoPlayerType[] _videoPlayerTypes = new VideoPlayerType[] { };
-        [SerializeField, UdonSynced] string[] _titles = new string[] { };
-        [SerializeField, UdonSynced] VRCUrl[] _urls = new VRCUrl[] { };
-        [SerializeField, UdonSynced] string[] _originalUrls = new string[] { };
-        [SerializeField] PlayableDirector[] _timelines = new PlayableDirector[] { };
-        DataList<Track> _tracks;
-        string _playlistUrl;
-        bool _initialized;
-        bool _isLoading;
-        bool _loaded;
+        [SerializeField] private Controller _controller;
+        [SerializeField] private VideoInfo _videoInfo;
+        [SerializeField] private bool _isQueue = false;
+        [SerializeField] private bool _isHistory = false;
+        [SerializeField] private string _playlistName;
+        [SerializeField, UdonSynced] private VideoPlayerType[] _videoPlayerTypes = new VideoPlayerType[0];
+        [SerializeField, UdonSynced] private string[] _titles = new string[0];
+        [SerializeField, UdonSynced] private VRCUrl[] _urls = new VRCUrl[0];
+        [SerializeField, UdonSynced] private string[] _originalUrls = new string[0];
+        [SerializeField] private PlayableDirector[] _timelines = new PlayableDirector[0];
+        private DataList<Track> _tracks;
+        private string _playlistUrl;
+        private bool _initialized;
+        private bool _isLoading;
+        private bool _loaded;
 
         private void Start()
         {

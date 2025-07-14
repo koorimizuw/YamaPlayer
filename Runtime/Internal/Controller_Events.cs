@@ -1,5 +1,6 @@
 using VRC.SDKBase;
 using VRC.SDK3.Components.Video;
+using UnityEngine;
 
 namespace Yamadev.YamaStream
 {
@@ -18,10 +19,6 @@ namespace Yamadev.YamaStream
             else EnsureVideoTime();
 
             PlayTimeline(0f);
-            if (KaraokeMode != KaraokeMode.None)
-            {
-                SendCustomEventDelayedSeconds(nameof(EnsureVideoTime), 1f);
-            }
 
             foreach (Listener listener in EventListeners) listener.OnVideoReady();
             PrintLog($"{_playerType.GetString()}: Video ready.");

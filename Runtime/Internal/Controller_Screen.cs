@@ -11,10 +11,6 @@ namespace Yamadev.YamaStream
         [SerializeField] private int _maxResolution;
         [SerializeField] private bool _mirrorFlip = true;
         [SerializeField, Range(0f, 1f)] private float _emission = 1f;
-#if UNITY_EDITOR && !COMPILER_UDONSHARP
-        [SerializeField] private bool _useLTCGI = false;
-        [SerializeField] private bool _useLightVolumes = false;
-#endif
         [SerializeField] private ScreenType[] _screenTypes;
         [SerializeField] private Object[] _screens;
         [SerializeField] private string[] _textureProperties;

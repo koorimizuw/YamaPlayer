@@ -1,5 +1,4 @@
-﻿
-using UdonSharp;
+﻿using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,21 +7,21 @@ namespace Yamadev.YamaStream.UI
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class Modal : UdonSharpBehaviour
     {
-        [SerializeField] Text _title;
-        [SerializeField] Text _message;
-        [SerializeField] ScrollRect _scrollRect;
-        [SerializeField] Button _close;
-        [SerializeField] Button _execute;
-        [SerializeField] Button _execute2;
-        [SerializeField] Text _closeText;
-        [SerializeField] Text _executeText;
-        [SerializeField] Text _execute2Text;
-        [SerializeField] float _maxHeight;
-        UdonEvent _closeEvent;
-        UdonEvent _executeEvent;
-        UdonEvent _execute2Event;
-        RectTransform _scrollRectTransform;
-        bool _initialized;
+        [SerializeField] private Text _title;
+        [SerializeField] private Text _message;
+        [SerializeField] private ScrollRect _scrollRect;
+        [SerializeField] private Button _close;
+        [SerializeField] private Button _execute;
+        [SerializeField] private Button _execute2;
+        [SerializeField] private Text _closeText;
+        [SerializeField] private Text _executeText;
+        [SerializeField] private Text _execute2Text;
+        [SerializeField] private float _maxHeight;
+        private UdonEvent _closeEvent;
+        private UdonEvent _executeEvent;
+        private UdonEvent _execute2Event;
+        private RectTransform _scrollRectTransform;
+        private bool _initialized;
 
         private void initialize()
         {

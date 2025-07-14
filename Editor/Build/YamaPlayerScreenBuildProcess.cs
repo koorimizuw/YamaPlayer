@@ -1,5 +1,6 @@
 using System.Linq;
 using UnityEngine;
+using Yamadev.YamaStream.Script;
 
 namespace Yamadev.YamaStream.Editor
 {
@@ -42,7 +43,8 @@ namespace Yamadev.YamaStream.Editor
 #if USE_LTCGI
             try
             {
-                var controller = FindLTCGIActivedController();
+                var player = FindLTCGIActivedPlayer();
+                var controller = player?.GetComponentInChildren<Controller>();
                 if (controller != null)
                 {
                     controller.AddScreen(ScreenType.Material, LTCGIUtility.CRT.material);
@@ -56,11 +58,11 @@ namespace Yamadev.YamaStream.Editor
 #endif
         }
 
-        private Controller FindLTCGIActivedController()
+        private YamaPlayer FindLTCGIActivedPlayer()
         {
 #if USE_LTCGI
-       var controllers = GameObject.FindObjectsOfType<Controller>();
-            var actived = controllers.Where(c => (bool)c.GetProgramVariable("_useLTCGI"));
+            var players = GameObject.FindObjectsOfType<YamaPlayer>();
+            var actived = players.Where(player => player.UseLTCGI);
 
             if (actived.Count() > 1)
             {

@@ -1,16 +1,24 @@
-﻿
-using UdonSharp;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace Yamadev.YamaStream.UI
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class UIColor : UdonSharpBehaviour
+    public class UIColor : MonoBehaviour
     {
-        [SerializeField] UIController _uiController;
-        [SerializeField] ColorType _colorType;
-        Color _color
+        [SerializeField] private UIController _uiController;
+        [SerializeField] private ColorType _colorType;
+
+        public UIController UIController
+        {
+            get => _uiController;
+            set
+            {
+                _uiController = value;
+                Apply();
+            }
+        }
+
+        private Color TargetColor
         {
             get
             {
@@ -21,19 +29,19 @@ namespace Yamadev.YamaStream.UI
                         return _uiController.PrimaryColor;
                     case ColorType.Secondary:
                         return _uiController.SecondaryColor;
+                    default:
+                        return new Color();
                 }
-                return new Color();
             }
         }
 
-        void Start() => Apply();
-
         public void Apply()
         {
-            Image img = GetComponent<Image>();
-            if (img != null) img.color = _color;
-            Text text = GetComponent<Text>();
-            if (text != null) text.color = _color;
+            var img = GetComponent<Image>();
+            if (img != null) img.color = TargetColor;
+
+            var text = GetComponent<Text>();
+            if (text != null) text.color = TargetColor;
         }
     }
 }

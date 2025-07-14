@@ -6,6 +6,7 @@ using UnityEngine;
 
 #if USE_VRCLV
 using VRCLightVolumes;
+using Yamadev.YamaStream.Script;
 #endif
 
 namespace Yamadev.YamaStream.Editor
@@ -40,13 +41,13 @@ namespace Yamadev.YamaStream.Editor
             }
         }
 
-        private Controller[] FindTVGIEnabledYamaPlayers()
+        private YamaPlayer[] FindTVGIEnabledYamaPlayers()
         {
-            var players = GameObject.FindObjectsOfType<Controller>();
-            return players.Where(player => (bool)player.GetProgramVariable("_useLightVolumes")).ToArray();
+            var players = GameObject.FindObjectsOfType<YamaPlayer>();
+            return players.Where(player => player.UseLightVolumes).ToArray();
         }
 
-        public void SetupTVGI(Controller controller)
+        public void SetupTVGI(YamaPlayer player)
         {
             try
             {
@@ -54,12 +55,18 @@ namespace Yamadev.YamaStream.Editor
                 GameObjectUtility.EnsureUniqueNameForSibling(go);
                 var tvgi = go.AddUdonSharpComponent<LightVolumeTVGI>(typeof(LightVolumeTVGI).GetSyncType());
 
-                AutoAssignAdditiveLightVolumes(controller, tvgi);
+                // AutoAssignAdditiveLightVolumes(player, tvgi);
+                var instances = player.TargetLightVolumes.Select(lv => lv.LightVolumeInstance).ToArray();
+                tvgi.TargetLightVolumes = instances;
 
                 var crt = CreateNewCustomRenderTexture();
                 tvgi.TargetRenderTexture = crt;
 
-                controller.AddScreen(ScreenType.Material, crt.material);
+                var controller = player.transform.GetComponentInChildren<Controller>();
+                if (controller != null)
+                {
+                    controller.AddScreen(ScreenType.Material, crt.material);
+                }
             }
             catch (System.Exception ex)
             {
@@ -108,7 +115,7 @@ namespace Yamadev.YamaStream.Editor
             }
         }
 
-        private void AutoAssignAdditiveLightVolumes(Controller controller, LightVolumeTVGI tvgi)
+        private void AutoAssignAdditiveLightVolumes(YamaPlayer player, LightVolumeTVGI tvgi)
         {
             var lightVolumes = _lightVolumes.Value;
             Debug.Log($"Found {lightVolumes.Count} LightVolumes in the scene.");
@@ -117,7 +124,7 @@ namespace Yamadev.YamaStream.Editor
             foreach (var lightVolume in lightVolumes)
             {
                 if (!lightVolume.Additive) continue;
-                if (ContainsPoint(lightVolume, controller.transform.position))
+                if (ContainsPoint(lightVolume, player.transform.position))
                 {
                     instances.Add(lightVolume.LightVolumeInstance);
                 }

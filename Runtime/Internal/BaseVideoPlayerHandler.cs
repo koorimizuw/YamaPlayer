@@ -33,7 +33,7 @@ namespace Yamadev.YamaStream
 
         private void Update()
         {
-            if (!_renderer || _stopped) return;
+            if (!_renderer || _stopped || _loading) return;
             if (_useMaterial) _videoTexture = _renderer.sharedMaterial.GetTexture(_textureName);
             else
             {
@@ -158,47 +158,51 @@ namespace Yamadev.YamaStream
         public override void PlayUrl(VRCUrl url)
         {
             if (!Utilities.IsValid(_baseVideoPlayer)) return;
+
             _baseVideoPlayer.PlayURL(url);
             _loadedUrl = url;
-            _loading = true;
             _stopped = false;
+            _loading = true;
         }
 
         public override void LoadUrl(VRCUrl url)
         {
             if (!Utilities.IsValid(_baseVideoPlayer)) return;
+
             _baseVideoPlayer.LoadURL(url);
             _loadedUrl = url;
-            _loading = true;
             _stopped = false;
+            _loading = true;
         }
 
         public override void Play()
         {
-            if (IsPlaying || !Utilities.IsValid(_baseVideoPlayer)) return;
+            if (_stopped || IsPlaying || !Utilities.IsValid(_baseVideoPlayer)) return;
             _baseVideoPlayer.Play();
         }
 
         public override void Pause()
         {
-            if (!IsPlaying || !Utilities.IsValid(_baseVideoPlayer)) return;
+            if (_stopped || !IsPlaying || !Utilities.IsValid(_baseVideoPlayer)) return;
             _baseVideoPlayer.Pause();
         }
 
         public override void Stop()
         {
             if (!Utilities.IsValid(_baseVideoPlayer)) return;
+
             _baseVideoPlayer.Stop();
             _loadedUrl = VRCUrl.Empty;
             _loading = false;
             _stopped = true;
-            if (!_videoTexture && Utilities.IsValid(_blitTexture))
+
+            if (!Utilities.IsValid(_videoTexture) && Utilities.IsValid(_blitTexture))
             {
                 _blitTexture.Release();
                 _blitTexture = null;
-                if (Utilities.IsValid(_listener)) _listener.OnTextureUpdated(null);
-                return;
             }
+
+            if (Utilities.IsValid(_listener)) _listener.OnTextureUpdated(null);
         }
 
         public override Texture Texture => _blitTexture ?? _videoTexture;
@@ -228,12 +232,17 @@ namespace Yamadev.YamaStream
         public override void OnVideoReady()
         {
             _loading = false;
+            if (_stopped)
+            {
+                _baseVideoPlayer.Stop();
+                return;
+            }
+
             if (Utilities.IsValid(_listener)) _listener.OnVideoReady();
         }
 
         public override void OnVideoStart()
         {
-            _loading = false;
             if (Utilities.IsValid(_listener)) _listener.OnVideoStart();
         }
 

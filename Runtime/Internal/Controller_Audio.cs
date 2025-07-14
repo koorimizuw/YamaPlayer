@@ -92,17 +92,17 @@ namespace Yamadev.YamaStream
         {
             get
             {
-                if (!AudioLinkAssigned) return false;
+                if (!AudioLinkAssigned || !Utilities.IsValid(MainAudioSource)) return false;
 
-                object audioLinkEnabled = _audioLink.GetProgramVariable("_audioLinkEnabled");
-                object audioSource = _audioLink.GetProgramVariable("audioSource");
-                if (!Utilities.IsValid(audioLinkEnabled) || !Utilities.IsValid(audioSource)) return false;
+                bool audioLinkEnabled = (bool)_audioLink.GetProgramVariable("_audioLinkEnabled");
+                AudioSource audioSource = (AudioSource)_audioLink.GetProgramVariable("audioSource");
+                if (!audioLinkEnabled || !Utilities.IsValid(audioSource) || audioSource != MainAudioSource) return false;
 
-                return (bool)audioLinkEnabled && (AudioSource)audioSource == MainAudioSource;
+                return true;
             }
             set
             {
-                if (!AudioLinkAssigned) return;
+                if (!AudioLinkAssigned || !Utilities.IsValid(MainAudioSource)) return;
 
                 if (value)
                 {
@@ -124,6 +124,12 @@ namespace Yamadev.YamaStream
             if (!Utilities.IsValid(_audioLinkMaterial))
             {
                 _audioLinkMaterial = (Material)_audioLink.GetProgramVariable("audioMaterial");
+            }
+
+            if (!Utilities.IsValid(_audioLinkMaterial))
+            {
+                PrintWarning("Audio link material not found.");
+                return;
             }
 
             _audioLinkMaterial.SetFloat(property, value);

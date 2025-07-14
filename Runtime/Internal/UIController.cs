@@ -56,8 +56,6 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] Slider _volume;
         [SerializeField] SliderHelper _volumeHelper;
         [SerializeField] Text _volumeTooltip;
-        [SerializeField] Slider _pitchSlider;
-        [SerializeField] Text _pitchText;
         [SerializeField] GameObject _audioLinkSettings;
         [SerializeField] Toggle _audioLinkOn;
         [SerializeField] Toggle _audioLinkOff;
@@ -73,10 +71,6 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] Text _repeatStartTime;
         [SerializeField] Text _repeatEndTime;
         [SerializeField] Text _localDelayText;
-        [SerializeField] Toggle _karaokeModeOff;
-        [SerializeField] Toggle _karaokeModeKaraoke;
-        [SerializeField] Toggle _karaokeModeDance;
-        [SerializeField] GameObject _karaokeModal;
 
         [SerializeField] LoopScroll _permission;
         [SerializeField] GameObject _permissionEntry;
@@ -522,51 +516,6 @@ namespace Yamadev.YamaStream.UI
         public void SetMaxResolution2160() => _controller.MaxResolution = 2160;
         public void SetMaxResolution4320() => _controller.MaxResolution = 4320;
 
-        public void SetKaraokeModeOff()
-        {
-            if (!IsPermissionGranted()) return;
-            _controller.TakeOwnership();
-            _controller.KaraokeMode = KaraokeMode.None;
-        }
-
-        public void SetKaraokeModeKaraoke()
-        {
-            if (!IsPermissionGranted()) return;
-            _controller.TakeOwnership();
-            _controller.KaraokeMode = KaraokeMode.Karaoke;
-        }
-
-        public void SetKaraokeModeDance()
-        {
-            if (!IsPermissionGranted()) return;
-            _controller.TakeOwnership();
-            _controller.KaraokeMode = KaraokeMode.Dance;
-        }
-
-        public void JoinKaraokeMembers()
-        {
-            if (_controller.KaraokeMode == KaraokeMode.None || _controller.IsKaraokeMember) return;
-            _controller.TakeOwnership();
-            _controller.KaraokeMembers = _controller.KaraokeMembers.Add(Networking.LocalPlayer.displayName);
-            if (Utilities.IsValid(_modal) && _modal.IsActive) OpenKaraokeMemberModal();
-        }
-
-        public void LeaveKaraokeMembers()
-        {
-            if (_controller.KaraokeMode == KaraokeMode.None || !_controller.IsKaraokeMember) return;
-            _controller.TakeOwnership();
-            _controller.KaraokeMembers = _controller.KaraokeMembers.Remove(Networking.LocalPlayer.displayName);
-            if (Utilities.IsValid(_modal) && _modal.IsActive) OpenKaraokeMemberModal();
-        }
-
-        public void OpenKaraokeMemberModal()
-        {
-            if (!_modal || _controller.KaraokeMode == KaraokeMode.None) return;
-            UdonEvent callback = _controller.IsKaraokeMember ? UdonEvent.New(this, nameof(LeaveKaraokeMembers)) : UdonEvent.New(this, nameof(JoinKaraokeMembers));
-            string executeText = _controller.IsKaraokeMember ? I18n.GetValue("leaveMember") : I18n.GetValue("joinMember");
-            _modal.Show(I18n.GetValue("karaokeMember"), string.Join("\n", _controller.KaraokeMembers), callback, I18n.GetValue("close"), executeText);
-        }
-
         public void SetPermission()
         {
             if (!_controller.Permission || !_permission || _permissionIndex < 0) return;
@@ -692,15 +641,6 @@ namespace Yamadev.YamaStream.UI
             if (Utilities.IsValid(_maxResolution4320)) _maxResolution4320.SetIsOnWithoutNotify(_controller.MaxResolution == 4320);
             if (Utilities.IsValid(_emissionSlider)) _emissionSlider.SetValueWithoutNotify(_controller.Emission);
             if (Utilities.IsValid(_emissionText)) _emissionText.text = $"{Mathf.Ceil(_controller.Emission * 100)}%";
-        }
-
-        private void UpdateKaraokeView()
-        {
-            if (Utilities.IsValid(_karaokeModeOff)) _karaokeModeOff.SetIsOnWithoutNotify(_controller.KaraokeMode == KaraokeMode.None);
-            if (Utilities.IsValid(_karaokeModeKaraoke)) _karaokeModeKaraoke.SetIsOnWithoutNotify(_controller.KaraokeMode == KaraokeMode.Karaoke);
-            if (Utilities.IsValid(_karaokeModeDance)) _karaokeModeDance.SetIsOnWithoutNotify(_controller.KaraokeMode == KaraokeMode.Dance);
-            if (Utilities.IsValid(_karaokeModal)) _karaokeModal.SetActive(_controller.KaraokeMode != KaraokeMode.None);
-            if (_modal.gameObject.activeSelf) OpenKaraokeMemberModal();
         }
 
         private void UpdateErrorView(VideoError videoError)
@@ -841,8 +781,6 @@ namespace Yamadev.YamaStream.UI
         public override void OnMaxResolutionChanged() => UpdateScreenView();
         public override void OnMirrorInversionChanged() => UpdateScreenView();
         public override void OnEmissionChanged() => UpdateScreenView();
-        public override void OnKaraokeModeChanged() => UpdateKaraokeView();
-        public override void OnKaraokeMemberChanged() => UpdateKaraokeView();
         public override void OnPermissionChanged() => GeneratePermissionView();
     }
 }

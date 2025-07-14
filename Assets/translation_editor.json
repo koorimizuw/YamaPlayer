@@ -150,7 +150,8 @@
     "ytDlpReturnedEmptyOutput": "yt-dlpの出力は空です。",
     "color": "カラー",
     "useLightVolumes": "Light Volumeを使用",
-    "playerSettings": "動画プレイヤー設定"
+    "playerSettings": "動画プレイヤー設定",
+    "targetLightVolumes": "対象のLight Volume"
   },
   "en-US": {
     "ui": "UI",
@@ -303,7 +304,8 @@
     "ytDlpReturnedEmptyOutput": "yt-dlp returned empty output.",
     "color": "Color",
     "useLightVolumes": "Use Light Volume",
-    "playerSettings": "Player Settings"
+    "playerSettings": "Player Settings",
+    "targetLightVolumes": "Target Light Volumes"
   },
   "zh-CN": {
     "ui": "UI",
@@ -456,7 +458,8 @@
     "ytDlpReturnedEmptyOutput": "yt-dlp返回空输出。",
     "color": "颜色",
     "useLightVolumes": "使用Light Volume",
-    "playerSettings": "播放器设置"
+    "playerSettings": "播放器设置",
+    "targetLightVolumes": "目標Light Volume"
   },
   "zh-TW": {
     "ui": "UI",
@@ -609,7 +612,8 @@
     "ytDlpReturnedEmptyOutput": "yt-dlp返回空輸出。",
     "color": "顏色",
     "useLightVolumes": "使用Light Volume",
-    "playerSettings": "播放器設定"
+    "playerSettings": "播放器設定",
+    "targetLightVolumes": "目標Light Volume"
   },
   "ko-KR": {
     "ui": "UI",
@@ -762,6 +766,7 @@
     "ytDlpReturnedEmptyOutput": "yt-dlp가 빈 출력을 반환했습니다.",
     "color": "색상",
     "useLightVolumes": "Light Volume 사용",
-    "playerSettings": "플레이어 설정"
+    "playerSettings": "플레이어 설정",
+    "targetLightVolumes": "대상 Light Volume"
   }
 }

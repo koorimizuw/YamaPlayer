@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 using System.Linq;
-using UdonSharp;
+using Yamadev.YamaStream.Script;
 
 #if USE_AUDIOLINK
 using AudioLink.Editor;
@@ -11,17 +11,32 @@ namespace Yamadev.YamaStream.Editor
 {
     public class ExternalSettings
     {
+        private readonly YamaPlayer _yamaPlayer;
         private readonly Controller _controller;
+
+        private readonly SerializedObject _yamaPlayerSerializedObject;
         private readonly SerializedObject _controllerSerializedObject;
 
         private readonly SerializedProperty _useAudioLink;
         private readonly SerializedProperty _audioLink;
         private readonly SerializedProperty _useLTCGI;
         private readonly SerializedProperty _useLightVolumes;
+        private readonly SerializedProperty _targetLightVolumes;
+
         public bool IsValid => _controller != null && _controllerSerializedObject != null;
 
-        public ExternalSettings(Controller controller)
+        public ExternalSettings(YamaPlayer yamaPlayer, Controller controller)
         {
+            _yamaPlayer = yamaPlayer;
+            if (_yamaPlayer != null)
+            {
+                _yamaPlayerSerializedObject = new SerializedObject(_yamaPlayer);
+
+                _useLTCGI = _yamaPlayerSerializedObject.FindProperty("UseLTCGI");
+                _useLightVolumes = _yamaPlayerSerializedObject.FindProperty("UseLightVolumes");
+                _targetLightVolumes = _yamaPlayerSerializedObject.FindProperty("TargetLightVolumes");
+            }
+
             _controller = controller;
             if (_controller != null)
             {
@@ -29,8 +44,6 @@ namespace Yamadev.YamaStream.Editor
 
                 _useAudioLink = _controllerSerializedObject.FindProperty("_useAudioLink");
                 _audioLink = _controllerSerializedObject.FindProperty("_audioLink");
-                _useLTCGI = _controllerSerializedObject.FindProperty("_useLTCGI");
-                _useLightVolumes = _controllerSerializedObject.FindProperty("_useLightVolumes");
             }
         }
 
@@ -84,7 +97,7 @@ namespace Yamadev.YamaStream.Editor
                 {
                     if (_useLTCGI.boolValue)
                     {
-                        if (!CheckLTCGIEnabledOnOtherPlayers(_controller))
+                        if (!CheckLTCGIEnabledOnOtherPlayers(_yamaPlayer))
                         {
                             var applyToAllScreens = ShowApplyToAllScreensMessage();
                             LTCGIUtility.ProcessLTCGI(_controller, applyToAllScreens);
@@ -101,11 +114,11 @@ namespace Yamadev.YamaStream.Editor
 #endif
         }
 
-        private bool CheckLTCGIEnabledOnOtherPlayers(Controller current)
+        private bool CheckLTCGIEnabledOnOtherPlayers(YamaPlayer current)
         {
 #if USE_LTCGI
-            var controllers = GameObject.FindObjectsOfType<Controller>();
-            var enabled = controllers.Where(c => (bool)c.GetProgramVariable("_useLTCGI")).ToArray();
+            var yamaPlayers = GameObject.FindObjectsOfType<YamaPlayer>();
+            var enabled = yamaPlayers.Where(player => player.UseLTCGI).ToArray();
 
             if (enabled.Length == 0 || enabled.FirstOrDefault() == current)
             {
@@ -115,12 +128,12 @@ namespace Yamadev.YamaStream.Editor
             if (Styles.DisplayConfirmDialog(Localization.Get("ltcgiSetOnOtherPlayer"), Localization.Get("clearLTCGISettings")))
             {
                 LTCGIUtility.ClearLTCGISettings();
-                foreach (var controller in controllers)
+                foreach (var yamaPlayer in yamaPlayers)
                 {
-                    if (controller != current)
+                    if (yamaPlayer != current)
                     {
-                        var serializedObject = new SerializedObject(controller);
-                        serializedObject.FindProperty("_useLTCGI").boolValue = false;
+                        var serializedObject = new SerializedObject(yamaPlayer);
+                        serializedObject.FindProperty("UseLTCGI").boolValue = false;
                         serializedObject.ApplyModifiedProperties();
                     }
                 }
@@ -144,6 +157,10 @@ namespace Yamadev.YamaStream.Editor
             using (var changeCheck = new EditorGUI.ChangeCheckScope())
             {
                 EditorGUILayout.PropertyField(_useLightVolumes, Localization.GetLayout("useLightVolumes"));
+                if (_useLightVolumes.boolValue)
+                {
+                    EditorGUILayout.PropertyField(_targetLightVolumes, Localization.GetLayout("targetLightVolumes"));
+                }
             }
 #else
             EditorGUILayout.LabelField("Light Volumes", Localization.Get("vrclvNotImported"));
@@ -154,6 +171,7 @@ namespace Yamadev.YamaStream.Editor
         {
             try
             {
+                _yamaPlayerSerializedObject?.ApplyModifiedProperties();
                 _controllerSerializedObject?.ApplyModifiedProperties();
             }
             catch (System.Exception ex)

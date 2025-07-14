@@ -10,10 +10,10 @@ namespace Yamadev.YamaStream
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class InputController : UdonSharpBehaviour
     {
-        bool _rightHand = true;
-        bool _isVr = false;
-        bool _initialized = false;
-        VRCPlayerApi _localPlayer;
+        private bool _rightHand = true;
+        private bool _isVr = false;
+        private bool _initialized = false;
+        private VRCPlayerApi _localPlayer;
 
         private void Start() => Initialize();
 
@@ -60,7 +60,7 @@ namespace Yamadev.YamaStream
                     uiDistance = hit.distance;
                     uiPoint = hit.point;
                 }
-                    
+
             }
             return distance < uiDistance ? Vector3.zero : uiPoint;
         }

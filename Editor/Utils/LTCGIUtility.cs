@@ -1,5 +1,7 @@
 using UnityEditor;
 using UnityEngine;
+using Yamadev.YamaStream.Script;
+
 
 #if USE_LTCGI
 using pi.LTCGI;
@@ -79,6 +81,9 @@ namespace Yamadev.YamaStream.Editor
             {
                 if (screen.controller == controller && screen.Type == ScreenType.Renderer && screen.GetComponent<Renderer>() != null)
                 {
+                    var isMainScreen = screen.GetComponentInParent<YamaPlayer>() != null;
+                    if (!applyToAllScreens && !isMainScreen) continue;
+
                     var ltcgiScreen = screen.GetComponent<LTCGI_Screen>() ?? screen.gameObject.AddComponent<LTCGI_Screen>();
                     ltcgiScreen.ColorMode = ColorMode.Texture;
                 }
@@ -89,7 +94,9 @@ namespace Yamadev.YamaStream.Editor
         {
             var ltcgiScreens = GameObject.FindObjectsOfType<LTCGI_Screen>();
             foreach (LTCGI_Screen ltcgiScreen in ltcgiScreens)
+            {
                 Object.DestroyImmediate(ltcgiScreen);
+            }
         }
     }
 #endif

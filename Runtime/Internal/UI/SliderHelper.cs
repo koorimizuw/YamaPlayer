@@ -1,7 +1,5 @@
-﻿
-using UdonSharp;
+﻿using UdonSharp;
 using UnityEngine;
-using VRC.SDKBase;
 
 namespace Yamadev.YamaStream.UI
 {
@@ -9,12 +7,12 @@ namespace Yamadev.YamaStream.UI
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class SliderHelper : UdonSharpBehaviour
     {
-        [SerializeField] InputController _inputController;
-        [SerializeField] RectTransform _tooltip;
-        RectTransform _trans;
-        float _percent = 0f;
+        [SerializeField] private InputController _inputController;
+        [SerializeField] private RectTransform _tooltip;
+        private RectTransform _trans;
+        private float _percent = 0f;
 
-        void Start()
+        private void Start()
         {
             _trans = GetComponent<RectTransform>();
         }
