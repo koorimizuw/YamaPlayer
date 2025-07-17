@@ -141,7 +141,7 @@ namespace Yamadev.YamaStream
 
         public PlayerState State => (PlayerState)_state;
 
-        private byte SyncedState
+        public byte SyncedState
         {
             set
             {
@@ -150,12 +150,15 @@ namespace Yamadev.YamaStream
                 {
                     case PlayerState.Idle:
                         Stop();
+                        _state = (byte)PlayerState.Idle;
                         break;
                     case PlayerState.Playing:
                         Play();
+                        _state = (byte)PlayerState.Playing;
                         break;
                     case PlayerState.Paused:
                         Pause();
+                        _state = (byte)PlayerState.Paused;
                         break;
                 }
             }
@@ -167,7 +170,7 @@ namespace Yamadev.YamaStream
 
         public void Play(bool force = false)
         {
-            if (State == PlayerState.Idle || (State == PlayerState.Playing && !force)) return;
+            if ((State == PlayerState.Idle || State == PlayerState.Playing) && !force) return;
             Handler.Play();
             _state = (byte)PlayerState.Playing;
 
@@ -185,9 +188,9 @@ namespace Yamadev.YamaStream
             PrintLog($"{_playerType.GetString()}: Video play.");
         }
 
-        public void Pause()
+        public void Pause(bool force = false)
         {
-            if (State == PlayerState.Idle || State == PlayerState.Paused) return;
+            if ((State == PlayerState.Idle || State == PlayerState.Paused) && !force) return;
             Handler.Pause();
             _state = (byte)PlayerState.Paused;
 
@@ -204,9 +207,9 @@ namespace Yamadev.YamaStream
             PrintLog($"{_playerType.GetString()}: Video pause.");
         }
 
-        public void Stop()
+        public void Stop(bool force = false)
         {
-            if (State == PlayerState.Idle) return;
+            if (State == PlayerState.Idle && !force) return;
             Handler.Stop();
             _state = (byte)PlayerState.Idle;
             _reloading = false;
@@ -217,6 +220,9 @@ namespace Yamadev.YamaStream
             UpdateAudioLinkMaterial("_MediaPlaying", 3);
 
             if (!string.IsNullOrEmpty(Track.GetUrl())) _history.AddTrack(Track);
+            _url = VRCUrl.Empty;
+            _originalUrl = string.Empty;
+            _title = string.Empty;
             Track = Track.New(_playerType, string.Empty, VRCUrl.Empty);
 
             if (Networking.IsOwner(gameObject) && !_isLocal)
@@ -353,7 +359,7 @@ namespace Yamadev.YamaStream
             }
             foreach (Listener listener in EventListeners) listener.OnTrackSynced(track.GetUrl());
 
-            if (track.GetUrl() != Track.GetUrl())
+            if (_state != (byte)PlayerState.Idle && track.GetUrl() != Track.GetUrl())
             {
                 StopTimeline();
                 LoadTrack(track);

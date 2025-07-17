@@ -561,8 +561,6 @@ MonoBehaviour:
   _maxResolution: 1080
   _mirrorFlip: 1
   _emission: 1
-  _useLTCGI: 0
-  _useLightVolumes: 0
   _screenTypes: 
   _screens: []
   _textureProperties: []
@@ -1659,6 +1657,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Internal: {fileID: 0}
   MainScreen: {fileID: 0}
+  UseLTCGI: 0
+  UseLightVolumes: 0
+  TargetLightVolumes: []
 --- !u!1 &8668596368552718706
 GameObject:
   m_ObjectHideFlags: 0

@@ -46,9 +46,12 @@ namespace Yamadev.YamaStream
                 return;
             }
 
-            if (!string.IsNullOrEmpty(Track.GetUrl()) && (Networking.IsOwner(gameObject) || _isLocal))
+            if (State == PlayerState.Playing && (Networking.IsOwner(gameObject) || _isLocal))
+            {
                 Stop();
+            }
 
+            _state = (byte)PlayerState.Playing;
             LoadTrack(track);
         }
 
@@ -66,9 +69,11 @@ namespace Yamadev.YamaStream
             if (!isReload) PlayerType = track.GetPlayerType();
             Track = track;
             ResolveTrack.Invoke();
-            _state = (byte)PlayerState.Playing;
 
-            if (Networking.IsOwner(gameObject) && !_isLocal && !isReload) RequestSerialization();
+            if (Networking.IsOwner(gameObject) && !_isLocal && !isReload)
+            {
+                RequestSerialization();
+            }
             foreach (Listener listener in EventListeners) listener.OnUrlChanged();
             PrintLog($"Load url: {track.GetUrl()}.");
         }

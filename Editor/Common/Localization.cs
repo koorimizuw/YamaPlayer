@@ -66,12 +66,20 @@ namespace Yamadev.YamaStream.Editor
                 case "ja-JP":
                     return "日本語";
                 case "en-US":
-                case "en-GB​":
+                case "en-GB":
                 case "en-CA":
                 case "en-AU":
                 case "en-SG":
                 case "en-IN":
                     return "English";
+                case "es-CL":
+                case "es-ES":
+                case "es-MX":
+                case "es-AR":
+                case "es-CO":
+                case "es-PE":
+                case "es-VE":
+                    return "Español";
                 case "ko-KR":
                     return "한국어";
                 case "zh-CN":
