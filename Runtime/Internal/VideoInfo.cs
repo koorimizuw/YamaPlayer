@@ -10,10 +10,10 @@ namespace Yamadev.YamaStream
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class VideoInfo : Listener
     {
-        [SerializeField] Controller _controller;
-        DataDictionary _info = new DataDictionary();
+        [SerializeField] private Controller _controller;
+        private DataDictionary _info = new DataDictionary();
 
-        void Start() => _controller.AddListener(this);
+        private void Start() => _controller.AddListener(this);
 
         public string GetVideoInfo(VRCUrl url)
         {
@@ -23,9 +23,18 @@ namespace Yamadev.YamaStream
             return string.Empty;
         }
 
-        public void DownloadVideoInfo(VRCUrl url)
+        private bool IsSupportedUrl(string url)
         {
-            if (!url.IsValid()) return;
+            if (url.StartsWith("https://www.youtube.com") || url.StartsWith("https://youtube.com") || url.StartsWith("https://youtu.be"))
+                return true;
+            if (url.StartsWith("https://www.twitch.tv") || url.StartsWith("https://twitch.tv"))
+                return true;
+            return false;
+        }
+
+        private void DownloadVideoInfo(VRCUrl url)
+        {
+            if (!url.IsValid() || !IsSupportedUrl(url.Get())) return;
             VRCStringDownloader.LoadUrl(url, (IUdonEventReceiver)this);
         }
 
@@ -52,7 +61,7 @@ namespace Yamadev.YamaStream
 
         public override void OnUrlChanged()
         {
-            if (_controller.Track.GetTitle() == string.Empty) 
+            if (_controller.Track.GetTitle() == string.Empty)
                 DownloadVideoInfo(_controller.Track.GetVRCUrl());
         }
 
