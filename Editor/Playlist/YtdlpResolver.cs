@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 using Debug = UnityEngine.Debug;
 
@@ -17,11 +18,14 @@ namespace Yamadev.YamaStream.Editor
         private const string FILENAME = "yt-dlp.exe";
 #elif UNITY_EDITOR_OSX
         private const string FILENAME = "yt-dlp_macos";
-        private const uint EXECUTABLE_PERMISSION = 0x100 | 0x40 | 0x80 | 0x20 | 0x8 | 0x4 | 0x1; // 0755
 #elif UNITY_EDITOR_LINUX
         private const string FILENAME = "yt-dlp_linux";
 #else
         private const string FILENAME = "yt-dlp";
+#endif
+
+#if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX
+        private const uint EXECUTABLE_PERMISSION = 0x100 | 0x40 | 0x80 | 0x20 | 0x8 | 0x4 | 0x1; // 0755
 #endif
 
         private static readonly string DownloadUrl = $"https://github.com/yt-dlp/yt-dlp/releases/latest/download/{FILENAME}";
