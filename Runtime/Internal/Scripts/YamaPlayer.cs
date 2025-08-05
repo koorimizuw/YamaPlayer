@@ -1,5 +1,5 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
+using VRCLightVolumes;
 
 namespace Yamadev.YamaStream.Script
 {
@@ -7,5 +7,13 @@ namespace Yamadev.YamaStream.Script
     {
         public Transform Internal;
         public Renderer MainScreen;
+
+        public bool UseLTCGI;
+        public bool UseLightVolumes;
+#if USE_VRCLV
+        public LightVolume[] TargetLightVolumes;
+#else
+        public MonoBehaviour[] TargetLightVolumes;
+#endif
     }
 }

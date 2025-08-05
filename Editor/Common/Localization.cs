@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Globalization;
 using System.Linq;
 using UnityEditor;
@@ -10,10 +9,10 @@ namespace Yamadev.YamaStream.Editor
 {
     internal static class Localization
     {
-        const string _tranlationGuid = "2d9e9cf6962ed7041b11321394b0bcac";
-        const string _languageKey = "YamaPlayer_EditorLanguage";
-        static string _defaultLanguage = "en-US";
-        static DataDictionary _translation;
+        private const string _tranlationGuid = "2d9e9cf6962ed7041b11321394b0bcac";
+        private const string _languageKey = "YamaPlayer_EditorLanguage";
+        private static string _defaultLanguage = "en-US";
+        private static DataDictionary _translation;
 
         public static DataDictionary Translation
         {
@@ -24,7 +23,7 @@ namespace Yamadev.YamaStream.Editor
                     TextAsset languageAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(AssetDatabase.GUIDToAssetPath(_tranlationGuid));
                     if (languageAsset != null &&
                         VRCJson.TryDeserializeFromJson(languageAsset.text, out DataToken data) &&
-                        data.TokenType == TokenType.DataDictionary) 
+                        data.TokenType == TokenType.DataDictionary)
                         _translation = data.DataDictionary;
                     else _translation = new DataDictionary();
                 }
@@ -51,7 +50,7 @@ namespace Yamadev.YamaStream.Editor
 
         public static string GetValue(string key, string language)
         {
-            if (Translation.TryGetValue(language, out var tr) && 
+            if (Translation.TryGetValue(language, out var tr) &&
                 tr.DataDictionary.TryGetValue(key, out var value))
                 return value.String;
             return null;

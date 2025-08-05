@@ -1,66 +1,79 @@
-﻿
-using UdonSharp;
+﻿using System;
 using UnityEngine;
 
 namespace Yamadev.YamaStream
 {
-    public class RepeatStatus : UdonSharpBehaviour { }
+    public class RepeatStatus : ObjectClass
+    {
+        public static RepeatStatus New(ulong packed)
+        {
+            bool flag = (packed & (1ul << 63)) != 0;
+            ulong clearedPacked = packed & ~(1ul << 63);
+            uint startBits = (uint)((clearedPacked >> 32) & 0xFFFFFFFF);
+            uint endBits = (uint)(clearedPacked & 0xFFFFFFFF);
+
+            float start = BitConverter.ToSingle(BitConverter.GetBytes(startBits), 0);
+            float end = BitConverter.ToSingle(BitConverter.GetBytes(endBits), 0);
+
+            var result = new object[] { flag, start, end };
+            return result.ForceCast<RepeatStatus>();
+        }
+
+        public static RepeatStatus New(bool flag, float start, float end)
+        {
+            var result = new object[] { flag, start, end };
+            return result.ForceCast<RepeatStatus>();
+        }
+    }
 
     public static class RepeatStatusExtentions
     {
-        static object[] parse(this RepeatStatus _status)
+        public static ulong Pack(this RepeatStatus status)
         {
-            return (object[])(object)_status;
+            var arr = status.UnPack();
+            ulong flagBit = ((bool)arr[0] ? 1ul : 0ul) << 63;
+            uint startBits = BitConverter.ToUInt32(BitConverter.GetBytes((float)arr[1]), 0);
+            uint endBits = BitConverter.ToUInt32(BitConverter.GetBytes((float)arr[2]), 0);
+
+            return flagBit | ((ulong)startBits << 32) | endBits;
         }
 
-        public static RepeatStatus ToRepeatStatus(this Vector3 vect)
+        public static float GetStartTime(this RepeatStatus status)
         {
-            bool enabled = vect.x == 1f;
-            return (RepeatStatus)(object)(object[]) new object[] { enabled, vect.y, vect.z };
+            var arr = status.UnPack();
+            return (float)arr[1];
         }
 
-        public static Vector3 ToVector3 (this RepeatStatus _status)
+        public static float GetEndTime(this RepeatStatus status)
         {
-            object[] status = _status.parse();
-            float x = (bool)status[0] ? 1f : 0f;
-            return new Vector3 (x, _status.GetStartTime(), _status.GetEndTime());
+            var arr = status.UnPack();
+            float value = (float)arr[2];
+            return value == 0f ? Mathf.Infinity : value;
         }
 
-        public static float GetStartTime(this RepeatStatus _status)
+        public static void SetStartTime(this RepeatStatus status, float startTime)
         {
-            object[] status = _status.parse();
-            return (float)status[1];
+            ((object[])(object)status)[1] = startTime;
         }
 
-        public static float GetEndTime(this RepeatStatus _status)
+        public static void SetEndTime(this RepeatStatus status, float endTime)
         {
-            object[] status = _status.parse();
-            return (float)status[2];
+            ((object[])(object)status)[2] = endTime;
         }
 
-        public static void SetStartTime(this RepeatStatus _status, float startTime)
+        public static bool IsOn(this RepeatStatus status)
         {
-            ((object[])(object)_status)[1] = startTime;
+            return (bool)status.UnPack()[0];
         }
 
-        public static void SetEndTime(this RepeatStatus _status, float endTime)
+        public static void TurnOn(this RepeatStatus status)
         {
-            ((object[])(object)_status)[2] = endTime;
+            ((object[])(object)status)[0] = true;
         }
 
-        public static bool IsOn(this RepeatStatus _status)
+        public static void TurnOff(this RepeatStatus status)
         {
-            return (bool)_status.parse()[0];
-        }
-
-        public static void TurnOn(this RepeatStatus _status)
-        {
-            ((object[])(object)_status)[0] = true;
-        }
-
-        public static void TurnOff(this RepeatStatus _status)
-        {
-            ((object[])(object)_status)[0] = false;
+            ((object[])(object)status)[0] = false;
         }
     }
 }

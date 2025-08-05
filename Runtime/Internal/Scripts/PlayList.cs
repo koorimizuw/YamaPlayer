@@ -1,6 +1,7 @@
 ﻿
 using System;
 using UnityEngine;
+using UnityEngine.Playables;
 
 namespace Yamadev.YamaStream.Script
 {
@@ -10,6 +11,7 @@ namespace Yamadev.YamaStream.Script
         public VideoPlayerType Mode;
         public string Title;
         public string Url;
+        public PlayableDirector PlayableDirector;
     }
 
     public class PlayList : MonoBehaviour
