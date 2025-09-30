@@ -65,7 +65,7 @@ namespace Yamadev.YamaStream.Editor
             MediaPlayer mediaPlayer = avPro.gameObject.AddComponent<MediaPlayer>();
 #if UNITY_EDITOR_WIN
             OptionsWindows options = (OptionsWindows)mediaPlayer.GetCurrentPlatformOptions();
-            options._audioMode = Windows.AudioOutput.Unity;
+            options.audioOutput = Windows.AudioOutput.Unity;
 #endif
             VRCAVProVideoScreen[] vrcAVProVideoScreens = Utils.FindComponentsInHierarthy<VRCAVProVideoScreen>();
             foreach (VRCAVProVideoScreen screen in vrcAVProVideoScreens)
