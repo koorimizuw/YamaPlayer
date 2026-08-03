@@ -1,0 +1,19 @@
+{
+    "name": "Yamadev.YamaStream.Modules.PermissionManagement.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:165d832aac3edac47af5451df1676e53",
+        "GUID:0d73284b61b0c97449887b82db5ead2b"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

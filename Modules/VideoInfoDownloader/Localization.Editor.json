@@ -1,0 +1,38 @@
+{
+  "ja": {
+    "module.videoInfoDownloader.name": "動画情報取得",
+    "module.videoInfoDownloader.description": "YouTubeやTwitchから動画タイトルを自動取得します"
+  },
+  "en": {
+    "module.videoInfoDownloader.name": "Video Info Downloader",
+    "module.videoInfoDownloader.description": "Automatically downloads video titles from YouTube or Twitch"
+  },
+  "ko": {
+    "module.videoInfoDownloader.name": "비디오 정보 다운로더",
+    "module.videoInfoDownloader.description": "YouTube 또는 Twitch에서 비디오 제목을 자동으로 다운로드합니다"
+  },
+  "zh-CN": {
+    "module.videoInfoDownloader.name": "视频信息下载器",
+    "module.videoInfoDownloader.description": "自动从YouTube或Twitch下载视频标题"
+  },
+  "zh-TW": {
+    "module.videoInfoDownloader.name": "影片資訊下載器",
+    "module.videoInfoDownloader.description": "自動從YouTube或Twitch下載影片標題"
+  },
+  "es": {
+    "module.videoInfoDownloader.name": "Descargador de Info de Video",
+    "module.videoInfoDownloader.description": "Descarga automáticamente títulos de videos de YouTube o Twitch"
+  },
+  "ru": {
+    "module.videoInfoDownloader.name": "Загрузчик информации о видео",
+    "module.videoInfoDownloader.description": "Автоматически загружает названия видео с YouTube или Twitch"
+  },
+  "uk": {
+    "module.videoInfoDownloader.name": "Завантажувач інформації про відео",
+    "module.videoInfoDownloader.description": "Автоматично завантажує назви відео з YouTube або Twitch"
+  },
+  "it": {
+    "module.videoInfoDownloader.name": "Scaricatore Info Video",
+    "module.videoInfoDownloader.description": "Scarica automaticamente i titoli dei video da YouTube o Twitch"
+  }
+}

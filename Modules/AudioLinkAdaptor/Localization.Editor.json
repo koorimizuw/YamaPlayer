@@ -1,0 +1,74 @@
+{
+  "ja": {
+    "module.audioLinkAdaptor.name": "AudioLink アダプター",
+    "module.audioLinkAdaptor.description": "AudioLinkの動画連動を自動設定します",
+    "module.audioLinkAdaptor.defaultAudioLinkEnabled": "デフォルトでAudioLinkを有効にする",
+    "module.audioLinkAdaptor.hint": "AudioLinkの参照先が設定されてない場合はビルド時に自動設定します。",
+    "module.audioLinkAdaptor.notInstalled": "AudioLinkが導入されていません。AudioLinkをインストールしてください。",
+    "module.audioLinkAdaptor.addToScene": "AudioLinkをシーンに追加"
+  },
+  "en": {
+    "module.audioLinkAdaptor.name": "AudioLink Adaptor",
+    "module.audioLinkAdaptor.description": "Automatically configures AudioLink video integration",
+    "module.audioLinkAdaptor.defaultAudioLinkEnabled": "Default to enable AudioLink",
+    "module.audioLinkAdaptor.hint": "If AudioLink reference is not set, it will be automatically configured at build time.",
+    "module.audioLinkAdaptor.notInstalled": "AudioLink is not installed. Please install AudioLink.",
+    "module.audioLinkAdaptor.addToScene": "Add AudioLink to Scene"
+  },
+  "ko": {
+    "module.audioLinkAdaptor.name": "AudioLink 어댑터",
+    "module.audioLinkAdaptor.description": "AudioLink 비디오 연동을 자동으로 설정합니다",
+    "module.audioLinkAdaptor.defaultAudioLinkEnabled": "기본적으로 AudioLink를 활성화합니다",
+    "module.audioLinkAdaptor.hint": "AudioLink 참조가 설정되지 않은 경우 빌드 시 자동으로 설정됩니다.",
+    "module.audioLinkAdaptor.notInstalled": "AudioLink가 설치되어 있지 않습니다. AudioLink를 설치해 주세요.",
+    "module.audioLinkAdaptor.addToScene": "AudioLink를 씬에 추가"
+  },
+  "zh-CN": {
+    "module.audioLinkAdaptor.name": "AudioLink 适配器",
+    "module.audioLinkAdaptor.description": "自动配置AudioLink视频联动",
+    "module.audioLinkAdaptor.defaultAudioLinkEnabled": "默认启用AudioLink",
+    "module.audioLinkAdaptor.hint": "如果未设置AudioLink引用，将在构建时自动配置。",
+    "module.audioLinkAdaptor.notInstalled": "AudioLink未安装。请安装AudioLink。",
+    "module.audioLinkAdaptor.addToScene": "将AudioLink添加到场景"
+  },
+  "zh-TW": {
+    "module.audioLinkAdaptor.name": "AudioLink 適配器",
+    "module.audioLinkAdaptor.description": "自動設定AudioLink影片連動",
+    "module.audioLinkAdaptor.defaultAudioLinkEnabled": "預設啟用AudioLink",
+    "module.audioLinkAdaptor.hint": "如果未設定AudioLink參照，將在建置時自動設定。",
+    "module.audioLinkAdaptor.notInstalled": "AudioLink尚未安裝。請安裝AudioLink。",
+    "module.audioLinkAdaptor.addToScene": "將AudioLink加入場景"
+  },
+  "es": {
+    "module.audioLinkAdaptor.name": "Adaptador AudioLink",
+    "module.audioLinkAdaptor.description": "Configura automáticamente la integración de video AudioLink",
+    "module.audioLinkAdaptor.defaultAudioLinkEnabled": "Activar AudioLink por defecto",
+    "module.audioLinkAdaptor.hint": "Si la referencia de AudioLink no está configurada, se configurará automáticamente en el momento de la compilación.",
+    "module.audioLinkAdaptor.notInstalled": "AudioLink no está instalado. Por favor, instale AudioLink.",
+    "module.audioLinkAdaptor.addToScene": "Agregar AudioLink a la escena"
+  },
+  "ru": {
+    "module.audioLinkAdaptor.name": "Адаптер AudioLink",
+    "module.audioLinkAdaptor.description": "Автоматически настраивает интеграцию видео AudioLink",
+    "module.audioLinkAdaptor.defaultAudioLinkEnabled": "Включить AudioLink по умолчанию",
+    "module.audioLinkAdaptor.hint": "Если ссылка на AudioLink не установлена, она будет автоматически настроена во время сборки.",
+    "module.audioLinkAdaptor.notInstalled": "AudioLink не установлен. Пожалуйста, установите AudioLink.",
+    "module.audioLinkAdaptor.addToScene": "Добавить AudioLink в сцену"
+  },
+  "uk": {
+    "module.audioLinkAdaptor.name": "Адаптер AudioLink",
+    "module.audioLinkAdaptor.description": "Автоматично налаштовує інтеграцію відео AudioLink",
+    "module.audioLinkAdaptor.defaultAudioLinkEnabled": "Увімкнути AudioLink за замовчуванням",
+    "module.audioLinkAdaptor.hint": "Якщо посилання на AudioLink не встановлено, воно буде автоматично налаштовано під час збірки.",
+    "module.audioLinkAdaptor.notInstalled": "AudioLink не встановлено. Будь ласка, встановіть AudioLink.",
+    "module.audioLinkAdaptor.addToScene": "Додати AudioLink до сцени"
+  },
+  "it": {
+    "module.audioLinkAdaptor.name": "Adattatore AudioLink",
+    "module.audioLinkAdaptor.description": "Configura automaticamente l'integrazione video di AudioLink",
+    "module.audioLinkAdaptor.defaultAudioLinkEnabled": "Abilita AudioLink per impostazione predefinita",
+    "module.audioLinkAdaptor.hint": "Se il riferimento AudioLink non è impostato, verrà configurato automaticamente al momento della build.",
+    "module.audioLinkAdaptor.notInstalled": "AudioLink non è installato. Si prega di installare AudioLink.",
+    "module.audioLinkAdaptor.addToScene": "Aggiungi AudioLink alla scena"
+  }
+}

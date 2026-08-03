@@ -1,0 +1,23 @@
+{
+    "name": "Yamadev.YamaStream.Modules.LTCGIAdaptor.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:165d832aac3edac47af5451df1676e53",
+        "GUID:befb3e42bf02a9b488522ef543d61aa0",
+        "GUID:554447c155c6e42429bea4d68056cb14",
+        "GUID:99835874ee819da44948776e0df4ff1d",
+        "GUID:f16c18940d95fd44a911829bf5e37070",
+        "GUID:d3802d62b65ae4848a923cbbdd4653e9"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

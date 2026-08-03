@@ -1,0 +1,56 @@
+{
+  "ja": {
+    "module.pitchshifter.name": "ピッチシフター",
+    "module.pitchshifter.description": "カラオケ用ピッチ変更モジュール。速度を変えずに音程を変更します。",
+    "module.pitchshifter.semitones": "セミトーン",
+    "module.pitchshifter.bufferLength": "バッファサイズ"
+  },
+  "en": {
+    "module.pitchshifter.name": "Pitch Shifter",
+    "module.pitchshifter.description": "Karaoke pitch shifting module. Changes pitch without changing playback speed.",
+    "module.pitchshifter.semitones": "Semitones",
+    "module.pitchshifter.bufferLength": "Buffer Size"
+  },
+  "ko": {
+    "module.pitchshifter.name": "피치 시프터",
+    "module.pitchshifter.description": "노래방용 피치 변경 모듈. 재생 속도를 변경하지 않고 음정을 변경합니다.",
+    "module.pitchshifter.semitones": "반음",
+    "module.pitchshifter.bufferLength": "버퍼 크기"
+  },
+  "zh-CN": {
+    "module.pitchshifter.name": "变调器",
+    "module.pitchshifter.description": "卡拉OK变调模块。在不改变播放速度的情况下改变音高。",
+    "module.pitchshifter.semitones": "半音",
+    "module.pitchshifter.bufferLength": "缓冲区大小"
+  },
+  "zh-TW": {
+    "module.pitchshifter.name": "變調器",
+    "module.pitchshifter.description": "卡拉OK變調模組。在不改變播放速度的情況下改變音高。",
+    "module.pitchshifter.semitones": "半音",
+    "module.pitchshifter.bufferLength": "緩衝區大小"
+  },
+  "ru": {
+    "module.pitchshifter.name": "Сдвиг высоты тона",
+    "module.pitchshifter.description": "Модуль изменения высоты тона для караоке. Изменяет высоту тона без изменения скорости воспроизведения.",
+    "module.pitchshifter.semitones": "Полутона",
+    "module.pitchshifter.bufferLength": "Размер буфера"
+  },
+  "uk": {
+    "module.pitchshifter.name": "Зсув висоти тону",
+    "module.pitchshifter.description": "Модуль зміни висоти тону для караоке. Змінює висоту тону без зміни швидкості відтворення.",
+    "module.pitchshifter.semitones": "Півтони",
+    "module.pitchshifter.bufferLength": "Розмір буфера"
+  },
+  "es": {
+    "module.pitchshifter.name": "Cambiador de tono",
+    "module.pitchshifter.description": "Módulo de cambio de tono para karaoke. Cambia el tono sin cambiar la velocidad de reproducción.",
+    "module.pitchshifter.semitones": "Semitonos",
+    "module.pitchshifter.bufferLength": "Tamaño del búfer"
+  },
+  "it": {
+    "module.pitchshifter.name": "Cambio Tonalità",
+    "module.pitchshifter.description": "Modulo per cambio tonalità karaoke. Cambia la tonalità senza modificare la velocità di riproduzione.",
+    "module.pitchshifter.semitones": "Semitoni",
+    "module.pitchshifter.bufferLength": "Dimensione Buffer"
+  }
+}

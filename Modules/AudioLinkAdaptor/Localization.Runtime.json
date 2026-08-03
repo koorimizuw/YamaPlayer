@@ -1,0 +1,56 @@
+{
+  "ja": {
+    "module.audioLinkAdaptor.title": "AudioLink 連携",
+    "module.audioLinkAdaptor.description": "動画の音声をAudioLinkに連携します",
+    "module.audioLinkAdaptor.disabled": "無効",
+    "module.audioLinkAdaptor.enabled": "有効"
+  },
+  "en": {
+    "module.audioLinkAdaptor.title": "AudioLink Integration",
+    "module.audioLinkAdaptor.description": "Links video audio to AudioLink",
+    "module.audioLinkAdaptor.disabled": "Disabled",
+    "module.audioLinkAdaptor.enabled": "Enabled"
+  },
+  "ko": {
+    "module.audioLinkAdaptor.title": "AudioLink 연동",
+    "module.audioLinkAdaptor.description": "비디오 오디오를 AudioLink에 연동합니다",
+    "module.audioLinkAdaptor.disabled": "비활성화",
+    "module.audioLinkAdaptor.enabled": "활성화"
+  },
+  "zh-CN": {
+    "module.audioLinkAdaptor.title": "AudioLink 联动",
+    "module.audioLinkAdaptor.description": "将视频音频连接到AudioLink",
+    "module.audioLinkAdaptor.disabled": "禁用",
+    "module.audioLinkAdaptor.enabled": "启用"
+  },
+  "zh-HK": {
+    "module.audioLinkAdaptor.title": "AudioLink 連動",
+    "module.audioLinkAdaptor.description": "將影片音訊連接到AudioLink",
+    "module.audioLinkAdaptor.disabled": "停用",
+    "module.audioLinkAdaptor.enabled": "啟用"
+  },
+  "ru": {
+    "module.audioLinkAdaptor.title": "Интеграция AudioLink",
+    "module.audioLinkAdaptor.description": "Связывает аудио видео с AudioLink",
+    "module.audioLinkAdaptor.disabled": "Отключено",
+    "module.audioLinkAdaptor.enabled": "Включено"
+  },
+  "uk": {
+    "module.audioLinkAdaptor.title": "Інтеграція AudioLink",
+    "module.audioLinkAdaptor.description": "Пов'язує аудіо відео з AudioLink",
+    "module.audioLinkAdaptor.disabled": "Вимкнено",
+    "module.audioLinkAdaptor.enabled": "Увімкнено"
+  },
+  "es": {
+    "module.audioLinkAdaptor.title": "Integración AudioLink",
+    "module.audioLinkAdaptor.description": "Enlaza el audio del video a AudioLink",
+    "module.audioLinkAdaptor.disabled": "Desactivado",
+    "module.audioLinkAdaptor.enabled": "Activado"
+  },
+  "it": {
+    "module.audioLinkAdaptor.title": "Integrazione AudioLink",
+    "module.audioLinkAdaptor.description": "Collega l'audio video ad AudioLink",
+    "module.audioLinkAdaptor.disabled": "Disabilitato",
+    "module.audioLinkAdaptor.enabled": "Abilitato"
+  }
+}

@@ -1,449 +1,493 @@
-
-using System;
+﻿using System;
 using UdonSharp;
 using UnityEngine;
-using VRC.SDK3.Components.Video;
 using VRC.SDKBase;
-
-#if AUDIOLINK_V1
-using AudioLink;
-#endif
 
 namespace Yamadev.YamaStream
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
-    public partial class Controller : Listener
+  public enum PlayerState
+  {
+    Idle,
+    Playing,
+    Paused,
+  }
+
+  [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+  [DefaultExecutionOrder(-1000)]
+  [DisallowMultipleComponent]
+  public partial class Controller : YamaPlayerListener
+  {
+    [SerializeField, HideInInspector] private string _version;
+    [SerializeField] private PlayerHandler[] _videoPlayerHandlers = new PlayerHandler[0];
+    [SerializeField] private bool _allowAutoSwitchHandler = true;
+    [SerializeField, Range(0, 10)] private int _useFallbackAfterErrors = 1;
+    [SerializeField] private string _timeFormat = @"hh\:mm\:ss";
+    [SerializeField] private bool _isLocal;
+    [SerializeField, Range(0, 10)] private int _maxErrorRetry = 5;
+    [SerializeField, UdonSynced, FieldChangeCallback(nameof(Loop))] private bool _loop;
+    [UdonSynced, FieldChangeCallback(nameof(Speed))] private float _speed = 1f;
+    [UdonSynced, FieldChangeCallback(nameof(Repeat))] private ulong _repeat;
+    [UdonSynced] private byte _syncedState;
+    [UdonSynced] private int _handlerIndex;
+    [UdonSynced] private string _title = string.Empty;
+    [UdonSynced] private VRCUrl _url = VRCUrl.Empty;
+    [UdonSynced] private byte[] _trackExtension = new byte[0];
+    private object[] _track;
+    private PlayerHandler _handler;
+    private bool _useFallback;
+    private YamaPlayerListener[] _listeners = new YamaPlayerListener[0];
+    private int _errorRetryCount;
+    private object[] _retryTargetTrack;
+    private bool _reloading;
+    private int _lastSetTimeFrame = 0;
+    private float _lastLoadTime = 0f;
+    private bool _checkRepeatRunning = false;
+
+    private const float SAFETY_RETRY_INTERVAL = 5.1f;
+
+    private void Start()
     {
-        [SerializeField] Animator _videoPlayerAnimator;
-        [SerializeField] VideoPlayerHandle[] _videoPlayerHandles;
-        [SerializeField] Permission _permission;
-        [SerializeField] float _retryAfterSeconds = 5.1f;
-        [SerializeField] int _maxErrorRetry = 5;
-        [SerializeField] string _timeFormat = @"hh\:mm\:ss";
-        [SerializeField] bool _isLocal;
-        [SerializeField] string _version;
-        [SerializeField] bool _useFallbackHandler;
-        [SerializeField, UdonSynced, FieldChangeCallback(nameof(VideoPlayerType))] VideoPlayerType _videoPlayerType;
-        [SerializeField, UdonSynced, FieldChangeCallback(nameof(Loop))] bool _loop;
-        [SerializeField, UdonSynced, FieldChangeCallback(nameof(SlideMode))] bool _slideMode;
-        [SerializeField, UdonSynced, FieldChangeCallback(nameof(SlideSeconds))] int _slideSeconds = 1;
-        [UdonSynced, FieldChangeCallback(nameof(Paused))] bool _paused;
-        [UdonSynced, FieldChangeCallback(nameof(Stopped))] bool _stopped = true;
-        [UdonSynced, FieldChangeCallback(nameof(Speed))] float _speed = 1f;
-        [UdonSynced, FieldChangeCallback(nameof(Repeat))] Vector3 _repeat = new Vector3(0f, 0f, 999999f);
-        Listener[] _listeners = { };
-        int _errorRetryCount = 0;
-        VRCUrl _retryTargetUrl = VRCUrl.Empty;
-        bool _isReload;
-        float _lastSetTime = 0f;
-        float _repeatCooling = 0.6f;
-        bool _initialized;
+      if (!Utilities.IsValid(_videoPlayerHandlers) || _videoPlayerHandlers.Length == 0)
+      {
+        PrintError($"Video player handlers are not assigned to {name}");
+        return;
+      }
 
-        void Start() => initialize();
+      SetupHandlers();
+      ReadPlaylists();
 
-        void Update()
-        {
-            if (OutOfRepeat(VideoTime) && Time.time - _lastSetTime > _repeatCooling)
-                SetTime(Repeat.ToRepeatStatus().GetStartTime());
-            if (IsPlaying && Time.time - _syncFrequency > _lastSync) DoSync();
-        }
+      InitializeScreen();
+      InitializeAudio();
 
-        public Permission Permission => _permission;
-
-        public string Version => _version;
-
-        public PlayerPermission PlayerPermission => _permission == null ? PlayerPermission.Editor : _permission.PlayerPermission;
-
-        void initialize()
-        {
-            if (_initialized) return;
-            Loop = _loop;
-            _videoPlayerAnimator.Rebind();
-            initializeScreen();
-            UpdateAudio();
-            UpdateAudioLink();
-            foreach (VideoPlayerHandle handle in _videoPlayerHandles)
-                handle.Listener = this;
-            _initialized = true;
-        }
-
-        public void AddListener(Listener listener)
-        {
-            if (Array.IndexOf(_listeners, listener) >= 0) return;
-            _listeners = _listeners.Add(listener);
-        }
-
-        public bool IsLocal => _isLocal;
-
-        public VideoPlayerType VideoPlayerType
-        {
-            get => _videoPlayerType;
-            set
-            {
-                if (_videoPlayerType == value) return;
-                VideoPlayerHandle.Stop();
-                _videoPlayerType = value;
-                if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
-                foreach (Listener listener in _listeners) listener.OnPlayerChanged();
-                PrintLog($"Video player change to {_videoPlayerType}.");
-            }
-        }
-
-        public VideoPlayerHandle VideoPlayerHandle
-        {
-            get
-            {
-                foreach (VideoPlayerHandle handle in _videoPlayerHandles)
-                    if (handle.VideoPlayerType == _videoPlayerType) return handle;
-                return null;
-            }
-        }
-
-        public bool Paused
-        {
-            get => _paused;
-            set
-            {
-                _paused = value;
-                if (_paused) VideoPlayerHandle.Pause();
-                else VideoPlayerHandle.Play();
-#if AUDIOLINK_V1
-                if (_audioLink != null && _useAudioLink)
-                    _audioLink.SetMediaPlaying(_paused ? MediaPlaying.Paused : IsLive ? MediaPlaying.Streaming : MediaPlaying.Playing);
-#endif
-                if (Networking.IsOwner(gameObject) && !_isLocal)
-                {
-                    SyncTime = VideoTime - VideoStandardDelay;
-                    RequestSerialization();
-                }
-            }
-        }
-
-        public bool Stopped
-        {
-            get => _stopped;
-            set
-            {
-                _stopped = value;
-                _isReload = false;
-                if (_stopped) VideoPlayerHandle.Stop();
-                if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
-            }
-        }
-
-        public bool SlideMode
-        {
-            get => _slideMode;
-            set
-            {
-                _slideMode = value;
-                if (!_paused) Paused = true;
-                if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
-                foreach (Listener listener in _listeners) listener.OnSlideModeChanged();
-                PrintLog($"Slide mode changed {_slideMode}.");
-            }
-        }
-
-        public int SlideSeconds
-        {
-            get => _slideSeconds;
-            set
-            {
-                _slideSeconds = value;
-                if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
-                foreach (Listener listener in _listeners) listener.OnSlideModeChanged();
-                PrintLog($"Slide seconds changed to {_slideSeconds}.");
-            }
-        }
-
-        public int SlidePage => _slideMode && !_stopped ? Mathf.FloorToInt(VideoTime) / _slideSeconds + 1 : 0;
-
-        public int SlidePageCount => _slideMode ? Mathf.FloorToInt(Duration) / _slideSeconds : 0;
-
-        public bool Loop
-        {
-            get => _loop;
-            set
-            {
-                _loop = value;
-                foreach (VideoPlayerHandle handle in _videoPlayerHandles) handle.Loop = _loop;
-#if AUDIOLINK_V1
-                if (_audioLink != null && _useAudioLink)
-                    _audioLink.SetMediaLoop(_loop ? MediaLoop.LoopOne : MediaLoop.None);
-#endif
-                if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
-                foreach (Listener listener in _listeners) listener.OnLoopChanged();
-                PrintLog($"Loop changed {_loop}.");
-            }
-        }
-
-        public void UpdateSpeed()
-        {
-            _videoPlayerAnimator.SetFloat("Speed", _speed);
-            _videoPlayerAnimator.Update(0f);
-            if (!_stopped && _videoPlayerType == VideoPlayerType.AVProVideoPlayer && !VideoPlayerHandle.UseFallbackHandle)
-                SendCustomEventDelayedFrames(nameof(Reload), 1);
-            UpdateAudio();
-        }
-
-        public float Speed
-        {
-            get => _speed;
-            set
-            {
-                _speed = value;
-                UpdateSpeed();
-                if (Networking.IsOwner(gameObject) && !_isLocal)
-                {
-                    SyncTime = VideoTime - VideoStandardDelay;
-                    RequestSerialization();
-                }
-                foreach (Listener listener in _listeners) listener.OnSpeedChanged();
-                PrintLog($"Speed changed {_speed:F2}x.");
-            }
-        }
-
-        public bool OutOfRepeat(float targetTime)
-        {
-            if (!IsPlaying || !Repeat.ToRepeatStatus().IsOn()) return false;
-            return targetTime > Repeat.ToRepeatStatus().GetEndTime() || targetTime < Repeat.ToRepeatStatus().GetStartTime();
-
-        }
-
-        public Vector3 Repeat
-        {
-            get => _repeat;
-            set
-            {
-                _repeat = value;
-                if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
-                foreach (Listener listener in _listeners) listener.OnRepeatChanged();
-                RepeatStatus status = _repeat.ToRepeatStatus();
-                if (status.IsOn()) PrintLog($"Repeat on, start: {status.GetStartTime()}, end: {status.GetEndTime()}.");
-                else PrintLog($"Repeat off.");
-            }
-        }
-
-        public float LastLoaded => VideoPlayerHandle.LastLoaded;
-        public bool IsPlaying => VideoPlayerHandle.IsPlaying;
-        public float Duration => VideoPlayerHandle.Duration;
-        public float VideoTime => VideoPlayerHandle.VideoTime;
-        public bool IsLoading => VideoPlayerHandle.IsLoading;
-        public bool IsReload => _isReload;
-        public bool IsLive => float.IsInfinity(Duration);
-
-        public void Reload()
-        {
-            if (!Stopped && !IsLoading) PlayTrack(Track, true);
-        }
-
-        public void ErrorRetry()
-        {
-            var currentUrl = Track.GetVRCUrl();
-
-            if (VRCUrl.IsNullOrEmpty(_retryTargetUrl) || _retryTargetUrl != currentUrl)
-            {
-                _errorRetryCount = 0;
-                _retryTargetUrl = VRCUrl.Empty;
-                PrintLog("Retry cancelled: track has changed.");
-                return;
-            }
-
-            if (IsPlaying || !currentUrl.Get().IsValidUrl())
-            {
-                _retryTargetUrl = VRCUrl.Empty;
-                return;
-            }
-
-            _resolveTrack.Invoke();
-            foreach (Listener listener in _listeners) listener.OnVideoRetry();
-        }
-
-        void HandleErrorRetry(VideoError videoError)
-        {
-            switch (videoError)
-            {
-                case VideoError.AccessDenied:
-                    PrintLog("Access denied - no retry will be attempted");
-                    _errorRetryCount = 0;
-                    _retryTargetUrl = VRCUrl.Empty;
-                    return;
-                case VideoError.InvalidURL:
-                    PrintLog("Invalid URL - no retry will be attempted");
-                    _errorRetryCount = 0;
-                    _retryTargetUrl = VRCUrl.Empty;
-                    return;
-                case VideoError.PlayerError:
-                    if (_errorRetryCount == 0)
-                    {
-                        if (_useFallbackHandler && Utilities.IsValid(VideoPlayerHandle.FallbackHandle))
-                        {
-                            VideoPlayerHandle.UseFallbackHandle = true;
-                            PrintLog($"Switching to fallback handler: {VideoPlayerHandle.FallbackHandle.VideoPlayerType}");
-                        }
-                    }
-                    else
-                    {
-                        VideoPlayerHandle.UseFallbackHandle = false;
-                    }
-                    break;
-            }
-
-            if (_errorRetryCount < _maxErrorRetry)
-            {
-                _errorRetryCount++;
-                _retryTargetUrl = Track.GetVRCUrl();
-                PrintLog($"Scheduling retry {_errorRetryCount}/{_maxErrorRetry} in {_retryAfterSeconds} seconds");
-                SendCustomEventDelayedSeconds(nameof(ErrorRetry), _retryAfterSeconds);
-            }
-            else
-            {
-                _errorRetryCount = 0;
-                _retryTargetUrl = VRCUrl.Empty;
-                PrintLog($"Maximum retry count ({_maxErrorRetry}) reached. Stopping retry attempts.");
-            }
-        }
-
-        public void SetPage(int page)
-        {
-            if (!_slideMode || page < 1 || page > SlidePageCount) return;
-            SetTime(page * _slideSeconds - 0.5f);
-        }
-
-        public void SetTime(float time)
-        {
-            if (IsLive || OutOfRepeat(time)) return;
-            VideoPlayerHandle.VideoTime = time;
-            _lastSetTime = Time.time;
-            if (Networking.IsOwner(gameObject) && !_isLocal)
-            {
-                SyncTime = time - VideoStandardDelay;
-                RequestSerialization();
-            }
-            foreach (Listener listener in _listeners) listener.OnSetTime(time);
-            PrintLog($"{_videoPlayerType}: Set video time: {time}.");
-        }
-
-        public void SendCustomVideoEvent(string eventName)
-        {
-            foreach (Listener listener in _listeners)
-                if (Utilities.IsValid(listener)) listener.SendCustomEvent(eventName);
-        }
-
-        public override void OnDeserialization()
-        {
-            Track track = Track.New(_targetPlayer, _title, _url, _originalUrl);
-            foreach (Listener listener in _listeners) listener.OnTrackSynced(track.GetUrl());
-            if (track.GetUrl() != Track.GetUrl())
-            {
-                Stopped = true;
-                PlayTrack(track);
-            }
-            DoSync(true);
-            GenerateDynamicPlaylists();
-        }
-
-        #region Video Event
-        public override void OnVideoReady()
-        {
-            foreach (Listener listener in _listeners) listener.OnVideoReady();
-            PrintLog($"{_videoPlayerType}: Video ready.");
-        }
-
-        public override void OnVideoStart()
-        {
-            _errorRetryCount = 0;
-            _retryTargetUrl = VRCUrl.Empty;
-            _stopped = false;
-            if (_paused || _slideMode) VideoPlayerHandle.Pause();
-            else VideoPlayerHandle.Play();
-            UpdateAudio();
-#if AUDIOLINK_V1
-            if (_audioLink != null && _useAudioLink)
-                _audioLink.SetMediaPlaying(IsLive ? MediaPlaying.Streaming : MediaPlaying.Playing);
-#endif
-            if (Networking.IsOwner(gameObject) && !_isLocal && !_isReload)
-            {
-                SyncTime = 0f;
-                RequestSerialization();
-            }
-            else DoSync();
-            if (KaraokeMode != KaraokeMode.None) SendCustomEventDelayedSeconds(nameof(ForceSync), 1f);
-            foreach (Listener listener in _listeners) listener.OnVideoStart();
-            PrintLog($"{_videoPlayerType}: Video start.");
-            _isReload = false;
-        }
-
-        public override void OnVideoPlay()
-        {
-            _paused = false;
-            if (KaraokeMode != KaraokeMode.None) SendCustomEventDelayedSeconds(nameof(ForceSync), 1f);
-            foreach (Listener listener in _listeners) listener.OnVideoPlay();
-            PrintLog($"{_videoPlayerType}: Video play.");
-        }
-
-        public override void OnVideoPause()
-        {
-            _paused = true;
-            foreach (Listener listener in _listeners) listener.OnVideoPause();
-            PrintLog($"{_videoPlayerType}: Video pause.");
-        }
-
-        public override void OnVideoStop()
-        {
-            if (!_isReload)
-            {
-                _paused = false;
-                _stopped = true;
-                _errorRetryCount = 0;
-                _retryTargetUrl = VRCUrl.Empty;
-                _repeat = new Vector3(0f, 0f, 999999f);
-                VideoPlayerHandle.UseFallbackHandle = false;
-                if (!string.IsNullOrEmpty(Track.GetUrl())) _history.AddTrack(Track);
-                Track = Track.New(_videoPlayerType, string.Empty, VRCUrl.Empty);
-#if AUDIOLINK_V1
-                if (_audioLink != null && _useAudioLink)
-                    _audioLink.SetMediaPlaying(MediaPlaying.Stopped);
-#endif
-                if (Networking.IsOwner(gameObject) && !_isLocal)
-                {
-                    ClearSync();
-                    RequestSerialization();
-                }
-            }
-            foreach (Listener listener in _listeners) listener.OnVideoStop();
-            PrintLog($"{_videoPlayerType}: Video stop.");
-        }
-
-        public override void OnVideoLoop()
-        {
-            if (Networking.IsOwner(gameObject) && !_isLocal)
-            {
-                SyncTime = 0f;
-                RequestSerialization();
-            }
-            foreach (Listener listener in _listeners) listener.OnVideoLoop();
-            PrintLog($"{_videoPlayerType}: Video loop.");
-        }
-
-        public override void OnVideoEnd()
-        {
-            if (Networking.IsOwner(gameObject) && !_isLocal && _forwardInterval >= 0)
-                SendCustomEventDelayedSeconds(nameof(RunForward), _forwardInterval);
-            foreach (Listener listener in _listeners) listener.OnVideoEnd();
-            PrintLog($"{_videoPlayerType}: Video end.");
-        }
-
-        public override void OnVideoError(VideoError videoError)
-        {
-            PrintLog($"{_videoPlayerType}: Video error {videoError}.");
-#if AUDIOLINK_V1
-            if (_audioLink != null && _useAudioLink)
-                _audioLink.SetMediaPlaying(MediaPlaying.Error);
-#endif
-            HandleErrorRetry(videoError);
-            foreach (Listener listener in _listeners) listener.OnVideoError(videoError);
-        }
-        #endregion
+      RegisterHandlerListeners();
     }
+
+    private void Update()
+    {
+      if (IsPlaying && Time.time - _lastSync > _syncFrequency)
+      {
+        EnsureVideoTime();
+      }
+    }
+
+    public string Version => _version;
+    public string TimeFormat => _timeFormat;
+    public bool IsLocal => _isLocal;
+    public PlayerState SyncedState => (PlayerState)_syncedState;
+    public bool IsLoading => ActiveHandler.IsLoading;
+    public bool Paused => ActiveHandler.IsPaused;
+    public bool Stopped => ActiveHandler.IsStopped;
+    public bool IsPlaying => ActiveHandler.IsPlaying;
+    public bool IsError => ActiveHandler.IsError;
+    public float Duration => ActiveHandler.Duration;
+    public float VideoTime => ActiveHandler.Time;
+    public bool IsLive => float.IsInfinity(Duration) || float.IsNaN(Duration);
+    public string FormatedDuration => IsLive ? string.Empty : TimeSpan.FromSeconds(Duration).ToString(_timeFormat);
+    public string FormatedVideoTime => IsLive ? string.Empty : TimeSpan.FromSeconds(VideoTime).ToString(_timeFormat);
+
+    public YamaPlayerListener[] EventListeners
+    {
+      get => _listeners;
+      set => _listeners = value;
+    }
+
+    public void AddListener(YamaPlayerListener listener)
+    {
+      if (!Utilities.IsValid(listener) || Array.IndexOf(_listeners, listener) >= 0) return;
+      _listeners = _listeners.Add(listener);
+    }
+
+    public void SendCustomVideoEvent(string eventName)
+    {
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
+      {
+        _listeners[i].SendCustomEvent(eventName);
+      }
+    }
+
+    public PlayerHandler Handler
+    {
+      get
+      {
+        if (!Utilities.IsValid(_handler))
+        {
+          _handler = _videoPlayerHandlers[0];
+        }
+        return _handler;
+      }
+      set
+      {
+        SetUseFallback(false);
+        _handler = value;
+        _handlerIndex = Array.IndexOf(_videoPlayerHandlers, value);
+        if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++)
+        {
+          var listener = _listeners[i];
+          if (Utilities.IsValid(listener)) listener.AfterPlayerHandlerChanged(_handler.Type);
+        }
+        PrintLog($"Player handler changed to {_handler.Type.GetString()}.");
+      }
+    }
+
+    [Obsolete("Use Handler instead")]
+    public PlayerHandler VideoPlayerHandle => Handler;
+
+    public PlayerHandler ActiveHandler
+    {
+      get
+      {
+        if (_useFallback && Utilities.IsValid(Handler.FallbackHandler)) return Handler.FallbackHandler;
+        return Handler;
+      }
+    }
+
+    private void SetUseFallback(bool value)
+    {
+      if (_useFallback == value) return;
+      if (value)
+      {
+        if (!Utilities.IsValid(Handler.FallbackHandler)) return;
+        _useFallback = true;
+        return;
+      }
+      _useFallback = false;
+      var fallback = Handler.FallbackHandler;
+      if (Utilities.IsValid(fallback) && !fallback.IsStopped) fallback.Stop();
+    }
+
+    private void RegisterHandlerListeners()
+    {
+      int len = _videoPlayerHandlers.Length;
+      for (int i = 0; i < len; i++)
+      {
+        var handler = _videoPlayerHandlers[i];
+        if (Utilities.IsValid(handler)) handler.SetListener(this);
+      }
+    }
+
+    private void SetupHandlers()
+    {
+      if (!Utilities.IsValid(_handler)) _handler = _videoPlayerHandlers[0];
+
+      int len = _videoPlayerHandlers.Length;
+      for (int i = 0; i < len; i++)
+      {
+        var handler = _videoPlayerHandlers[i];
+        if (Utilities.IsValid(handler)) handler.Loop = _loop;
+      }
+    }
+
+    public bool AllowAutoSwitchHandler
+    {
+      get => _allowAutoSwitchHandler;
+      set => _allowAutoSwitchHandler = value;
+    }
+
+    public void SetPlayerType(VideoPlayerType playerType)
+    {
+      if (Utilities.IsValid(Handler) && Handler.Type == playerType) return;
+      Stop();
+      SwitchToHandlerIndex(FindHandlerIndexByType(playerType));
+    }
+
+    public void SetPlayerHandler(int index)
+    {
+      if (index >= 0 && index < _videoPlayerHandlers.Length && _videoPlayerHandlers[index] == Handler) return;
+      Stop();
+      SwitchToHandlerIndex(index);
+    }
+
+    private bool SwitchToHandlerIndex(int index)
+    {
+      if (index < 0 || index >= _videoPlayerHandlers.Length || !Utilities.IsValid(_videoPlayerHandlers[index]))
+      {
+        PrintError($"Cannot switch handler: invalid handler index {index}.");
+        return false;
+      }
+
+      var next = _videoPlayerHandlers[index];
+      _handlerIndex = index;
+      if (next == _handler) return true;
+
+      StopLocal();
+      Handler = next;
+      return true;
+    }
+
+    private int FindHandlerIndexByType(VideoPlayerType playerType)
+    {
+      int len = _videoPlayerHandlers.Length;
+      for (int i = 0; i < len; i++)
+      {
+        var handler = _videoPlayerHandlers[i];
+        if (Utilities.IsValid(handler) && handler.Type == playerType) return i;
+      }
+      return -1;
+    }
+
+    public int FindHandlerIndexForUrl(VRCUrl url)
+    {
+      return FindHandlerIndexForTrack(TrackUtils.NewTrack(0, string.Empty, url));
+    }
+
+    public int FindHandlerIndexForTrack(object[] track)
+    {
+      int len = _videoPlayerHandlers.Length;
+      for (int i = 0; i < len; i++)
+      {
+        var handler = _videoPlayerHandlers[i];
+        if (Utilities.IsValid(handler) && handler.IsValidTrack(track)) return i;
+      }
+      return -1;
+    }
+
+    private int ResolveHandlerIndexForTrack(object[] track)
+    {
+      int declared = FindHandlerIndexByType(TrackUtils.GetPlayerType(track));
+      if (declared >= 0 && _videoPlayerHandlers[declared].IsValidTrack(track)) return declared;
+      if (_allowAutoSwitchHandler) return FindHandlerIndexForTrack(track);
+      return -1;
+    }
+
+    public void Play(bool force = false)
+    {
+      if ((Stopped || IsPlaying) && !force) return;
+      _syncedState = (byte)PlayerState.Playing;
+      ActiveHandler.Play();
+    }
+
+    public void Pause(bool force = false)
+    {
+      if ((Stopped || Paused) && !force) return;
+      _syncedState = (byte)PlayerState.Paused;
+      ActiveHandler.Pause();
+    }
+
+    public void Stop(bool force = false)
+    {
+      _autoForward = false;
+      _reloading = false;
+      if (Stopped && !IsError && !force) return;
+      _syncedState = (byte)PlayerState.Idle;
+      ClearPlaylistIndexes();
+      StopLocal();
+      if (IsError) AfterVideoStopped();
+    }
+
+    private void StopLocal()
+    {
+      _autoForward = false;
+      ActiveHandler.Stop();
+    }
+
+    public void Reload()
+    {
+      if (!Stopped && !IsLoading) ResolveAndLoadTrack(Track, true);
+    }
+
+    public bool Loop
+    {
+      get => _loop;
+      set
+      {
+        _loop = value;
+        int handlerLen = _videoPlayerHandlers.Length;
+        for (int i = 0; i < handlerLen; i++)
+        {
+          var handler = _videoPlayerHandlers[i];
+          if (Utilities.IsValid(handler)) handler.Loop = _loop;
+        }
+
+        if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
+        int listenerLen = _listeners.Length;
+        for (int i = 0; i < listenerLen; i++)
+        {
+          var listener = _listeners[i];
+          if (Utilities.IsValid(listener)) listener.AfterLoopChanged(value);
+        }
+        PrintLog($"Loop changed to {_loop}.");
+      }
+    }
+
+    public float Speed
+    {
+      get => _speed;
+      set
+      {
+        _speed = value;
+        UpdateSpeed();
+        if (Networking.IsOwner(gameObject) && !_isLocal)
+        {
+          UpdateSyncedVideoTime(VideoTime);
+          RequestSerialization();
+        }
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++)
+        {
+          var listener = _listeners[i];
+          if (Utilities.IsValid(listener)) listener.AfterSpeedChanged(value);
+        }
+        PrintLog($"Speed changed to {_speed:F2}x.");
+      }
+    }
+
+    public void UpdateSpeed()
+    {
+      int len = _videoPlayerHandlers.Length;
+      for (int i = 0; i < len; i++)
+      {
+        var handler = _videoPlayerHandlers[i];
+        if (Utilities.IsValid(handler)) handler.Speed = _speed;
+      }
+      if (!Stopped && ActiveHandler.Type == VideoPlayerType.AVProVideoPlayer)
+        SendCustomEventDelayedFrames(nameof(Reload), 0);
+      UpdateAudioPitch();
+    }
+
+    public ulong Repeat
+    {
+      get => _repeat;
+      set
+      {
+        _repeat = value;
+        CheckRepeat();
+        if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++)
+        {
+          var listener = _listeners[i];
+          if (Utilities.IsValid(listener)) listener.AfterRepeatChanged(value);
+        }
+
+        if (RepeatUtils.IsOn(_repeat)) PrintLog($"Repeat on, start: {RepeatUtils.GetStartTime(_repeat)}, end: {RepeatUtils.GetEndTime(_repeat)}.");
+      }
+    }
+
+    public void CheckRepeat()
+    {
+      if (_checkRepeatRunning) return;
+      _checkRepeatRunning = true;
+      SendCustomEventDelayedFrames(nameof(_CheckRepeat), 0);
+    }
+
+    public void _CheckRepeat()
+    {
+      if (!RepeatUtils.IsOn(_repeat) || IsLive || Stopped)
+      {
+        _checkRepeatRunning = false;
+        return;
+      }
+
+      if (IsPlaying)
+      {
+        var start = RepeatUtils.GetStartTime(_repeat);
+        var end = RepeatUtils.GetEndTime(_repeat);
+        if (ActiveHandler.Time > end || ActiveHandler.Time < start) SetTime(start);
+      }
+
+      SendCustomEventDelayedSeconds(nameof(_CheckRepeat), 0.5f);
+    }
+
+    public void SetTime(float time)
+    {
+      if (IsLive || Time.frameCount == _lastSetTimeFrame) return;
+      _lastSetTimeFrame = Time.frameCount;
+
+      ActiveHandler.Time = time;
+      if (Networking.IsOwner(gameObject) && !_isLocal)
+      {
+        UpdateSyncedVideoTime(time);
+        RequestSerialization();
+      }
+
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
+      {
+        var listener = _listeners[i];
+        if (Utilities.IsValid(listener)) listener.AfterTimeChanged(time);
+      }
+      PrintLog($"{ActiveHandler.Type.GetString()}: Set video time: {time}.");
+    }
+
+    public object[] Track
+    {
+      get
+      {
+        if (!Utilities.IsValid(_track))
+        {
+          _track = TrackUtils.CreateEmptyTrack();
+        }
+        return _track;
+      }
+      set
+      {
+        _track = value;
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++)
+        {
+          var listener = _listeners[i];
+          if (Utilities.IsValid(listener)) listener.AfterTrackUpdated();
+        }
+      }
+    }
+
+    public void PlayTrack(object[] track)
+    {
+      if (!Utilities.IsValid(track)) return;
+
+      if (ResolveHandlerIndexForTrack(track) < 0)
+      {
+        PrintError($"Track is not playable: url={TrackUtils.GetUrl(track).Get()}, extension={TrackUtils.GetExtensionString(track)}.");
+        return;
+      }
+
+      if (IsPlaying && (Networking.IsOwner(gameObject) || _isLocal))
+      {
+        Stop();
+      }
+
+      ClearPlaylistIndexes();
+
+      _syncedState = (byte)PlayerState.Playing;
+      ResolveAndLoadTrack(track);
+    }
+
+    private void ResolveAndLoadTrack(object[] track, bool isReload = false)
+    {
+      _reloading = isReload;
+
+      int index = ResolveHandlerIndexForTrack(track);
+      if (index >= 0) SwitchToHandlerIndex(index);
+
+      LoadTrackLocal(track, isReload);
+
+      if (Networking.IsOwner(gameObject) && !_isLocal && !isReload)
+      {
+        _trackVersion++;
+        _appliedTrackVersion = _trackVersion;
+        RequestSerialization();
+      }
+    }
+
+    private void LoadTrackLocal(object[] track, bool isReload)
+    {
+      _reloading = isReload;
+      StopLocal();
+
+      if (!isReload) Track = track;
+      ActiveHandler.LoadTrack(track);
+      _lastLoadTime = Time.time;
+
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
+      {
+        var listener = _listeners[i];
+        if (Utilities.IsValid(listener)) listener.AfterTrackLoaded();
+      }
+      PrintLog($"Load url: {TrackUtils.GetUrl(track)}.");
+    }
+  }
 }

@@ -1,0 +1,56 @@
+{
+  "ja": {
+    "module.slideshower.name": "スライドショー",
+    "module.slideshower.description": "動画をスライドとして表示するモジュール。ページごとに動画を切り替えます。",
+    "module.slideshower.slideMode": "スライドモード",
+    "module.slideshower.slideSeconds": "1スライドあたりの秒数"
+  },
+  "en": {
+    "module.slideshower.name": "Slide Shower",
+    "module.slideshower.description": "A module that displays video as slides. Switches video by page.",
+    "module.slideshower.slideMode": "Slide Mode",
+    "module.slideshower.slideSeconds": "Seconds per Slide"
+  },
+  "ko": {
+    "module.slideshower.name": "슬라이드쇼",
+    "module.slideshower.description": "동영상을 슬라이드로 표시하는 모듈. 페이지별로 동영상을 전환합니다.",
+    "module.slideshower.slideMode": "슬라이드 모드",
+    "module.slideshower.slideSeconds": "슬라이드당 초"
+  },
+  "zh-CN": {
+    "module.slideshower.name": "幻灯片",
+    "module.slideshower.description": "将视频显示为幻灯片的模块。按页面切换视频。",
+    "module.slideshower.slideMode": "幻灯片模式",
+    "module.slideshower.slideSeconds": "每张幻灯片的秒数"
+  },
+  "zh-TW": {
+    "module.slideshower.name": "幻燈片",
+    "module.slideshower.description": "將視頻顯示為幻燈片的模組。按頁面切換視頻。",
+    "module.slideshower.slideMode": "幻燈片模式",
+    "module.slideshower.slideSeconds": "每張幻燈片的秒數"
+  },
+  "ru": {
+    "module.slideshower.name": "Слайд-шоу",
+    "module.slideshower.description": "Модуль для отображения видео в виде слайдов. Переключает видео по страницам.",
+    "module.slideshower.slideMode": "Режим слайдов",
+    "module.slideshower.slideSeconds": "Секунд на слайд"
+  },
+  "uk": {
+    "module.slideshower.name": "Слайд-шоу",
+    "module.slideshower.description": "Модуль для відображення відео у вигляді слайдів. Перемикає відео за сторінками.",
+    "module.slideshower.slideMode": "Режим слайдів",
+    "module.slideshower.slideSeconds": "Секунд на слайд"
+  },
+  "es": {
+    "module.slideshower.name": "Presentación de diapositivas",
+    "module.slideshower.description": "Un módulo que muestra el video como diapositivas. Cambia el video por página.",
+    "module.slideshower.slideMode": "Modo de diapositivas",
+    "module.slideshower.slideSeconds": "Segundos por diapositiva"
+  },
+  "it": {
+    "module.slideshower.name": "Presentazione Diapositive",
+    "module.slideshower.description": "Un modulo che visualizza il video come diapositive. Cambia video per pagina.",
+    "module.slideshower.slideMode": "Modalità Diapositive",
+    "module.slideshower.slideSeconds": "Secondi per Diapositiva"
+  }
+}
