@@ -1,0 +1,21 @@
+{
+    "name": "Yamadev.YamaStream.Modules.TimelineSync.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:165d832aac3edac47af5451df1676e53",
+        "GUID:befb3e42bf02a9b488522ef543d61aa0",
+        "GUID:554447c155c6e42429bea4d68056cb14",
+        "GUID:7f33e6a0d739fb547bd869e30e52653f"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

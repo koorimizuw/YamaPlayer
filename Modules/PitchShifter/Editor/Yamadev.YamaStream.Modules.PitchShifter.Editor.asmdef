@@ -1,0 +1,25 @@
+{
+    "name": "Yamadev.YamaStream.Modules.PitchShifter.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:3456780c4fb2d324ab9c633d6f1b0ddb",
+        "GUID:c77e490e9787a1f4587759f072ef4626",
+        "GUID:befb3e42bf02a9b488522ef543d61aa0",
+        "GUID:99835874ee819da44948776e0df4ff1d",
+        "GUID:165d832aac3edac47af5451df1676e53"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [
+        "VRCSDKBase.dll",
+        "VRCSDK3.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

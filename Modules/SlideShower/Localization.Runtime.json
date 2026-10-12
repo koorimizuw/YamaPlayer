@@ -1,0 +1,101 @@
+{
+  "ja": {
+    "module.slideshower.slideMode.title": "スライドモード",
+    "module.slideshower.slideMode.description": "動画をスライドとして表示します",
+    "module.slideshower.slideMode.on": "オン",
+    "module.slideshower.slideMode.off": "オフ",
+    "module.slideshower.slideSeconds.title": "スライド秒数",
+    "module.slideshower.slideSeconds.description": "1スライドあたりの秒数を設定します",
+    "module.slideshower.slideSeconds.1s": "1秒",
+    "module.slideshower.slideSeconds.2s": "2秒",
+    "module.slideshower.slideSeconds.3s": "3秒"
+  },
+  "en": {
+    "module.slideshower.slideMode.title": "Slide Mode",
+    "module.slideshower.slideMode.description": "Displays video as slides",
+    "module.slideshower.slideMode.on": "ON",
+    "module.slideshower.slideMode.off": "OFF",
+    "module.slideshower.slideSeconds.title": "Slide Seconds",
+    "module.slideshower.slideSeconds.description": "Set seconds per slide",
+    "module.slideshower.slideSeconds.1s": "1s",
+    "module.slideshower.slideSeconds.2s": "2s",
+    "module.slideshower.slideSeconds.3s": "3s"
+  },
+  "ko": {
+    "module.slideshower.slideMode.title": "슬라이드 모드",
+    "module.slideshower.slideMode.description": "동영상을 슬라이드로 표시합니다",
+    "module.slideshower.slideMode.on": "ON",
+    "module.slideshower.slideMode.off": "OFF",
+    "module.slideshower.slideSeconds.title": "슬라이드 초",
+    "module.slideshower.slideSeconds.description": "슬라이드당 초를 설정합니다",
+    "module.slideshower.slideSeconds.1s": "1초",
+    "module.slideshower.slideSeconds.2s": "2초",
+    "module.slideshower.slideSeconds.3s": "3초"
+  },
+  "zh-CN": {
+    "module.slideshower.slideMode.title": "幻灯片模式",
+    "module.slideshower.slideMode.description": "将视频显示为幻灯片",
+    "module.slideshower.slideMode.on": "开启",
+    "module.slideshower.slideMode.off": "关闭",
+    "module.slideshower.slideSeconds.title": "幻灯片秒数",
+    "module.slideshower.slideSeconds.description": "设置每张幻灯片的秒数",
+    "module.slideshower.slideSeconds.1s": "1秒",
+    "module.slideshower.slideSeconds.2s": "2秒",
+    "module.slideshower.slideSeconds.3s": "3秒"
+  },
+  "zh-HK": {
+    "module.slideshower.slideMode.title": "幻燈片模式",
+    "module.slideshower.slideMode.description": "將影片顯示為幻燈片",
+    "module.slideshower.slideMode.on": "開啟",
+    "module.slideshower.slideMode.off": "關閉",
+    "module.slideshower.slideSeconds.title": "幻燈片秒數",
+    "module.slideshower.slideSeconds.description": "設置每張幻燈片的秒數",
+    "module.slideshower.slideSeconds.1s": "1秒",
+    "module.slideshower.slideSeconds.2s": "2秒",
+    "module.slideshower.slideSeconds.3s": "3秒"
+  },
+  "ru": {
+    "module.slideshower.slideMode.title": "Режим слайдов",
+    "module.slideshower.slideMode.description": "Отображает видео как слайды",
+    "module.slideshower.slideMode.on": "ВКЛ",
+    "module.slideshower.slideMode.off": "ВЫКЛ",
+    "module.slideshower.slideSeconds.title": "Секунды слайда",
+    "module.slideshower.slideSeconds.description": "Установить секунд на слайд",
+    "module.slideshower.slideSeconds.1s": "1 сек",
+    "module.slideshower.slideSeconds.2s": "2 сек",
+    "module.slideshower.slideSeconds.3s": "3 сек"
+  },
+  "uk": {
+    "module.slideshower.slideMode.title": "Режим слайдів",
+    "module.slideshower.slideMode.description": "Відображає відео як слайди",
+    "module.slideshower.slideMode.on": "УВІМК",
+    "module.slideshower.slideMode.off": "ВИМК",
+    "module.slideshower.slideSeconds.title": "Секунди слайда",
+    "module.slideshower.slideSeconds.description": "Встановити секунд на слайд",
+    "module.slideshower.slideSeconds.1s": "1 сек",
+    "module.slideshower.slideSeconds.2s": "2 сек",
+    "module.slideshower.slideSeconds.3s": "3 сек"
+  },
+  "es": {
+    "module.slideshower.slideMode.title": "Modo diapositivas",
+    "module.slideshower.slideMode.description": "Muestra el video como diapositivas",
+    "module.slideshower.slideMode.on": "ON",
+    "module.slideshower.slideMode.off": "OFF",
+    "module.slideshower.slideSeconds.title": "Segundos de diapositiva",
+    "module.slideshower.slideSeconds.description": "Establecer segundos por diapositiva",
+    "module.slideshower.slideSeconds.1s": "1s",
+    "module.slideshower.slideSeconds.2s": "2s",
+    "module.slideshower.slideSeconds.3s": "3s"
+  },
+  "it": {
+    "module.slideshower.slideMode.title": "Modalità Diapositive",
+    "module.slideshower.slideMode.description": "Visualizza il video come diapositive",
+    "module.slideshower.slideMode.on": "ON",
+    "module.slideshower.slideMode.off": "OFF",
+    "module.slideshower.slideSeconds.title": "Secondi Diapositiva",
+    "module.slideshower.slideSeconds.description": "Imposta i secondi per diapositiva",
+    "module.slideshower.slideSeconds.1s": "1s",
+    "module.slideshower.slideSeconds.2s": "2s",
+    "module.slideshower.slideSeconds.3s": "3s"
+  }
+}

@@ -1,0 +1,21 @@
+{
+    "name": "Yamadev.YamaStream.Module.Persistence.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:befb3e42bf02a9b488522ef543d61aa0",
+        "GUID:165d832aac3edac47af5451df1676e53",
+        "GUID:99835874ee819da44948776e0df4ff1d",
+        "GUID:3024182220628be4eae94a5f57752f32"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

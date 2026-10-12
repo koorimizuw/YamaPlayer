@@ -1,0 +1,38 @@
+{
+  "ja": {
+    "module.pitchshifter.title": "ピッチシフター",
+    "module.pitchshifter.description": "速度を変えずに音程を変更します"
+  },
+  "en": {
+    "module.pitchshifter.title": "Pitch Shifter",
+    "module.pitchshifter.description": "Changes pitch without changing playback speed"
+  },
+  "ko": {
+    "module.pitchshifter.title": "피치 시프터",
+    "module.pitchshifter.description": "재생 속도를 변경하지 않고 음정을 변경합니다"
+  },
+  "zh-CN": {
+    "module.pitchshifter.title": "变调器",
+    "module.pitchshifter.description": "在不改变播放速度的情况下改变音高"
+  },
+  "zh-HK": {
+    "module.pitchshifter.title": "變調器",
+    "module.pitchshifter.description": "在不改變播放速度的情況下改變音高"
+  },
+  "ru": {
+    "module.pitchshifter.title": "Сдвиг высоты тона",
+    "module.pitchshifter.description": "Изменяет высоту тона без изменения скорости воспроизведения"
+  },
+  "uk": {
+    "module.pitchshifter.title": "Зсув висоти тону",
+    "module.pitchshifter.description": "Змінює висоту тону без зміни швидкості відтворення"
+  },
+  "es": {
+    "module.pitchshifter.title": "Cambiador de tono",
+    "module.pitchshifter.description": "Cambia el tono sin cambiar la velocidad de reproducción"
+  },
+  "it": {
+    "module.pitchshifter.title": "Cambio Tonalità",
+    "module.pitchshifter.description": "Cambia la tonalità senza modificare la velocità di riproduzione"
+  }
+}
