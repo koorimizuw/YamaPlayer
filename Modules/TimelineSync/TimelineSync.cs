@@ -14,6 +14,7 @@ namespace Yamadev.YamaStream.Modules.TimelineSync
     [SerializeField] private bool[] _hideOnStop;
     private int _currentIndex = -1;
     private float _pendingTime = 0f;
+    private bool _isReady = false;
 
     public override void Start()
     {
@@ -113,6 +114,7 @@ namespace Yamadev.YamaStream.Modules.TimelineSync
 
     public override void AfterVideoReady()
     {
+      _isReady = true;
       UpdateCurrentTimeline();
       if (Utilities.IsValid(_controller) && _controller.SyncedState == PlayerState.Playing) PlayTimeline(_pendingTime);
       else PauseTimeline(_pendingTime);
@@ -120,37 +122,39 @@ namespace Yamadev.YamaStream.Modules.TimelineSync
 
     public override void AfterVideoLooped()
     {
+      if (!_isReady) return;
       PlayTimeline(0f);
     }
 
     public override void AfterVideoPlayed()
     {
-      if (!Utilities.IsValid(_controller)) return;
+      if (!_isReady || !Utilities.IsValid(_controller)) return;
       PlayTimeline(_controller.VideoTime);
     }
 
     public override void AfterVideoPaused()
     {
-      if (!Utilities.IsValid(_controller)) return;
+      if (!_isReady || !Utilities.IsValid(_controller)) return;
       PauseTimeline(_controller.VideoTime);
     }
 
     public override void AfterVideoStopped()
     {
+      _isReady = false;
       StopTimeline();
     }
 
     public override void AfterTimeChanged(float time)
     {
       _pendingTime = time;
-      SetTimelineTime(time);
+      if (_isReady) SetTimelineTime(time);
     }
 
     public override void AfterTrackLoaded()
     {
-      if (!Utilities.IsValid(_controller)) return;
+      _isReady = false;
       _pendingTime = 0f;
-      UpdateCurrentTimeline();
+      StopTimeline();
     }
   }
 }
