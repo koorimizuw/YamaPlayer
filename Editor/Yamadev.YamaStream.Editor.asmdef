@@ -44,6 +44,11 @@
             "name": "red.sim.lightvolumes",
             "expression": "",
             "define": "VRC_LIGHT_VOLUMES_INCLUDED"
+        },
+        {
+            "name": "red.sim.lightvolumes",
+            "expression": "3.0.0",
+            "define": "VRC_LIGHT_VOLUMES_3"
         }
     ],
     "noEngineReferences": false
