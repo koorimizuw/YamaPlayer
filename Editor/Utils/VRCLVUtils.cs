@@ -24,6 +24,28 @@ namespace Yamadev.YamaStream.Editor
             return tvgi;
         }
 
+#if VRC_LIGHT_VOLUMES_3
+        public static LightVolumeManager GetOrAddLVManager()
+        {
+            LightVolumeManager[] managers = Utils.FindComponentsInHierarthy<LightVolumeManager>();
+            if (managers.Length > 0) return managers[0];
+
+            GameObject go = new GameObject("Light Volume Manager");
+            Undo.RegisterCreatedObjectUndo(go, "Create Light Volume Manager");
+            LightVolumeManager manager = UdonSharpUndo.AddComponent<LightVolumeManager>(go);
+            UdonSharpEditorUtility.CopyProxyToUdon(manager);
+            return manager;
+        }
+
+        static void EnableAutoUpdateVolumes()
+        {
+            LightVolumeManager manager = GetOrAddLVManager();
+            Undo.RecordObject(manager, "Enable Auto Update Volumes");
+            manager.AutoUpdateVolumes = true;
+            UdonSharpEditorUtility.CopyProxyToUdon(manager);
+            EditorUtility.SetDirty(manager);
+        }
+#else
         public static LightVolumeSetup GetOrAddLVSetup()
         {
             LightVolumeSetup[] setups = Utils.FindComponentsInHierarthy<LightVolumeSetup>();
@@ -35,10 +57,18 @@ namespace Yamadev.YamaStream.Editor
             return setup;
         }
 
-        public static void SetUpVRCLV(this YamaPlayer player)
+        static void EnableAutoUpdateVolumes()
         {
             LightVolumeSetup setup = GetOrAddLVSetup();
             setup.AutoUpdateVolumes = true;
+            setup.SyncUdonScript();
+            EditorUtility.SetDirty(setup);
+        }
+#endif
+
+        public static void SetUpVRCLV(this YamaPlayer player)
+        {
+            EnableAutoUpdateVolumes();
 
             LightVolumeTVGI tvgi = GetOrAddLVTVGI();
             tvgi.TargetRenderTexture = TVGICRT;
