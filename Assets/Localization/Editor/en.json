@@ -62,6 +62,8 @@
   "settings.playback.label": "Playback settings",
   "settings.playback.loop": "Loop",
   "settings.playback.loop.tooltip": "When enabled, video will automatically restart from the beginning after it ends.",
+  "settings.playback.playOnLoad": "Play on load",
+  "settings.playback.playOnLoad.tooltip": "When enabled, playback starts automatically once the video has loaded. When disabled, the video waits in a paused state.",
   "settings.playback.lowLatency": "Low latency mode",
   "settings.playback.lowLatency.tooltip": "When enabled, minimizes delay for live streams.",
   "settings.playback.retryInterval": "Retry interval (sec)",

@@ -115,7 +115,8 @@ namespace Yamadev.YamaStream
       _activePlaylistIndex = Array.IndexOf(_playlists, playlist);
       _playingTrackIndex = index;
 
-      _syncedState = (byte)PlayerState.Playing;
+      if (_playOnLoad) _syncedState = (byte)PlayerState.Playing;
+      else _syncedState = (byte)PlayerState.Paused;
       ResolveAndLoadTrack(track);
     }
 

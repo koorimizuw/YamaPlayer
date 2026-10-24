@@ -61,6 +61,8 @@
   "settings.playback.label": "播放设置",
   "settings.playback.loop": "循环播放",
   "settings.playback.loop.tooltip": "启用后，视频结束后将自动从头播放。",
+  "settings.playback.playOnLoad": "加载后自动播放",
+  "settings.playback.playOnLoad.tooltip": "启用后，视频加载完成后自动开始播放。禁用后，视频将保持暂停状态等待。",
   "settings.playback.lowLatency": "低延迟模式",
   "settings.playback.lowLatency.tooltip": "启用后，最大限度减少直播延迟。",
   "settings.playback.retryInterval.tooltip": "视频加载失败时重试前的等待时间（秒）。",

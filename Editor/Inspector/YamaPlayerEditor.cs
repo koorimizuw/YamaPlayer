@@ -31,6 +31,7 @@ namespace Yamadev.YamaStream.Editor
     // private SerializedProperty _retryAfterSeconds;
     private SerializedProperty _maxErrorRetry;
     private SerializedProperty _useFallbackAfterErrors;
+    private SerializedProperty _playOnLoad;
     private SerializedProperty _forwardInterval;
     private SerializedProperty _screenTypes;
     private SerializedProperty _screens;
@@ -86,6 +87,7 @@ namespace Yamadev.YamaStream.Editor
         // _retryAfterSeconds = _controllerSerializedObject.FindProperty("_retryAfterSeconds");
         _maxErrorRetry = _controllerSerializedObject.FindProperty("_maxErrorRetry");
         _useFallbackAfterErrors = _controllerSerializedObject.FindProperty("_useFallbackAfterErrors");
+        _playOnLoad = _controllerSerializedObject.FindProperty("_playOnLoad");
         _forwardInterval = _controllerSerializedObject.FindProperty("_forwardInterval");
         _screenTypes = _controllerSerializedObject.FindProperty("_screenTypes");
         _screens = _controllerSerializedObject.FindProperty("_screens");
@@ -357,6 +359,7 @@ namespace Yamadev.YamaStream.Editor
       // EditorGUILayout.PropertyField(_retryAfterSeconds, EditorLocalization.GetLayout("settings.playback.retryInterval", "settings.playback.retryInterval.tooltip"));
       EditorGUILayout.PropertyField(_maxErrorRetry, EditorLocalization.GetLayout("settings.playback.maxRetry", "settings.playback.maxRetry.tooltip"));
       EditorGUILayout.PropertyField(_useFallbackAfterErrors, EditorLocalization.GetLayout("settings.playback.fallbackAfterErrors", "settings.playback.fallbackAfterErrors.tooltip"));
+      EditorGUILayout.PropertyField(_playOnLoad, EditorLocalization.GetLayout("settings.playback.playOnLoad", "settings.playback.playOnLoad.tooltip"));
       EditorGUILayout.PropertyField(_useLowLatency, EditorLocalization.GetLayout("settings.playback.lowLatency", "settings.playback.lowLatency.tooltip"));
       DrawScreenSettings();
       DrawSpeakerSettings();

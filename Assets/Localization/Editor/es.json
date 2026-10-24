@@ -61,6 +61,8 @@
   "settings.playback.label": "Configuración de reproducción",
   "settings.playback.loop": "Repetir",
   "settings.playback.loop.tooltip": "Cuando está activado, el video se reiniciará automáticamente al finalizar.",
+  "settings.playback.playOnLoad": "Reproducir al cargar",
+  "settings.playback.playOnLoad.tooltip": "Cuando está activado, la reproducción comienza automáticamente al terminar de cargar el video. Cuando está desactivado, el video espera en pausa.",
   "settings.playback.lowLatency": "Modo de baja latencia",
   "settings.playback.lowLatency.tooltip": "Cuando está activado, minimiza el retraso para transmisiones en vivo.",
   "settings.playback.retryInterval.tooltip": "Tiempo de espera en segundos antes de reintentar cuando falla la carga del video.",

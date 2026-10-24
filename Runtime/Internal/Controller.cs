@@ -25,6 +25,7 @@ namespace Yamadev.YamaStream
     [SerializeField] private bool _isLocal;
     [SerializeField, Range(0, 10)] private int _maxErrorRetry = 5;
     [SerializeField, UdonSynced, FieldChangeCallback(nameof(Loop))] private bool _loop;
+    [SerializeField] private bool _playOnLoad = true;
     [UdonSynced, FieldChangeCallback(nameof(Speed))] private float _speed = 1f;
     [UdonSynced, FieldChangeCallback(nameof(Repeat))] private ulong _repeat;
     [UdonSynced] private byte _syncedState;
@@ -288,6 +289,12 @@ namespace Yamadev.YamaStream
       if (!Stopped && !IsLoading) ResolveAndLoadTrack(Track, true);
     }
 
+    public bool PlayOnLoad
+    {
+      get => _playOnLoad;
+      set => _playOnLoad = value;
+    }
+
     public bool Loop
     {
       get => _loop;
@@ -451,7 +458,8 @@ namespace Yamadev.YamaStream
 
       ClearPlaylistIndexes();
 
-      _syncedState = (byte)PlayerState.Playing;
+      if (_playOnLoad) _syncedState = (byte)PlayerState.Playing;
+      else _syncedState = (byte)PlayerState.Paused;
       ResolveAndLoadTrack(track);
     }
 

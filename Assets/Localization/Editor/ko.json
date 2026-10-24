@@ -61,6 +61,8 @@
   "settings.playback.label": "재생 설정",
   "settings.playback.loop": "반복 재생",
   "settings.playback.loop.tooltip": "활성화하면 영상이 끝난 후 자동으로 처음부터 다시 재생됩니다.",
+  "settings.playback.playOnLoad": "로드 후 자동 재생",
+  "settings.playback.playOnLoad.tooltip": "활성화하면 영상 로드가 완료된 후 자동으로 재생을 시작합니다. 비활성화하면 일시정지 상태로 대기합니다.",
   "settings.playback.lowLatency": "저지연 모드",
   "settings.playback.lowLatency.tooltip": "활성화하면 라이브 스트리밍 등에서 지연을 최소화합니다.",
   "settings.playback.retryInterval.tooltip": "영상 로드 실패 시 재시도까지 대기 시간(초).",

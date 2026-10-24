@@ -62,6 +62,8 @@
   "settings.playback.label": "再生設定",
   "settings.playback.loop": "ループ再生",
   "settings.playback.loop.tooltip": "有効にすると、動画が終了後に自動的に最初から再生されます。",
+  "settings.playback.playOnLoad": "ロード後に自動再生",
+  "settings.playback.playOnLoad.tooltip": "有効にすると、動画のロード完了後に自動的に再生を開始します。無効にすると一時停止状態で待機します。",
   "settings.playback.lowLatency": "低遅延モード",
   "settings.playback.lowLatency.tooltip": "有効にすると、ライブ配信などで遅延を最小限に抑えます。",
   "settings.playback.retryInterval": "リトライ間隔 (秒)",

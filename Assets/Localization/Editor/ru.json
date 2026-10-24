@@ -61,6 +61,8 @@
   "settings.playback.label": "Настройки воспроизведения",
   "settings.playback.loop": "Повтор",
   "settings.playback.loop.tooltip": "При включении видео автоматически перезапустится после окончания.",
+  "settings.playback.playOnLoad": "Воспроизводить после загрузки",
+  "settings.playback.playOnLoad.tooltip": "При включении воспроизведение начинается автоматически после загрузки видео. При выключении видео ожидает в режиме паузы.",
   "settings.playback.lowLatency": "Режим низкой задержки",
   "settings.playback.lowLatency.tooltip": "При включении минимизирует задержку для прямых трансляций.",
   "settings.playback.retryInterval.tooltip": "Время ожидания в секундах перед повторной попыткой при ошибке загрузки видео.",

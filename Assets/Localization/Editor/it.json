@@ -62,6 +62,8 @@
   "settings.playback.label": "Impostazioni Riproduzione",
   "settings.playback.loop": "Riproduzione in Loop",
   "settings.playback.loop.tooltip": "Se abilitato, il video ripartirà automaticamente dall'inizio al termine.",
+  "settings.playback.playOnLoad": "Riproduci al Caricamento",
+  "settings.playback.playOnLoad.tooltip": "Se abilitato, la riproduzione inizia automaticamente al termine del caricamento del video. Se disabilitato, il video resta in pausa.",
   "settings.playback.lowLatency": "Modalità Bassa Latenza",
   "settings.playback.lowLatency.tooltip": "Se abilitato, minimizza il ritardo per le trasmissioni in diretta.",
   "settings.playback.retryInterval": "Intervallo Riprova (sec)",
