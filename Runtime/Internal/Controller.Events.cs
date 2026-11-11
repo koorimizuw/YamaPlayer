@@ -88,7 +88,10 @@ namespace Yamadev.YamaStream
         UpdateSyncedVideoTime(0f);
         RequestSerialization();
       }
-      else EnsureVideoTime();
+      // After a reload (for example an AVPro speed change), restore the
+      // position immediately. Without force the owner would just adopt the
+      // freshly reloaded 0 second position as the new sync baseline.
+      else EnsureVideoTime(_reloading);
 
       int len = _listeners.Length;
       for (int i = 0; i < len; i++)

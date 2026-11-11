@@ -10,6 +10,8 @@ namespace Yamadev.YamaStream
     [SerializeField, Range(1f, 10f)] private float _syncFrequency = 5.0f;
     [SerializeField, Range(0f, 1f)] private float _syncMargin = 0.3f;
     [UdonSynced] private float _syncedVideoTime = 0;
+    // Contains Networking.GetServerTimeInMilliseconds(). The field name is kept
+    // for serialization compatibility with existing scenes.
     [UdonSynced] private long _networkDataTimeTicks = 0;
     [UdonSynced] private int _trackVersion = 0;
     private int _appliedTrackVersion = 0;
@@ -58,7 +60,10 @@ namespace Yamadev.YamaStream
     private void UpdateSyncedVideoTime(float time)
     {
       _syncedVideoTime = Mathf.Clamp(time - _localDelay, 0f, Duration);
-      _networkDataTimeTicks = Networking.GetNetworkDateTime().Ticks;
+      // Use the monotonic server clock instead of GetNetworkDateTime().
+      // GetNetworkDateTime() is a wall clock and can jump backwards when the
+      // network time is corrected, which used to cause a rewind.
+      _networkDataTimeTicks = (long)Networking.GetServerTimeInMilliseconds();
     }
 
     private void ResetSyncedVideoTime()
@@ -75,9 +80,41 @@ namespace Yamadev.YamaStream
         return;
       }
 
-      float offset = Paused ? 0 : (float)(Networking.GetNetworkDateTime().Ticks - _networkDataTimeTicks) / TimeSpan.TicksPerSecond * Speed;
-      float targetTime = Mathf.Clamp(_syncedVideoTime + offset + _localDelay, 0, Duration);
-      if (force || Mathf.Abs(VideoTime - targetTime) >= _syncMargin)
+      float videoTime = VideoTime;
+      if (float.IsNaN(videoTime) || float.IsInfinity(videoTime))
+      {
+        _lastSync = Time.time;
+        return;
+      }
+
+      float offset = Paused ? 0 : (float)((long)Networking.GetServerTimeInMilliseconds() - _networkDataTimeTicks) / 1000f * Speed;
+      float targetTime = Mathf.Clamp(_syncedVideoTime + offset + _localDelay, 0f, Duration);
+
+      if (Networking.IsOwner(gameObject))
+      {
+        // The owner is the time authority. During normal playback, refresh the
+        // shared baseline from the actual video time instead of seeking to a
+        // wall-clock prediction. This prevents the owner from rewinding itself
+        // every _syncFrequency seconds.
+        if (force)
+        {
+          SetTime(targetTime);
+        }
+        else
+        {
+          UpdateSyncedVideoTime(videoTime);
+          if (!_isLocal) RequestSerialization();
+        }
+        _lastSync = Time.time;
+        return;
+      }
+
+      // Remote clients follow the owner. Correct a small forward lag (the
+      // video is behind), but require a larger threshold before seeking
+      // backwards so normal playback does not visibly rewind.
+      float diff = targetTime - videoTime;
+      float backwardMargin = Mathf.Max(_syncMargin, 1f);
+      if (force || diff > _syncMargin || diff < -backwardMargin)
       {
         SetTime(targetTime);
       }

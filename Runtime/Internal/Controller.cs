@@ -403,6 +403,16 @@ namespace Yamadev.YamaStream
       if (IsLive || Time.frameCount == _lastSetTimeFrame) return;
       _lastSetTimeFrame = Time.frameCount;
 
+      // Modules / user scripts can pass values outside the video range (for
+      // example SkipTime(-5) near the beginning or an unset repeat point).
+      // Passing a negative time to the player makes it jump back to 0, so
+      // clamp it before it reaches the handler.
+      float duration = Duration;
+      if (duration > 0f)
+        time = Mathf.Clamp(time, 0f, duration);
+      else if (time < 0f)
+        time = 0f;
+
       ActiveHandler.Time = time;
       if (Networking.IsOwner(gameObject) && !_isLocal)
       {
