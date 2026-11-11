@@ -22,14 +22,41 @@ namespace Yamadev.YamaStream
     private RenderTexture _blitTexture;
     private bool _stopped = true;
     private bool _isError;
+    private int _maxResolution = 1080;
 
     private void Start()
     {
       if (!Utilities.IsValid(_baseVideoPlayer)) _baseVideoPlayer = GetComponent<BaseVRCVideoPlayer>();
       if (!Utilities.IsValid(_animator)) _animator = GetComponent<Animator>();
-      _animator.Rebind();
+      BindAnimator();
+      // VRCUnityVideoPlayer adds its runtime VideoPlayer in its own Start().
+      // Depending on the Udon start order the Rebind above may run before that
+      // component exists, so bind once more on the next frame.
+      SendCustomEventDelayedFrames(nameof(BindAnimator), 0);
       if (!Utilities.IsValid(_renderer)) _renderer = GetComponent<Renderer>();
       _properties = new MaterialPropertyBlock();
+    }
+
+    private void ApplyAnimatorValues()
+    {
+      if (!Utilities.IsValid(_animator)) return;
+      _animator.SetFloat("Speed", _speed);
+      _animator.SetFloat("Resolution", _maxResolution / 4320f);
+      _animator.Update(0f);
+    }
+
+    /// <summary>
+    /// Rebind after the runtime video player has been added by VRChat.
+    /// VRCUnityVideoPlayer adds its UnityEngine.Video.VideoPlayer at runtime,
+    /// so an Animator.Rebind() that runs too early will not bind the Speed /
+    /// Resolution curves. Rebind after the player is ready and re-apply the
+    /// current values.
+    /// </summary>
+    public void BindAnimator()
+    {
+      if (!Utilities.IsValid(_animator)) return;
+      _animator.Rebind();
+      ApplyAnimatorValues();
     }
 
     protected override bool IsValidUrl(VRCUrl url)
@@ -112,8 +139,8 @@ namespace Yamadev.YamaStream
       get => _speed;
       set
       {
-        if (!Utilities.IsValid(_animator)) return;
         _speed = value;
+        if (!Utilities.IsValid(_animator)) return;
         _animator.SetFloat("Speed", _speed);
         _animator.Update(0f);
       }
@@ -150,8 +177,9 @@ namespace Yamadev.YamaStream
     {
       set
       {
+        _maxResolution = value;
         if (!Utilities.IsValid(_animator)) return;
-        _animator.SetFloat("Resolution", value / 4320f);
+        _animator.SetFloat("Resolution", _maxResolution / 4320f);
         _animator.Update(0f);
       }
     }
@@ -271,11 +299,15 @@ namespace Yamadev.YamaStream
         return;
       }
 
+      // The runtime video player now exists, so this is the safe point to
+      // (re)bind the speed / resolution animation.
+      BindAnimator();
       if (Utilities.IsValid(_listener)) _listener.AfterVideoReady();
     }
 
     public override void OnVideoStart()
     {
+      ApplyAnimatorValues();
       if (Utilities.IsValid(_listener)) _listener.AfterVideoStarted();
     }
 
