@@ -10,9 +10,8 @@ namespace Yamadev.YamaStream
     [SerializeField, Range(1f, 10f)] private float _syncFrequency = 5.0f;
     [SerializeField, Range(0f, 1f)] private float _syncMargin = 0.3f;
     [UdonSynced] private float _syncedVideoTime = 0;
-    // Contains Networking.GetServerTimeInMilliseconds(). The field name is kept
-    // for serialization compatibility with existing scenes.
-    [UdonSynced] private long _networkDataTimeTicks = 0;
+    // Server time in milliseconds when _syncedVideoTime was captured.
+    [UdonSynced] private long _serverTimeMilliseconds = 0;
     [UdonSynced] private int _trackVersion = 0;
     private int _appliedTrackVersion = 0;
     private float _lastSync = 0;
@@ -63,18 +62,18 @@ namespace Yamadev.YamaStream
       // Use the monotonic server clock instead of GetNetworkDateTime().
       // GetNetworkDateTime() is a wall clock and can jump backwards when the
       // network time is corrected, which used to cause a rewind.
-      _networkDataTimeTicks = (long)Networking.GetServerTimeInMilliseconds();
+      _serverTimeMilliseconds = (long)Networking.GetServerTimeInMilliseconds();
     }
 
     private void ResetSyncedVideoTime()
     {
       _syncedVideoTime = 0;
-      _networkDataTimeTicks = 0;
+      _serverTimeMilliseconds = 0;
     }
 
     private void EnsureVideoTime(bool force = false)
     {
-      if (IsLive || Stopped || _networkDataTimeTicks == 0)
+      if (IsLive || Stopped || _serverTimeMilliseconds == 0)
       {
         _lastSync = Time.time;
         return;
@@ -87,7 +86,7 @@ namespace Yamadev.YamaStream
         return;
       }
 
-      float offset = Paused ? 0 : (float)((long)Networking.GetServerTimeInMilliseconds() - _networkDataTimeTicks) / 1000f * Speed;
+      float offset = Paused ? 0 : (float)((long)Networking.GetServerTimeInMilliseconds() - _serverTimeMilliseconds) / 1000f * Speed;
       float targetTime = Mathf.Clamp(_syncedVideoTime + offset + _localDelay, 0f, Duration);
 
       if (Networking.IsOwner(gameObject))
