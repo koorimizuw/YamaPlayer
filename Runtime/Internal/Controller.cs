@@ -403,8 +403,7 @@ namespace Yamadev.YamaStream
       if (IsLive || Time.frameCount == _lastSetTimeFrame) return;
       _lastSetTimeFrame = Time.frameCount;
 
-      // Modules / user scripts can pass values outside the video range (for
-      // example SkipTime(-5) near the beginning or an unset repeat point).
+      // Modules / user scripts can pass values outside the video range.
       // Passing a negative time to the player makes it jump back to 0, so
       // clamp it before it reaches the handler.
       float duration = Duration;
